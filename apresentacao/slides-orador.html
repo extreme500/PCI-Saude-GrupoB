@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protocolos em Rota — Orador</title>
+<meta name="description" content="Versão de orador da apresentação do Ciclo 2: cada slide acompanhado do roteiro de fala, dados de apoio e respostas prováveis.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Mesma paleta "Creme" do deck principal — ver slides.html.
+   Deck light-locked de propósito: superfície de apresentação. */
+:root {
+  color-scheme: light;
+  --creme-100:#FEFCF7; --creme-200:#F9F2E4; --creme-300:#F2E7D2; --creme-400:#E8D8BC;
+  --tinta:#33291F; --tinta-70:#5C4F41; --tinta-45:#8A7A67; --tinta-20:#C6B7A2;
+  --terracota:#B35C38; --terracota-suave:#F3DFD3;
+  --sage:#4A6B5B; --sage-suave:#DDE7E0;
+  --borda: rgba(51,41,31,.14);
+  --sombra: 0 1px 2px rgba(51,41,31,.05), 0 8px 24px rgba(51,41,31,.06);
+  --serif:'Fraunces','Iowan Old Style',Georgia,serif;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--sans); color:var(--tinta); background:var(--creme-200);
+  background-image:
+    radial-gradient(900px 560px at 12% -8%, #FFFFFF 0%, transparent 60%),
+    radial-gradient(760px 520px at 92% 8%, var(--creme-100) 0%, transparent 62%),
+    radial-gradient(880px 640px at 78% 104%, var(--creme-400) 0%, transparent 60%),
+    linear-gradient(158deg, var(--creme-100) 0%, var(--creme-200) 42%, var(--creme-300) 100%);
+  background-attachment:fixed; min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- cabeçalho fixo ---------- */
+.topo{
+  position:sticky; top:0; z-index:40;
+  background:rgba(249,242,228,.93); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--borda);
+  padding:11px clamp(14px,3vw,30px);
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.topo .titulo{font-family:var(--serif);font-weight:600;font-size:15px}
+.topo .modo{font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;
+  color:var(--terracota);background:var(--terracota-suave);padding:3px 9px;border-radius:99px}
+.topo .tempo{margin-left:auto;font-size:12px;color:var(--tinta-45);font-variant-numeric:tabular-nums}
+.topo .aviso{font-size:11px;color:var(--tinta-45);width:100%}
+
+/* ---------- layout de dois painéis ---------- */
+.par{
+  display:grid; grid-template-columns:1fr 1fr; gap:clamp(12px,1.8vw,22px);
+  max-width:1560px; margin:0 auto; padding:clamp(14px,2.4vw,28px);
+  align-items:start;
+}
+@media (max-width:980px){ .par{grid-template-columns:1fr} }
+
+.bloco{scroll-margin-top:70px; margin-bottom:clamp(20px,3.6vh,42px)}
+
+/* painel do slide (miniatura fiel) */
+.tela{
+  background:linear-gradient(158deg,var(--creme-100),var(--creme-200) 55%,var(--creme-300));
+  border:1px solid var(--borda); border-radius:16px; box-shadow:var(--sombra);
+  padding:clamp(18px,2.4vw,30px); aspect-ratio:16/9;
+  display:flex; flex-direction:column; justify-content:center; overflow:hidden;
+  position:sticky; top:74px;
+}
+@media (max-width:980px){ .tela{position:static;aspect-ratio:auto} }
+
+/* painel de fala */
+.fala{
+  background:rgba(255,253,248,.8); border:1px solid var(--borda);
+  border-radius:16px; padding:clamp(16px,2.2vw,28px); box-shadow:var(--sombra);
+}
+.fala h4{
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  color:var(--terracota); margin:0 0 9px;
+  display:flex;align-items:center;gap:8px;
+}
+.fala h4::after{content:"";flex:1;height:1px;background:var(--borda)}
+.fala h4:not(:first-child){margin-top:20px}
+.fala h4.verde{color:var(--sage)}
+.fala p{font-size:14.5px;line-height:1.62;color:var(--tinta-70);margin-bottom:10px}
+.fala p:last-child{margin-bottom:0}
+.fala strong{color:var(--tinta);font-weight:650}
+.fala .diga{
+  font-family:var(--serif); font-size:15.5px; line-height:1.56; color:var(--tinta);
+  border-left:3px solid var(--terracota); padding:2px 0 2px 14px; margin-bottom:12px;
+}
+.fala ul{list-style:none;display:grid;gap:7px;margin-bottom:10px}
+.fala ul li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;
+  font-size:14px;line-height:1.55;color:var(--tinta-70)}
+.fala ul li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--terracota-suave);
+  border:1.5px solid var(--terracota);margin-top:.58em}
+.fala .cuidado{
+  background:var(--terracota-suave); border-radius:10px; padding:12px 14px;
+  font-size:13.5px; line-height:1.55; color:var(--tinta);
+}
+.fala .cuidado b{font-weight:700}
+.fala .seg{
+  background:var(--sage-suave); border-radius:10px; padding:12px 14px;
+  font-size:13.5px; line-height:1.55; color:var(--tinta); margin-top:10px;
+}
+.crono{font-size:11px;color:var(--tinta-45);font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase; margin-bottom:12px}
+code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);padding:1px 5px;border-radius:4px}
+
+/* ---------- tipografia reduzida dentro da miniatura ---------- */
+.tela .etiqueta{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--terracota);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.tela .etiqueta::after{content:"";flex:1;height:1px;background:var(--borda);max-width:90px}
+.tela h1{font-family:var(--serif);font-size:clamp(22px,2.9vw,40px);font-weight:600;line-height:1.05;letter-spacing:-.02em}
+.tela h2{font-family:var(--serif);font-size:clamp(17px,2.05vw,28px);font-weight:600;line-height:1.14;
+  letter-spacing:-.015em;margin-bottom:12px}
+.tela .sub{font-size:clamp(11px,1.05vw,14px);color:var(--tinta-70);line-height:1.5;max-width:60ch}
+.tela .grade{display:grid;gap:9px}
+.tela .g2{grid-template-columns:1fr 1fr}
+.tela .g3{grid-template-columns:repeat(3,1fr)}
+.tela .cartao{background:rgba(255,253,248,.75);border:1px solid var(--borda);border-radius:10px;padding:10px 12px}
+.tela .cartao h3{font-size:10.5px;font-weight:700;margin-bottom:5px}
+.tela .cartao p{font-size:10.5px;color:var(--tinta-70);line-height:1.45}
+.tela .cartao .fonte{font-size:9px;color:var(--tinta-45);margin-top:6px}
+.tela .realce{background:linear-gradient(135deg,var(--terracota-suave),rgba(255,253,248,.7));
+  border-left:3px solid var(--terracota);border-radius:0 10px 10px 0;padding:11px 13px}
+.tela .realce.verde{background:linear-gradient(135deg,var(--sage-suave),rgba(255,253,248,.7));border-left-color:var(--sage)}
+.tela blockquote{font-family:var(--serif);font-size:11.5px;line-height:1.5;font-style:italic}
+.tela blockquote b{font-style:normal;background:rgba(179,92,56,.15);padding:0 3px;border-radius:3px}
+.tela .lei-fonte{font-size:9px;color:var(--tinta-45);margin-top:7px;font-style:normal}
+.tela pre{font-family:var(--mono);font-size:9.5px;line-height:1.6;background:rgba(255,253,248,.85);
+  border:1px solid var(--borda);border-radius:9px;padding:11px;overflow-x:auto}
+.tela pre .k{color:var(--sage);font-weight:600}
+.tela pre .c{color:var(--tinta-45)}
+.tela .numero{font-family:var(--serif);font-size:clamp(20px,2.6vw,34px);font-weight:700;line-height:1}
+.tela .numero.destaque{color:var(--terracota)}
+.tela .numero small{font-size:.42em;color:var(--tinta-45);margin-left:3px}
+.tela .rotulo{font-size:9.5px;color:var(--tinta-70);line-height:1.42;margin-top:7px}
+.tela ul.lista{list-style:none;display:grid;gap:6px}
+.tela ul.lista li{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:start;
+  font-size:10.5px;line-height:1.45;color:var(--tinta-70)}
+.tela ul.lista li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--terracota);margin-top:.5em}
+.tela .fluxo{display:grid;gap:7px}
+.tela .faixa{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:center;
+  background:rgba(255,253,248,.75);border:1px solid var(--borda);border-radius:10px;padding:10px 12px}
+.tela .faixa .qual{font-family:var(--serif);font-size:10.5px;font-weight:600;color:var(--terracota);line-height:1.2}
+.tela .faixa.logica .qual{color:var(--sage)}
+.tela .faixa .oque{font-size:10.5px;color:var(--tinta-70);line-height:1.45}
+.tela .seta{text-align:center;color:var(--tinta-20);font-size:12px;line-height:1}
+.tela .capa-meta{margin-top:18px;padding-top:14px;border-top:1px solid var(--borda);
+  display:flex;gap:26px;font-size:10.5px;color:var(--tinta-70);flex-wrap:wrap}
+.tela .capa-meta b{display:block;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--tinta-45);margin-bottom:3px}
+.tela em.dest{font-style:normal;color:var(--terracota);font-weight:600}
+
+.rodape{max-width:1560px;margin:0 auto;padding:0 clamp(14px,3vw,30px) 60px;
+  font-size:12.5px;color:var(--tinta-45);line-height:1.6}
+.rodape a{color:var(--terracota)}
+
+@media print{
+  body{background:#fff}
+  .topo{position:static}
+  .tela{position:static;aspect-ratio:auto}
+  .bloco{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <span class="titulo">Protocolos em rota</span>
+  <span class="modo">Versão do orador</span>
+  <span class="tempo">8 slides · ~9 min + perguntas</span>
+  <span class="aviso">Documento de apoio — <strong>não projetar</strong>. O deck
+  para projeção é <code>slides.html</code>. Os dois têm exatamente os mesmos 8 slides.</span>
+</header>
+
+<!-- ══════════ 1 ══════════ -->
+<div class="par bloco">
+  <div class="tela">
+    <div class="etiqueta">INF99003 · Ciclo 2</div>
+    <h1>Protocolos em rota</h1>
+    <p class="sub" style="margin-top:12px">Planejamento automatizado para a
+    <strong>conformidade normativa</strong> das visitas domiciliares de Agentes
+    Comunitários de Saúde — com a rota já resolvida por grafos.</p>
+    <div class="capa-meta">
+      <div><b>Grupo</b>Grupo B</div>
+      <div><b>Domínio</b>APS · SUS</div>
+      <div><b>Abordagem</b>Grafos + PDDL</div>
+    </div>
+  </div>
+  <div class="fala">
+    <div class="crono">Slide 1 · ~40 s</div>
+    <h4>Abertura</h4>
+    <p class="diga">“O enunciado do Ciclo 2 pede um artefato que facilite o
+    planejamento das visitas dos Agentes Comunitários de Saúde. Quase todo mundo
+    vai atacar isso como um problema de rota. Nós também — mas descobrimos que a
+    rota é só metade do problema.”</p>
+    <h4>Objetivo desta abertura</h4>
+    <ul>
+      <li>Plantar desde já a ideia de que existe uma <strong>segunda metade</strong>
+      do problema que passa despercebida.</li>
+      <li>Não explicar nada ainda. O slide 2 faz isso.</li>
+    </ul>
+    <div class="cuidado"><b>Não diga</b> “vamos usar PDDL” na abertura. A
+    ferramenta só faz sentido depois que a lacuna estiver estabelecida — caso
+    contrário parece escolha arbitrária.</div>
+  </div>
+</div>
+
+<!-- ══════════ 2 ══════════ -->
+<div class="par bloco">
+  <div class="tela">
+    <div class="etiqueta">Problema &amp; foco</div>
+    <h2>Metade do problema é o trajeto.<br>A outra metade é a norma.</h2>
+    <div class="grade g2">
+      <div class="cartao"><h3>O problema do enunciado</h3><p>Visitar as famílias do
+      território no prazo, com equipe limitada. Georreferenciamento, prioridade
+      clínica, intervalo máximo entre visitas.</p></div>
+      <div class="cartao"><h3>Nosso recorte</h3><p><strong>Um ACS, um turno, rota já
+      definida.</strong> A pergunta passa a ser o que fazer <em class="dest">dentro</em>
+      e <em class="dest">entre</em> as visitas.</p></div>
+    </div>
+    <div class="realce" style="margin-top:10px"><p style="font-size:11px;line-height:1.45">
+    Chegar na casa certa não basta: o atendimento só é <strong>legal</strong> se o
+    agente tiver habilitação, equipamento, supervisão e insumo — e alguns desses
+    acabam no meio do turno.</p></div>
+  </div>
+  <div class="fala">
+    <div class="crono">Slide 2 · ~1 min 10 s</div>
+    <h4>O roteiro</h4>
+    <p class="diga">“O ACS visita as famílias da microárea dele. O enunciado cita
+    otimização de percurso, tamanho de equipe, urgência e intervalo máximo entre
+    visitas. Nós fizemos um recorte deliberado: <strong>um agente, um turno, e a
+    rota já definida</strong>.”</p>
+    <p class="diga">“E aí aparece o que nos interessou. Quando o agente chega na
+    casa, ele não pode simplesmente atender. A lei condiciona o que ele pode fazer.
+    E algumas dessas condições — insumo na bolsa, supervisão do enfermeiro —
+    <strong>acabam no meio do turno</strong>.”</p>
+    <h4>Por que o recorte é defensável</h4>
+    <ul>
+      <li>O problema completo (HHCRSP) é reconhecidamente pesado — as revisões do
+      slide 3 documentam isso.</li>
+      <li>Recortar não é fugir: é isolar a variável que queremos estudar.</li>
+      <li><strong>Assuma a limitação antes que perguntem.</strong> Diga que é um
+      agente só e que é a extensão natural do trabalho.</li>
+    </ul>
+    <div class="seg"><b>Se perguntarem “por que não múltiplos agentes?”</b> —
+    “Porque aí voltaríamos ao HHCRSP completo, e a variável que queremos medir
+    ficaria encoberta pela complexidade do escalonamento. Está declarado como
+    limitação.”</div>
+  </div>
+</div>
+
+<!-- ══════════ 3 ══════════ -->
+<div class="par bloco">
+  <div class="tela">
+    <div class="etiqueta">Artigos</div>
+    <h2>Quatro frentes e uma lacuna</h2>
+    <div class="grade g2">
+      <div class="cartao"><h3>Roteamento em saúde domiciliar</h3><p>HHCRSP é o VRP
+      com restrições próprias — inclusive <strong>requisitos de qualificação</strong>.</p>
+      <p class="fonte">Fikar &amp; Hirsch (2017) · Cissé et al. (2017)</p></div>
+      <div class="cartao"><h3>Planejamento clássico</h3><p>STRIPS, busca heurística,
+      h_max/h_add, planejamento <strong>ótimo com garantia</strong>.</p>
+      <p class="fonte">Fikes &amp; Nilsson (1971) · Bonet &amp; Geffner (2001) · Helmert &amp; Domshlak (2009)</p></div>
+      <div class="cartao"><h3>Planejamento em protocolos de saúde</h3><p>Diretrizes
+      clínicas <strong>traduzidas para domínios de planejamento</strong>.</p>
+      <p class="fonte">González-Ferrer et al. (2013) · Bradbrook et al. (2005)</p></div>
+      <div class="cartao"><h3>LLM como planejadora</h3><p>Geração autônoma de planos
+      é limitada — <strong>≈12%</strong> no melhor modelo.</p>
+      <p class="fonte">Valmeekam et al. (2023)</p></div>
+    </div>
+    <div class="realce verde" style="margin-top:10px"><p style="font-size:10.5px;line-height:1.45">
+    <strong>A lacuna.</strong> A literatura trata qualificação como
+    <em class="dest">rótulo estático</em>. Na lei brasileira ela é
+    <strong>condição dinâmica e encadeada</strong>.</p></div>
+  </div>
+  <div class="fala">
+    <div class="crono">Slide 3 · ~1 min 50 s — o slide mais importante da banca</div>
+    <h4>Como conduzir</h4>
+    <p>Não leia os quatro cartões. Gaste o tempo no <strong>segundo</strong> e no
+    <strong>terceiro</strong>, e feche na lacuna.</p>
+    <p class="diga">“Duas revisões consolidam o problema: Fikar e Hirsch, e Cissé e
+    colegas, ambas de 2017. O ponto que nos interessa está em Cissé: o HHCRSP é uma
+    extensão do VRP com restrições laterais — e uma delas é <strong>requisito de
+    qualificação</strong>. Ou seja, a literatura já sabe que qualificação importa.”</p>
+    <p class="diga">“Mas ela é tratada como um <strong>rótulo estático</strong>: o
+    agente <i>i</i> pode atender o paciente <i>j</i>. Na lei brasileira a
+    qualificação não é um rótulo — é uma condição composta que muda durante o
+    turno, porque a supervisão exigida é um recurso que o próprio deslocamento
+    consome. É essa a lacuna.”</p>
+    <h4 class="verde">O precedente que blinda a escolha</h4>
+    <p>González-Ferrer et al. (2013) traduzem <strong>diretrizes clínicas</strong>
+    para um domínio de planejamento HTN e geram planos de cuidado. É o argumento
+    de que traduzir norma em domínio de planejamento <strong>não é invenção
+    nossa</strong> — nós mudamos a fonte da regra, de diretriz clínica para norma
+    jurídica.</p>
+    <h4>Por que a LLM está no slide</h4>
+    <p>Porque nós <strong>consideramos e descartamos</strong> esse caminho. Mostra
+    que houve escolha, e a escolha tem base empírica: ≈12% de sucesso.</p>
+    <div class="cuidado"><b>Cuidado com as datas.</b> As duas revisões são de 2017.
+    Se alguém perguntar se há coisa mais recente, a resposta honesta é: sim, há
+    revisões posteriores; estas duas são as canônicas e as mais citadas.</div>
+  </div>
+</div>
+
+<!-- ══════════ 4 ══════════ -->
+<div class="par bloco">
+  <div class="tela">
+    <div class="etiqueta">Questão inicial</div>
+    <h2>A pergunta que guia o trabalho</h2>
+    <div class="realce"><p style="font-family:var(--serif);font-size:15px;line-height:1.35;font-weight:600">
+    Com a rota física já definida, o Planejamento Automatizado agrega algo
+    <em class="dest">mensurável</em> frente a um programa simples que percorra a
+    mesma rota cumprindo os mesmos protocolos?</p></div>
+    <div class="grade g2" style="margin-top:10px">
+      <div class="cartao"><h3>Hipótese nula</h3><p>“Um laço <code>for</code> faria o
+      mesmo.” — a <strong>redundância tecnológica</strong>.</p></div>
+      <div class="cartao"><h3>Como testamos</h3><p>Implementamos esse laço de
+      verdade, como <strong>grupo de controle</strong>, com a mesma tabela de
+      custos.</p></div>
+    </div>
+  </div>
+  <div class="fala">
+    <div class="crono">Slide 4 · ~1 min</div>
+    <h4>O roteiro</h4>
+    <p class="diga">“A pergunta que guia o trabalho é deliberadamente cética contra
+    nós mesmos. Com a rota já definida, o planejamento automatizado agrega alguma
+    coisa <strong>mensurável</strong> frente a um programa simples?”</p>
+    <p class="diga">“A hipótese nula é a objeção mais dura que existe contra a nossa
+    escolha: um laço <code>for</code> faria o mesmo. Em vez de argumentar contra
+    ela, nós <strong>implementamos</strong> o laço e usamos como grupo de
+    controle.”</p>
+    <h4>Detalhe metodológico que vale citar</h4>
+    <p>O executor guloso <strong>lê a tabela de custos do próprio arquivo
+    <code>.pddl</code></strong>. Isso elimina a possibilidade de estarmos medindo
+    os dois com réguas diferentes — que, aliás, foi um erro real que cometemos e
+    corrigimos durante o desenvolvimento.</p>
+    <div class="seg"><b>Se sobrar tempo:</b> conte esse erro. A diferença de custo
+    não fechava com a diferença de contagem de ações, e foi assim que o pegamos.
+    Banca gosta de rigor demonstrado, não de rigor afirmado.</div>
+  </div>
+</div>
+
+<!-- ══════════ 5 ══════════ -->
+<div class="par bloco">
+  <div class="tela">
+    <div class="etiqueta">Proposta de abordagem</div>
+    <h2>Duas camadas, cada paradigma no seu lugar</h2>
+    <div class="fluxo">
+      <div class="faixa"><div class="qual">Camada geométrica</div>
+      <div class="oque"><b>Em que ordem visitar.</b> Vizinho Mais Próximo + 2-opt.
+      Entrega a rota e o custo de desviar até a UBS.</div></div>
+      <div class="seta">▼</div>
+      <div class="faixa logica"><div class="qual">Camada lógica</div>
+      <div class="oque"><b>O que fazer em cada parada.</b> Domínio PDDL: condições
+      legais, encaminhamento obrigatório e <b>recursos finitos</b>.</div></div>
+    </div>
+    <div class="grade g3" style="margin-top:10px">
+      <div class="cartao"><h3>Nunca escolhe a rota</h3><p>Só anda pelas arestas que o
+      roteirizador autorizou.</p></div>
+      <div class="cartao"><h3>Contrato mínimo</h3><p>Ordem + matriz de custos. Trocar
+      por OSRM não muda o domínio.</p></div>
+      <div class="cartao"><h3>Decisão que sobra</h3><p><strong>Onde sair da rota</strong>
+      para reabastecer.</p></div>
+    </div>
+  </div>
+  <div class="fala">
+    <div class="crono">Slide 5 · ~1 min 30 s</div>
+    <h4>O roteiro</h4>
+    <p class="diga">“A arquitetura tem duas camadas desacopladas. A camada
+    geométrica resolve o que ela sabe resolver: a ordem das casas, com vizinho mais
+    próximo e 2-opt. Ela entrega duas coisas — a rota, e quanto custa desviar até a
+    UBS a partir de cada parada.”</p>
+    <p class="diga">“A camada lógica recebe essa rota <strong>congelada</strong> e
+    decide o que fazer em cada casa. Ela não pode mudar a ordem: só anda pelas
+    arestas que o roteirizador autorizou.”</p>
+    <h4>O ponto que não pode faltar</h4>
+    <p>Explique <strong>por que sobra decisão</strong> para o planejador. Se não
+    explicar isso, a plateia conclui que o planejador é decorativo.</p>
+    <p class="diga">“Se a rota está fixa e cada visita fosse independente, o problema
+    se decomporia e um laço bastaria. O que impede isso são os <strong>recursos
+    finitos que acoplam as paradas</strong>: as fitas de glicemia só se repõem na
+    UBS, e a supervisão do enfermeiro acaba quando o agente sai da casa. Uma decisão
+    tomada na terceira parada pode inviabilizar a sétima.”</p>
+    <div class="seg"><b>Se perguntarem “por que não OR-Tools?”</b> — “Ele resolve a
+    metade geométrica, que nós também resolvemos, e não resolve a metade normativa.
+    Usamos os dois, cada um no seu lugar. E trocar nosso roteirizador por ele não
+    exigiria mudar uma linha do domínio.”</div>
+  </div>
+</div>
+
+<!-- ══════════ 6 ══════════ -->
+<div class="par bloco">
+  <div class="tela">
+    <div class="etiqueta">Justificativa</div>
+    <h2>A lei já está escrita como uma ação STRIPS</h2>
+    <div class="realce" style="margin-bottom:9px"><blockquote>
+      “<b>desde que</b> o ACS <b>tenha concluído curso técnico</b> e <b>tenha
+      disponíveis os equipamentos adequados</b>, são atividades do Agente […]
+      <b>assistidas por profissional de saúde de nível superior</b> […] a aferição
+      da pressão arterial […], <b>encaminhando o paciente</b> para a unidade de
+      referência”
+      <div class="lei-fonte">Lei 11.350/2006, art. 3º § 4º (red. Lei 13.595/2018)</div>
+    </blockquote></div>
+    <pre><span class="k">:precondition</span> (and (curso-tecnico-concluido ?ag)  <span class="c">; "desde que"</span>
+                   (equipamento-disponivel ?ag)   <span class="c">; "equipamentos"</span>
+                   (supervisao-ativa ?ag))        <span class="c">; "nível superior"</span>
+<span class="k">:effect</span>       (and (pa-ok ?p)
+                   (pendencia-encaminhamento ?p)) <span class="c">; "encaminhando"</span></pre>
+  </div>
+  <div class="fala">
+    <div class="crono">Slide 6 · ~1 min 40 s — o slide decisivo</div>
+    <h4>O roteiro</h4>
+    <p><strong>Leia o trecho da lei em voz alta.</strong> É a única leitura literal
+    que vale a pena na apresentação inteira — o efeito depende de as pessoas
+    ouvirem a estrutura condicional.</p>
+    <p class="diga">“Isso é a Lei 11.350, artigo 3º, parágrafo 4º. Repare na
+    estrutura: <strong>desde que</strong> tenha curso técnico, <strong>e</strong>
+    tenha equipamento, <strong>e</strong> seja assistido por profissional de nível
+    superior — então pode aferir pressão. E ao fazer isso, <strong>obriga-se</strong>
+    a encaminhar o paciente.”</p>
+    <p class="diga">“Três condições conjuntivas e um efeito obrigatório. Isso é
+    exatamente um esquema de ação STRIPS. A lei já está escrita no formalismo.”</p>
+    <h4>A frase de fechamento</h4>
+    <p class="diga">“Um <code>if/else</code> em Python <strong>codifica</strong> a
+    regra. O domínio PDDL <strong>é</strong> a regra. Se a norma mudar, a gente
+    edita a norma no domínio — não sai caçando condicional espalhado pelo código.”</p>
+    <div class="cuidado"><b>Correção importante que vocês precisam saber.</b> A
+    versão inicial da nossa ideia modelava o ACS aplicando insulina e fazendo
+    curativo cirúrgico. <b>Isso está errado</b> — são atribuições de técnico de
+    enfermagem. Trocamos pelo rol legal real. Se alguém da área da saúde estiver
+    na banca, esse cuidado conta muito a favor.</div>
+  </div>
+</div>
+
+<!-- ══════════ 7 ══════════ -->
+<div class="par bloco">
+  <div class="tela">
+    <div class="etiqueta">Evidência preliminar</div>
+    <h2>O que medimos até agora</h2>
+    <div class="grade g3">
+      <div class="cartao"><div class="numero">0%</div><div class="rotulo">
+      <strong>Ganho mediano de custo</strong> sobre o laço simples.</div></div>
+      <div class="cartao" style="border-color:rgba(179,92,56,.4)"><div class="numero destaque">17<small>%</small></div>
+      <div class="rotulo"><strong>Falsos negativos do laço:</strong> 5 de 30 turnos
+      declarados inviáveis <em class="dest">havendo</em> plano válido.</div></div>
+      <div class="cartao"><div class="numero">0 <small>nós</small></div><div class="rotulo">
+      <strong>Prova de inviabilidade</strong> quando falta condição legal.</div></div>
+    </div>
+    <div class="realce verde" style="margin-top:12px"><p style="font-size:10.5px;line-height:1.45">
+    <strong>O mecanismo.</strong> O laço aciona a supervisão, <em class="dest">depois</em>
+    descobre que faltam fitas e desvia — e o desvio invalida a supervisão. Gasta
+    duas janelas na mesma casa. O planejador deduz que basta
+    <strong>desviar antes de acionar</strong>.</p></div>
+  </div>
+  <div class="fala">
+    <div class="crono">Slide 7 · ~2 min — não corra aqui</div>
+    <h4>Comece pelo número que nos contraria</h4>
+    <p class="diga">“O primeiro número é zero, e é o ganho de custo. Em rota onde o
+    insumo dá para o turno inteiro, o laço simples já acerta o ótimo. Se a gente
+    viesse aqui vender economia de deslocamento, estaria exagerando o resultado.”</p>
+    <p><strong>Abrir com o resultado desfavorável compra credibilidade para o
+    próximo.</strong> Não inverta a ordem.</p>
+    <h4>O número que importa</h4>
+    <p class="diga">“O resultado é o do meio. Em 5 de 30 turnos, o laço simples
+    concluiu que era impossível atender todo mundo — e <strong>existia</strong> um
+    plano válido. Ele produziu um falso negativo em 17% dos casos.”</p>
+    <h4>O mecanismo — saiba de cor</h4>
+    <p>Este é o momento em que a apresentação se justifica. Conte devagar:</p>
+    <ul>
+      <li>O laço chega na casa e aciona a supervisão para aferir a pressão.</li>
+      <li>Só <strong>depois</strong> descobre que acabaram as fitas de glicemia.</li>
+      <li>Desvia até a UBS — e o deslocamento <strong>invalida a supervisão que ele
+      já tinha acionado</strong>.</li>
+      <li>Volta, aciona de novo: gastou <strong>duas janelas</strong> na mesma casa.</li>
+      <li>Fica sem janelas antes do fim do turno e declara inviável.</li>
+      <li>O planejador deduz sozinho que basta <strong>desviar antes de acionar</strong>.</li>
+    </ul>
+    <p class="diga">“E essa ordem não está escrita em nenhuma linha do domínio. Ela
+    sai das pré-condições. É a resposta concreta à pergunta do slide 4.”</p>
+    <div class="cuidado"><b>Seja honesto se perguntarem.</b> Sim, dava para
+    consertar o laço para esse caso. O argumento não é que ele seja incorrigível —
+    é que <b>cada regra nova exige uma correção manual dessas</b>, enquanto o
+    domínio declarativo absorve a regra sem mudar código. Admitir isso fortalece
+    o trabalho; esconder e ser pego destrói.</div>
+  </div>
+</div>
+
+<!-- ══════════ 8 ══════════ -->
+<div class="par bloco">
+  <div class="tela">
+    <div class="etiqueta">Onde estamos</div>
+    <h2>Resultado honesto, próximos passos claros</h2>
+    <div class="grade g2">
+      <div class="cartao"><h3 style="color:var(--sage)">O que o planejador entrega</h3>
+      <ul class="lista" style="margin-top:7px">
+        <li>Corretude sob escassez</li><li>Prova de inviabilidade</li>
+        <li>Otimalidade com garantia</li><li>Declaratividade</li></ul></div>
+      <div class="cartao"><h3 style="color:var(--terracota)">O que ainda falta</h3>
+      <ul class="lista" style="margin-top:7px">
+        <li>Validar os <code>.pddl</code> no Fast Downward</li>
+        <li>Prioridade e intervalo para <strong>selecionar</strong> o turno</li>
+        <li>Múltiplos agentes</li><li>Custos por API de mapas</li></ul></div>
+    </div>
+    <p class="sub" style="margin-top:12px;font-size:11px">O trunfo não é “usamos
+    Planning”. É <strong>medimos onde Planning ajuda — e onde não ajuda.</strong></p>
+  </div>
+  <div class="fala">
+    <div class="crono">Slide 8 · ~1 min</div>
+    <h4>Fechamento</h4>
+    <p class="diga">“Fechando: o planejador quase não economiza deslocamento. O que
+    ele entrega é corretude quando os recursos apertam, capacidade de
+    <strong>provar</strong> que um turno é impossível em vez de só falhar,
+    otimalidade com garantia formal, e declaratividade.”</p>
+    <p class="diga">“E o trunfo do trabalho não é ter usado planejamento. É termos
+    <strong>medido onde ele ajuda neste problema, e onde não ajuda</strong> — que é
+    o que o Ciclo 2 pede ao exigir organização pelo método científico.”</p>
+    <h4>Sobre os próximos passos</h4>
+    <p>Apresente-os como <strong>lacunas conhecidas</strong>, não como promessas.
+    A mais visível frente ao enunciado é a segunda: prioridade clínica e intervalo
+    máximo entre visitas estão nos dados, mas ainda não entram na seleção do turno.
+    <strong>Diga isso antes que perguntem.</strong></p>
+    <div class="seg"><b>Se perguntarem sobre dados de pacientes:</b> “Todos
+    fictícios. Só as coordenadas são reais, e servem apenas para dar ordem de
+    grandeza à matriz de distâncias.”</div>
+  </div>
+</div>
+
+<div class="rodape">
+  <p><strong>Antes de apresentar:</strong> leia o
+  <a href="CHEATSHEET.md">CHEATSHEET.md</a> — bibliografia comentada, glossário e
+  as perguntas prováveis da banca com respostas prontas.</p>
+  <p style="margin-top:8px">Números e método completos em
+  <a href="../docs/03-metodo-experimental.md">docs/03-metodo-experimental.md</a> ·
+  Texto literal das normas em
+  <a href="../docs/04-fontes.md">docs/04-fontes.md</a>.</p>
+</div>
+
+</body>
+</html>

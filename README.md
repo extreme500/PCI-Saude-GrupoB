@@ -50,6 +50,11 @@ python prototipo/experimentos/rodar_experimentos.py --experimento e2
 ## Estrutura
 
 ```
+apresentacao/
+  slides.html                 deck para projetar (8 slides, paleta Creme)
+  slides-orador.html          mesmos slides + roteiro de fala e cronometragem
+  CHEATSHEET.md               bibliografia comentada, glossario e numeros
+
 docs/
   01-analise-da-proposta.md   por que a abordagem é válida, e onde ela falha
   02-modelagem-pddl.md        decisões de modelagem e o mapa ação ↔ norma legal
