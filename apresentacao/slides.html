@@ -156,7 +156,8 @@ em.dest{font-style:normal;color:var(--terracota);font-weight:650}
   font-family:var(--serif); font-size:clamp(21px,3.1vw,46px);
   line-height:1.24; font-weight:600; letter-spacing:-.015em;
 }
-.realce .media{font-size:clamp(16px,1.95vw,28px);line-height:1.42;color:var(--tinta-70)}
+.realce .media{font-size:clamp(15px,1.78vw,26px);line-height:1.45;color:var(--tinta-70)}
+.realce .frase{font-size:clamp(15px,1.72vw,25px);line-height:1.48;color:var(--tinta);font-weight:450}
 
 /* ---------- lei + código ---------- */
 blockquote.lei{
@@ -214,7 +215,7 @@ pre.codigo .c{color:var(--tinta-45)}
 .coluna ul li{
   display:grid; grid-template-columns:auto 1fr; gap:clamp(9px,1.1vw,15px);
   align-items:baseline;
-  font-size:clamp(15px,1.8vw,26px); line-height:1.3; color:var(--tinta-70);
+  font-size:clamp(13.5px,1.55vw,22px); line-height:1.34; color:var(--tinta-70);
 }
 .coluna ul li::before{
   content:""; width:8px; height:8px; border-radius:50%;
@@ -287,19 +288,21 @@ pre.codigo .c{color:var(--tinta-45)}
   <!-- 2 ─ PROBLEMA / FOCO -->
   <section class="slide">
     <div class="etiqueta">Problema &amp; foco</div>
-    <h2>Metade é trajeto.<br>Metade é norma.</h2>
+    <h2>Não apenas trajeto,<br>também norma.</h2>
     <div class="termos">
       <div class="termo">
         <b>O enunciado</b>
-        <span>rota · equipe · urgência · intervalo entre visitas</span>
+        <span>Otimizar o percurso, o tamanho da equipe, a urgência de cada
+        paciente e o intervalo máximo entre visitas.</span>
       </div>
       <div class="termo">
         <b>Nosso recorte</b>
-        <span>um agente · um turno · rota já definida</span>
+        <span>Um agente, um turno, e a rota já definida por um roteirizador.</span>
       </div>
       <div class="termo verde">
         <b>O que sobra</b>
-        <span>o que fazer <em class="dest">dentro</em> e <em class="dest">entre</em> as visitas</span>
+        <span>Decidir o que fazer <em class="dest">dentro</em> e
+        <em class="dest">entre</em> as visitas — e isso quem condiciona é a lei.</span>
       </div>
     </div>
   </section>
@@ -307,7 +310,13 @@ pre.codigo .c{color:var(--tinta-45)}
   <!-- 3 ─ O QUE É PLANNING -->
   <section class="slide">
     <div class="etiqueta">Vocabulário mínimo</div>
-    <h2 class="menor">Planejamento automatizado</h2>
+    <h2 class="menor">O que é planejamento automatizado</h2>
+    <p class="linha-forte" style="max-width:74ch;margin-bottom:clamp(14px,2.1vh,26px)">
+      Uma área clássica de IA. Em vez de programar <em class="dest">como</em>
+      resolver, você descreve as regras do mundo — e um algoritmo genérico
+      procura sozinho a sequência de ações que leva da situação atual
+      até o objetivo.
+    </p>
     <div class="termos col4">
       <div class="termo centro">
         <b>Estado</b>
@@ -326,8 +335,9 @@ pre.codigo .c{color:var(--tinta-45)}
         <span>busca a sequência que leva um ao outro</span>
       </div>
     </div>
-    <div class="realce verde" style="margin-top:clamp(16px,2.4vh,32px)">
-      <p class="grande">Descreve-se <em class="dest">as regras</em> — não o algoritmo.</p>
+    <div class="realce verde" style="margin-top:clamp(14px,2.1vh,28px)">
+      <p class="frase">E quando não existe sequência possível, ele consegue
+      <em class="dest">provar</em> que não existe.</p>
     </div>
   </section>
 
@@ -354,9 +364,10 @@ pre.codigo .c{color:var(--tinta-45)}
       </div>
     </div>
     <div class="realce" style="margin-top:clamp(15px,2.2vh,30px)">
-      <p class="grande">Qualificação:
-        <em class="dest">rótulo estático</em> na literatura,
-        <em class="dest">condição dinâmica</em> na lei.</p>
+      <p class="frase">A literatura trata a qualificação do agente como uma
+      <em class="dest">etiqueta fixa</em>: ou ele pode atender aquele paciente,
+      ou não pode. Na lei brasileira ela depende de condições que
+      <em class="dest">mudam durante o próprio turno</em>.</p>
     </div>
   </section>
 
@@ -386,17 +397,21 @@ pre.codigo .c{color:var(--tinta-45)}
     <div class="termos">
       <div class="termo">
         <b>Geométrica &nbsp;·&nbsp; grafos</b>
-        <span>em que ordem visitar</span>
+        <span>Define em que ordem visitar as casas e quanto custa desviar
+        até a UBS a partir de cada parada.</span>
       </div>
       <div class="termo verde">
         <b>Lógica &nbsp;·&nbsp; PDDL</b>
-        <span>o que fazer em cada parada</span>
+        <span>Recebe a rota pronta e decide o que fazer em cada parada,
+        sem poder alterar a ordem.</span>
       </div>
     </div>
-    <div class="realce" style="margin-top:clamp(16px,2.4vh,32px)">
-      <p class="grande">O que acopla as paradas:</p>
-      <p class="media" style="margin-top:clamp(8px,1.2vh,14px)">
-        insumo só se repõe na UBS &nbsp;·&nbsp; supervisão acaba ao sair da casa
+    <div class="realce" style="margin-top:clamp(14px,2.1vh,28px)">
+      <p class="grande">O que acopla as paradas</p>
+      <p class="frase" style="margin-top:clamp(7px,1.1vh,13px)">
+        As fitas de glicemia só se repõem na UBS, e a supervisão acaba quando o
+        agente sai da casa. Uma decisão tomada na terceira parada pode
+        inviabilizar a sétima.
       </p>
     </div>
   </section>
@@ -441,9 +456,12 @@ pre.codigo .c{color:var(--tinta-45)}
       </div>
     </div>
     <div class="realce verde" style="margin-top:clamp(16px,2.4vh,32px)">
-      <p class="grande">Ele desviou <em class="dest">antes</em> de acionar a supervisão.</p>
-      <p class="media" style="margin-top:clamp(8px,1.2vh,14px)">
-        Essa ordem não está escrita em nenhuma linha do domínio.
+      <p class="grande">O planejador foi à UBS <em class="dest">antes</em>
+      de acionar a supervisão.</p>
+      <p class="frase" style="margin-top:clamp(7px,1.1vh,13px)">
+        O algoritmo comum fez o contrário: gastou duas janelas na mesma casa e
+        ficou sem supervisão antes do fim do turno. Essa ordem não está escrita
+        em nenhuma linha do domínio.
       </p>
     </div>
   </section>
@@ -456,19 +474,19 @@ pre.codigo .c{color:var(--tinta-45)}
       <div class="coluna entrega">
         <h3>Entrega</h3>
         <ul>
-          <li>Corretude sob escassez</li>
-          <li>Prova de inviabilidade</li>
-          <li>Otimalidade garantida</li>
-          <li>Declaratividade</li>
+          <li>Corretude sob escassez <b>de recursos</b></li>
+          <li>Prova de inviabilidade, <b>não só falha</b></li>
+          <li>Otimalidade com <b>garantia formal</b></li>
+          <li>Declaratividade: <b>muda a norma, não o código</b></li>
         </ul>
       </div>
       <div class="coluna falta">
         <h3>Falta</h3>
         <ul>
-          <li>Validar no Fast Downward</li>
-          <li>Prioridade e intervalo</li>
-          <li>Múltiplos agentes</li>
-          <li>API de mapas</li>
+          <li>Validar os planos <b>no Fast Downward</b></li>
+          <li>Prioridade e intervalo <b>na seleção do turno</b></li>
+          <li>Estender para <b>múltiplos agentes</b></li>
+          <li>Custos reais <b>por API de mapas</b></li>
         </ul>
       </div>
     </div>

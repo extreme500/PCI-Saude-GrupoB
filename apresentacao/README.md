@@ -4,7 +4,7 @@ Três arquivos, três usos diferentes.
 
 | Arquivo | Para quê |
 |---|---|
-| [`slides.html`](slides.html) | **O deck que vai na tela.** 9 slides, só palavras-chave, letra grande. Abra no navegador e use ← → (ou espaço) para navegar. |
+| [`slides.html`](slides.html) | **O deck que vai na tela.** 9 slides, letra grande, frases curtas. Abra no navegador e use ← → (ou espaço) para navegar. |
 | [`slides-orador.html`](slides-orador.html) | **O que o apresentador lê.** Os mesmos 9 slides, cada um ao lado do roteiro de fala, cronometragem e respostas prováveis da banca. Não projetar. |
 | [`CHEATSHEET.md`](CHEATSHEET.md) | **Para se situar no projeto.** Bibliografia comentada, glossário, números medidos e as perguntas que a banca provavelmente vai fazer. |
 
@@ -29,8 +29,9 @@ versão do orador.
 8. **Justificativa ‹2›** — a evidência preliminar medida
 9. Fechamento — entrega e lacunas
 
-Os slides carregam **apenas palavras-chave**: o conteúdo é falado, não lido.
-O texto corrido de cada slide está na versão do orador.
+Cada slide traz uma ou duas frases de resumo — o suficiente para a plateia
+acompanhar sozinha, sem servir de teleprompter. O desenvolvimento é falado;
+o texto corrido está na versão do orador.
 
 ## Notas técnicas
 

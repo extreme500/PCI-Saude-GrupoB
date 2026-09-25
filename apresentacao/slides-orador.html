@@ -143,6 +143,8 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
 .tela .realce.verde{background:linear-gradient(135deg,var(--sage-suave),rgba(255,253,248,.72));border-left-color:var(--sage)}
 .tela .realce .grande{font-family:var(--serif);font-size:clamp(11.5px,1.22vw,17px);line-height:1.24;font-weight:600}
 .tela .realce .media{font-size:clamp(9.5px,.95vw,12.5px);line-height:1.4;color:var(--tinta-70)}
+.tela .realce .frase{font-size:clamp(9px,.92vw,12px);line-height:1.42;color:var(--tinta)}
+.tela .coluna ul li b{color:var(--tinta);font-weight:650}
 
 .tela blockquote.lei{font-family:var(--serif);font-size:clamp(9.5px,.98vw,13px);line-height:1.45;font-style:italic}
 .tela blockquote.lei b{font-style:normal;background:rgba(179,92,56,.18);padding:0 3px;border-radius:3px}
@@ -233,11 +235,15 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
 <div class="par bloco">
   <div class="tela">
     <div class="etiqueta">Problema &amp; foco</div>
-    <h2>Metade é trajeto.<br>Metade é norma.</h2>
+    <h2>Não apenas trajeto,<br>também norma.</h2>
     <div class="termos">
-      <div class="termo"><b>O enunciado</b><span>rota · equipe · urgência · intervalo entre visitas</span></div>
-      <div class="termo"><b>Nosso recorte</b><span>um agente · um turno · rota já definida</span></div>
-      <div class="termo verde"><b>O que sobra</b><span>o que fazer <em class="dest">dentro</em> e <em class="dest">entre</em> as visitas</span></div>
+      <div class="termo"><b>O enunciado</b><span>Otimizar o percurso, o tamanho da
+      equipe, a urgência de cada paciente e o intervalo máximo entre visitas.</span></div>
+      <div class="termo"><b>Nosso recorte</b><span>Um agente, um turno, e a rota já
+      definida por um roteirizador.</span></div>
+      <div class="termo verde"><b>O que sobra</b><span>Decidir o que fazer
+      <em class="dest">dentro</em> e <em class="dest">entre</em> as visitas — e isso
+      quem condiciona é a lei.</span></div>
     </div>
   </div>
   <div class="fala">
@@ -270,7 +276,11 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
 <div class="par bloco">
   <div class="tela">
     <div class="etiqueta">Vocabulário mínimo</div>
-    <h2 class="menor">Planejamento automatizado</h2>
+    <h2 class="menor">O que é planejamento automatizado</h2>
+    <p class="linha-forte" style="max-width:74ch;margin-bottom:9px">Uma área clássica
+    de IA. Em vez de programar <em class="dest">como</em> resolver, você descreve as
+    regras do mundo — e um algoritmo genérico procura sozinho a sequência de ações
+    que leva da situação atual até o objetivo.</p>
     <div class="termos col4">
       <div class="termo centro"><b>Estado</b><span>o mundo descrito como fatos</span></div>
       <div class="termo centro"><b>Ação</b><span>pré-condições &rarr; efeitos</span></div>
@@ -278,7 +288,8 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
       <div class="termo centro"><b>Planejador</b><span>busca a sequência que leva um ao outro</span></div>
     </div>
     <div class="realce verde" style="margin-top:10px">
-      <p class="grande">Descreve-se <em class="dest">as regras</em> — não o algoritmo.</p>
+      <p class="frase">E quando não existe sequência possível, ele consegue
+      <em class="dest">provar</em> que não existe.</p>
     </div>
   </div>
   <div class="fala">
@@ -329,9 +340,10 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
       <div class="artigo"><h3>LLM como planejadora</h3>
       <p>Valmeekam et al. (2023) · ≈12%</p></div>
     </div>
-    <div class="realce" style="margin-top:10px"><p class="grande">Qualificação:
-    <em class="dest">rótulo estático</em> na literatura,
-    <em class="dest">condição dinâmica</em> na lei.</p></div>
+    <div class="realce" style="margin-top:10px"><p class="frase">A literatura trata a
+    qualificação do agente como uma <em class="dest">etiqueta fixa</em>: ou ele pode
+    atender aquele paciente, ou não pode. Na lei brasileira ela depende de condições
+    que <em class="dest">mudam durante o próprio turno</em>.</p></div>
   </div>
   <div class="fala">
     <div class="crono">Slide 4 · ~1 min 50 s — o slide mais importante da banca</div>
@@ -401,13 +413,16 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     <div class="etiqueta">Proposta de abordagem</div>
     <h2>Duas camadas</h2>
     <div class="termos">
-      <div class="termo"><b>Geométrica &nbsp;·&nbsp; grafos</b><span>em que ordem visitar</span></div>
-      <div class="termo verde"><b>Lógica &nbsp;·&nbsp; PDDL</b><span>o que fazer em cada parada</span></div>
+      <div class="termo"><b>Geométrica &nbsp;·&nbsp; grafos</b><span>Define em que ordem
+      visitar as casas e quanto custa desviar até a UBS a partir de cada parada.</span></div>
+      <div class="termo verde"><b>Lógica &nbsp;·&nbsp; PDDL</b><span>Recebe a rota pronta
+      e decide o que fazer em cada parada, sem poder alterar a ordem.</span></div>
     </div>
     <div class="realce" style="margin-top:10px">
-      <p class="grande">O que acopla as paradas:</p>
-      <p class="media" style="margin-top:6px">insumo só se repõe na UBS &nbsp;·&nbsp;
-      supervisão acaba ao sair da casa</p>
+      <p class="grande">O que acopla as paradas</p>
+      <p class="frase" style="margin-top:6px">As fitas de glicemia só se repõem na UBS,
+      e a supervisão acaba quando o agente sai da casa. Uma decisão tomada na terceira
+      parada pode inviabilizar a sétima.</p>
     </div>
   </div>
   <div class="fala">
@@ -495,9 +510,11 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
       <div class="rotulo">para <strong>provar</strong> inviabilidade legal</div></div>
     </div>
     <div class="realce verde" style="margin-top:10px">
-      <p class="grande">Ele desviou <em class="dest">antes</em> de acionar a supervisão.</p>
-      <p class="media" style="margin-top:6px">Essa ordem não está escrita em nenhuma
-      linha do domínio.</p>
+      <p class="grande">O planejador foi à UBS <em class="dest">antes</em> de acionar
+      a supervisão.</p>
+      <p class="frase" style="margin-top:6px">O algoritmo comum fez o contrário: gastou
+      duas janelas na mesma casa e ficou sem supervisão antes do fim do turno. Essa
+      ordem não está escrita em nenhuma linha do domínio.</p>
     </div>
   </div>
   <div class="fala">
@@ -515,6 +532,29 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     sobe para 2,1% porque um grupo menor (11 instâncias) puxa para cima, com máximo
     de 10,3%. Reportamos as duas porque a distribuição é torta: muitos zeros e
     poucos ganhos grandes. Dar só a média sugeriria um ganho típico que não existe.</p>
+
+    <h4>O que é “0 nós para provar inviabilidade”</h4>
+    <p><strong>Nós</strong> são estados expandidos durante a busca. Zero significa
+    que o planejador respondeu “impossível” <strong>sem testar nenhuma
+    sequência</strong>.</p>
+    <p>Ele consegue porque, antes de buscar, calcula a heurística sobre a
+    <strong>relaxação por deleção</strong>: uma versão do problema em que as ações
+    só <em>adicionam</em> fatos, nunca removem. Nesse mundo relaxado ele verifica
+    quais fatos chegam a ser alcançáveis.</p>
+    <p>No cenário sem curso técnico: o objetivo exige
+    <code>protocolo-cumprido</code>, que exige <code>pa-ok</code>. A única ação que
+    produz <code>pa-ok</code> é a aferição de pressão, cuja pré-condição inclui
+    <code>curso-tecnico-concluido</code> — um fato que não está no estado inicial e
+    que <strong>nenhuma ação cria</strong>. Logo <code>pa-ok</code> é inalcançável
+    até no mundo relaxado.</p>
+    <p>E como a relaxação só torna o problema <strong>mais fácil</strong>, o que é
+    impossível nela é impossível no problema real. Isso é <strong>prova</strong>,
+    não estimativa.</p>
+    <div class="seg"><b>O contraste que vale mencionar:</b> quando a inviabilidade é
+    por <b>falta de recurso</b> (acabaram as janelas de supervisão), a relaxação
+    ignora as remoções e “acha” que o contador nunca baixa. A heurística não enxerga
+    nada, e a prova passa a custar varrer o espaço inteiro — 332 nós. Mesma resposta,
+    custo muito diferente, porque o <i>tipo</i> de impossibilidade é diferente.</div>
 
     <h4>Comece pelo número que nos contraria</h4>
     <p class="diga">“O primeiro número é zero, e é o ganho de custo. Em rota onde o
@@ -555,11 +595,15 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     <h2 class="menor">Entrega e lacunas</h2>
     <div class="balanco">
       <div class="coluna entrega"><h3>Entrega</h3>
-        <ul><li>Corretude sob escassez</li><li>Prova de inviabilidade</li>
-        <li>Otimalidade garantida</li><li>Declaratividade</li></ul></div>
+        <ul><li>Corretude sob escassez <b>de recursos</b></li>
+        <li>Prova de inviabilidade, <b>não só falha</b></li>
+        <li>Otimalidade com <b>garantia formal</b></li>
+        <li>Declaratividade: <b>muda a norma, não o código</b></li></ul></div>
       <div class="coluna falta"><h3>Falta</h3>
-        <ul><li>Validar no Fast Downward</li><li>Prioridade e intervalo</li>
-        <li>Múltiplos agentes</li><li>API de mapas</li></ul></div>
+        <ul><li>Validar os planos <b>no Fast Downward</b></li>
+        <li>Prioridade e intervalo <b>na seleção do turno</b></li>
+        <li>Estender para <b>múltiplos agentes</b></li>
+        <li>Custos reais <b>por API de mapas</b></li></ul></div>
     </div>
   </div>
   <div class="fala">
@@ -578,11 +622,44 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     foi em corretude e em prova. Dizer “medimos <em>como</em> ele ajuda” descreve
     o achado com precisão; dizer “<em>se</em> ajuda” sugeriria que a resposta
     pudesse ter sido “não”, e não foi.</p>
+    <h4 class="verde">O que é declaratividade</h4>
+    <p>Você descreve <strong>o que</strong> vale, não <strong>como</strong> calcular.
+    Em nenhum lugar do <code>dominio.pddl</code> está escrito “primeiro cheque o
+    estoque, depois acione a supervisão”. Só existem ações com pré-condições e
+    efeitos; o algoritmo de busca é genérico e nunca muda.</p>
+    <p>Consequência prática: se amanhã uma portaria exigir verificar a caderneta
+    antes de qualquer procedimento do § 4º, você acrescenta <strong>uma linha de
+    pré-condição</strong> no domínio. No executor guloso, a mesma mudança significa
+    achar o ponto certo do laço, reordenar comandos e reavaliar a interação com tudo
+    que já estava lá.</p>
+    <p>Foi isso que o <code>--sem-curso-tecnico</code> demonstrou:
+    <strong>um fato removido do estado inicial</strong> mudou a resposta, com zero
+    linha de código alterada.</p>
+
+    <h4 class="verde">Como o Planning garante otimalidade</h4>
+    <p>Por <strong>A* com heurística admissível</strong>. O A* ordena a busca por
+    <code>f = g + h</code>, onde <code>g</code> é o custo já gasto e <code>h</code> a
+    estimativa do que falta. Uma heurística é <strong>admissível</strong> quando
+    <strong>nunca superestima</strong> o custo restante.</p>
+    <p>O teorema: nessa condição, quando o A* alcança o objetivo pela primeira vez, o
+    caminho encontrado é de <strong>custo mínimo</strong> — qualquer alternativa mais
+    barata ainda na fila teria <code>f</code> menor e teria sido retirada antes.</p>
+    <p>A <code>h_max</code> é admissível por dois motivos: é calculada na relaxação
+    (que só pode ser mais barata que o real, logo é limite inferior) e toma o
+    <strong>máximo</strong> entre os subobjetivos — atingir todos custa pelo menos o
+    do mais caro. Já a <code>h_add</code> <strong>soma</strong> os subobjetivos,
+    conta trabalho compartilhado duas vezes, superestima e perde a garantia: ela
+    devolveu 333 onde o ótimo era 286.</p>
+    <div class="cuidado"><b>Ressalva que vale declarar antes que perguntem.</b> A
+    garantia é de custo mínimo <b>dado o nosso modelo de custos e a rota fixa</b>.
+    Não é o melhor turno possível no absoluto — a rota veio de uma heurística que
+    também não é ótima. Prometer mais do que isso seria exagerar o resultado.</div>
+
     <h4>Sobre as lacunas</h4>
-    <p>As quatro palavras da coluna da direita são só lembretes. Apresente-as como
+    <p>Os quatro itens da coluna da direita são só lembretes. Apresente-os como
     <strong>lacunas conhecidas</strong>, não como promessas. A mais visível frente
-    ao enunciado é “prioridade e intervalo”: os dois estão nos dados, mas ainda não
-    entram na seleção de quem compõe o turno. <strong>Diga isso antes que
+    ao enunciado é “prioridade e intervalo na seleção do turno”: os dois estão nos
+    dados, mas ainda não decidem quem compõe o turno. <strong>Diga isso antes que
     perguntem.</strong></p>
     <div class="seg"><b>Se perguntarem sobre dados de pacientes:</b> “Todos
     fictícios. Só as coordenadas são reais, e servem apenas para dar ordem de
