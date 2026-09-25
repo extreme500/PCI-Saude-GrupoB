@@ -4,8 +4,8 @@ Três arquivos, três usos diferentes.
 
 | Arquivo | Para quê |
 |---|---|
-| [`slides.html`](slides.html) | **O deck que vai na tela.** 8 slides, texto enxuto. Abra no navegador e use ← → (ou espaço) para navegar. |
-| [`slides-orador.html`](slides-orador.html) | **O que o apresentador lê.** Os mesmos 8 slides, cada um ao lado do roteiro de fala, cronometragem e respostas prováveis da banca. Não projetar. |
+| [`slides.html`](slides.html) | **O deck que vai na tela.** 9 slides, só palavras-chave, letra grande. Abra no navegador e use ← → (ou espaço) para navegar. |
+| [`slides-orador.html`](slides-orador.html) | **O que o apresentador lê.** Os mesmos 9 slides, cada um ao lado do roteiro de fala, cronometragem e respostas prováveis da banca. Não projetar. |
 | [`CHEATSHEET.md`](CHEATSHEET.md) | **Para se situar no projeto.** Bibliografia comentada, glossário, números medidos e as perguntas que a banca provavelmente vai fazer. |
 
 ## Como apresentar
@@ -14,19 +14,23 @@ Três arquivos, três usos diferentes.
 2. Quem apresenta abre o `slides-orador.html` num segundo monitor, tablet ou celular.
 3. Projete o `slides.html` em tela cheia (`F11`).
 
-Duração alvo: **~9 minutos** + perguntas. A cronometragem por slide está na
+Duração alvo: **~10 minutos** + perguntas. A cronometragem por slide está na
 versão do orador.
 
 ## Estrutura dos 8 slides
 
-1. Capa
+1. Capa — título e autores
 2. **Problema & foco** — o recorte e por que ele é defensável
-3. **Artigos** — quatro frentes da literatura e a lacuna que abrimos
-4. **Questão inicial** — a pergunta cética e a hipótese nula
-5. **Proposta** — a arquitetura em duas camadas
-6. **Justificativa ‹1›** — a lei já está escrita como uma ação STRIPS
-7. **Justificativa ‹2›** — a evidência preliminar medida
-8. Fechamento — o que entrega e o que ainda falta
+3. **Planejamento automatizado** — vocabulário mínimo: estado, ação, objetivo
+4. **Artigos** — quatro frentes da literatura e a lacuna que abrimos
+5. **Questão inicial** — a pergunta cética e a hipótese nula
+6. **Proposta** — a arquitetura em duas camadas
+7. **Justificativa ‹1›** — a lei já está escrita como uma ação STRIPS
+8. **Justificativa ‹2›** — a evidência preliminar medida
+9. Fechamento — entrega e lacunas
+
+Os slides carregam **apenas palavras-chave**: o conteúdo é falado, não lido.
+O texto corrido de cada slide está na versão do orador.
 
 ## Notas técnicas
 

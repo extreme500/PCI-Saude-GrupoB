@@ -11,227 +11,255 @@
 <style>
 /* ===========================================================================
    Paleta "Creme" — deck light-locked.
-   Uma apresentação é uma superfície projetada: ela precisa ser idêntica em
-   qualquer máquina, independentemente do tema do sistema operacional do
-   apresentador. Por isso color-scheme: light e sem variante escura.
+   Uma apresentação é superfície projetada: precisa ser idêntica em qualquer
+   máquina, independentemente do tema do sistema do apresentador.
+   Tipografia dimensionada para PROJEÇÃO: pouco texto, letra grande.
    =========================================================================== */
 :root {
   color-scheme: light;
 
-  --creme-100: #FEFCF7;
-  --creme-200: #F9F2E4;
-  --creme-300: #F2E7D2;
-  --creme-400: #E8D8BC;
-  --creme-500: #D9C4A1;
+  --creme-100:#FEFCF7; --creme-200:#F9F2E4; --creme-300:#F2E7D2;
+  --creme-400:#E8D8BC; --creme-500:#D9C4A1;
 
-  --tinta:      #33291F;
-  --tinta-70:   #5C4F41;
-  --tinta-45:   #8A7A67;
-  --tinta-20:   #C6B7A2;
+  --tinta:#33291F; --tinta-70:#5C4F41; --tinta-45:#8A7A67; --tinta-20:#C6B7A2;
 
-  --terracota:  #B35C38;
-  --terracota-suave: #F3DFD3;
-  --sage:       #4A6B5B;
-  --sage-suave: #DDE7E0;
+  --terracota:#B35C38; --terracota-suave:#F3DFD3;
+  --sage:#4A6B5B; --sage-suave:#DDE7E0;
 
-  --borda: rgba(51, 41, 31, .14);
-  --sombra: 0 1px 2px rgba(51,41,31,.05), 0 8px 24px rgba(51,41,31,.06);
+  --borda: rgba(51,41,31,.15);
+  --sombra: 0 2px 4px rgba(51,41,31,.05), 0 12px 32px rgba(51,41,31,.07);
 
-  --serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --serif:'Fraunces','Iowan Old Style',Georgia,serif;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*{box-sizing:border-box;margin:0;padding:0}
 
-body {
-  font-family: var(--sans);
-  color: var(--tinta);
-  background: var(--creme-200);
+body{
+  font-family:var(--sans); color:var(--tinta); background:var(--creme-200);
   background-image:
-    radial-gradient(900px 560px at 12% -8%, #FFFFFF 0%, transparent 60%),
-    radial-gradient(760px 520px at 92% 8%, var(--creme-100) 0%, transparent 62%),
-    radial-gradient(880px 640px at 78% 104%, var(--creme-400) 0%, transparent 60%),
+    radial-gradient(1000px 620px at 10% -10%, #FFFFFF 0%, transparent 60%),
+    radial-gradient(840px 560px at 94% 6%, var(--creme-100) 0%, transparent 62%),
+    radial-gradient(980px 700px at 80% 106%, var(--creme-400) 0%, transparent 60%),
     linear-gradient(158deg, var(--creme-100) 0%, var(--creme-200) 42%, var(--creme-300) 100%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
+  background-attachment:fixed;
+  min-height:100vh; -webkit-font-smoothing:antialiased; overflow:hidden;
 }
 
-/* ---------- estrutura do slide ---------- */
-.deck { position: relative; height: 100vh; }
+/* ---------- estrutura ---------- */
+.deck{position:relative;height:100vh}
 
-.slide {
-  position: absolute; inset: 0;
-  display: none;
-  flex-direction: column; justify-content: center;
-  padding: clamp(28px, 5vw, 92px);
-  padding-bottom: clamp(70px, 9vh, 104px);
-  max-width: 1180px; margin: 0 auto;
-  animation: entra .42s cubic-bezier(.22,.9,.3,1) both;
+.slide{
+  position:absolute; inset:0;
+  display:none; flex-direction:column; justify-content:center;
+  padding:clamp(26px,3.6vw,64px);
+  padding-bottom:clamp(62px,7.5vh,92px);
+  max-width:1580px; margin:0 auto;
+  overflow-y:auto;
+  animation:entra .4s cubic-bezier(.22,.9,.3,1) both;
 }
-.slide.ativo { display: flex; }
-@keyframes entra { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .slide { animation: none; } }
+.slide.ativo{display:flex}
+@keyframes entra{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide{animation:none}}
 
-/* ---------- tipografia ---------- */
-.etiqueta {
-  font-size: clamp(10px, 1.05vw, 12px); font-weight: 700;
-  letter-spacing: .16em; text-transform: uppercase;
-  color: var(--terracota); margin-bottom: clamp(12px, 1.8vh, 20px);
-  display: flex; align-items: center; gap: 10px;
+/* ---------- tipografia grande ---------- */
+.etiqueta{
+  font-size:clamp(11px,1.2vw,16px); font-weight:700;
+  letter-spacing:.17em; text-transform:uppercase; color:var(--terracota);
+  margin-bottom:clamp(14px,2vh,24px);
+  display:flex; align-items:center; gap:12px;
 }
-.etiqueta::after { content: ""; flex: 1; height: 1px; background: var(--borda); max-width: 120px; }
+.etiqueta::after{content:"";flex:1;height:1px;background:var(--borda);max-width:180px}
 
-h1 {
-  font-family: var(--serif);
-  font-size: clamp(34px, 5.6vw, 72px); font-weight: 600;
-  line-height: 1.04; letter-spacing: -.02em;
+h1{
+  font-family:var(--serif);
+  font-size:clamp(46px,8vw,118px); font-weight:700;
+  line-height:1; letter-spacing:-.025em;
 }
-h2 {
-  font-family: var(--serif);
-  font-size: clamp(26px, 3.9vw, 48px); font-weight: 600;
-  line-height: 1.12; letter-spacing: -.015em;
-  margin-bottom: clamp(14px, 2.4vh, 26px);
+h2{
+  font-family:var(--serif);
+  font-size:clamp(34px,5.9vw,84px); font-weight:600;
+  line-height:1.05; letter-spacing:-.022em;
+  margin-bottom:clamp(20px,3vh,40px);
 }
-.sub {
-  font-size: clamp(15px, 1.75vw, 21px); color: var(--tinta-70);
-  line-height: 1.55; max-width: 62ch;
+h2.menor{font-size:clamp(30px,4.9vw,68px)}
+
+.linha-forte{
+  font-size:clamp(19px,2.35vw,34px); line-height:1.4;
+  color:var(--tinta-70); max-width:44ch; font-weight:450;
 }
-strong { font-weight: 650; color: var(--tinta); }
-em.dest { font-style: normal; color: var(--terracota); font-weight: 600; }
+strong{font-weight:650;color:var(--tinta)}
+em.dest{font-style:normal;color:var(--terracota);font-weight:650}
 
 /* ---------- capa ---------- */
-.capa-meta {
-  margin-top: clamp(24px, 4vh, 44px); padding-top: clamp(18px, 2.6vh, 26px);
-  border-top: 1px solid var(--borda);
-  display: flex; flex-wrap: wrap; gap: clamp(18px, 4vw, 54px);
-  font-size: clamp(12px, 1.3vw, 15px); color: var(--tinta-70);
+.autores{
+  margin-top:clamp(28px,4.5vh,56px); padding-top:clamp(20px,2.8vh,32px);
+  border-top:2px solid var(--borda);
 }
-.capa-meta b { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-45); margin-bottom: 5px; font-weight: 700; }
-
-/* ---------- listas ---------- */
-ul.lista { list-style: none; display: grid; gap: clamp(10px, 1.7vh, 16px); }
-ul.lista li {
-  display: grid; grid-template-columns: auto 1fr; gap: 13px; align-items: start;
-  font-size: clamp(14px, 1.65vw, 19px); line-height: 1.5; color: var(--tinta-70);
+.autores .nomes{
+  font-family:var(--serif); font-size:clamp(17px,2.05vw,30px);
+  font-weight:600; line-height:1.45; color:var(--tinta);
 }
-ul.lista li::before {
-  content: ""; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--terracota); margin-top: .55em;
+.autores .curso{
+  margin-top:clamp(10px,1.4vh,16px);
+  font-size:clamp(12px,1.25vw,17px); color:var(--tinta-45);
+  letter-spacing:.06em; font-weight:600;
 }
 
-/* ---------- cartões ---------- */
-.grade { display: grid; gap: clamp(10px, 1.5vw, 18px); }
-.g2 { grid-template-columns: repeat(2, 1fr); }
-.g3 { grid-template-columns: repeat(3, 1fr); }
-@media (max-width: 760px) { .g2, .g3 { grid-template-columns: 1fr; } }
+/* ---------- termo: palavra-chave + glosa ---------- */
+.termos{display:grid;gap:clamp(12px,1.8vh,22px)}
+.termos.col2{grid-template-columns:1fr 1fr;gap:clamp(12px,1.6vw,26px)}
+.termos.col4{grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.3vw,20px)}
+@media (max-width:900px){.termos.col2,.termos.col4{grid-template-columns:1fr}}
 
-.cartao {
-  background: rgba(255,253,248,.72);
-  border: 1px solid var(--borda); border-radius: 14px;
-  padding: clamp(13px, 1.9vw, 22px);
-  box-shadow: var(--sombra);
-  backdrop-filter: blur(6px);
+.termo{
+  background:rgba(255,253,248,.7); border:1px solid var(--borda);
+  border-left:4px solid var(--terracota); border-radius:0 14px 14px 0;
+  padding:clamp(13px,1.7vw,24px) clamp(15px,1.9vw,28px);
+  box-shadow:var(--sombra);
 }
-.cartao h3 {
-  font-size: clamp(12px, 1.35vw, 15px); font-weight: 700;
-  letter-spacing: .01em; margin-bottom: 7px;
+.termo.verde{border-left-color:var(--sage)}
+.termo b{
+  display:block; font-family:var(--serif);
+  font-size:clamp(18px,2.35vw,34px); font-weight:700;
+  line-height:1.1; letter-spacing:-.015em; color:var(--tinta);
+  margin-bottom:clamp(4px,.7vh,9px);
 }
-.cartao p { font-size: clamp(12px, 1.35vw, 15px); color: var(--tinta-70); line-height: 1.5; }
-.cartao .fonte { font-size: clamp(10px, 1.1vw, 12px); color: var(--tinta-45); margin-top: 9px; font-variant-numeric: tabular-nums; }
+.termo span{
+  display:block; font-size:clamp(14px,1.65vw,24px);
+  line-height:1.38; color:var(--tinta-70);
+}
+.termo.centro{border-left:none;border-top:4px solid var(--terracota);border-radius:0 0 14px 14px;text-align:left}
 
-/* ---------- destaque / citação ---------- */
-.realce {
-  background: linear-gradient(135deg, var(--terracota-suave), rgba(255,253,248,.7));
-  border-left: 3px solid var(--terracota); border-radius: 0 14px 14px 0;
-  padding: clamp(15px, 2.2vw, 26px);
+/* ---------- cartões de artigos ---------- */
+.artigos{display:grid;grid-template-columns:1fr 1fr;gap:clamp(11px,1.4vw,20px)}
+@media (max-width:900px){.artigos{grid-template-columns:1fr}}
+.artigo{
+  background:rgba(255,253,248,.72); border:1px solid var(--borda);
+  border-radius:14px; padding:clamp(13px,1.6vw,24px); box-shadow:var(--sombra);
 }
-.realce.verde { background: linear-gradient(135deg, var(--sage-suave), rgba(255,253,248,.7)); border-left-color: var(--sage); }
+.artigo h3{
+  font-family:var(--serif); font-size:clamp(16px,1.95vw,28px);
+  font-weight:600; line-height:1.15; margin-bottom:clamp(6px,.9vh,11px);
+}
+.artigo p{font-size:clamp(13px,1.45vw,20px);color:var(--tinta-45);line-height:1.4;font-variant-numeric:tabular-nums}
 
-blockquote.lei {
-  font-family: var(--serif); font-size: clamp(14px, 1.7vw, 20px);
-  line-height: 1.52; color: var(--tinta); font-style: italic;
+/* ---------- realce ---------- */
+.realce{
+  background:linear-gradient(135deg,var(--terracota-suave),rgba(255,253,248,.72));
+  border-left:5px solid var(--terracota); border-radius:0 16px 16px 0;
+  padding:clamp(17px,2.3vw,34px);
 }
-blockquote.lei b { font-style: normal; background: rgba(179,92,56,.15); padding: 0 4px; border-radius: 3px; }
-.lei-fonte { font-size: clamp(10px, 1.1vw, 12px); color: var(--tinta-45); margin-top: 10px; font-style: normal; }
+.realce.verde{background:linear-gradient(135deg,var(--sage-suave),rgba(255,253,248,.72));border-left-color:var(--sage)}
+.realce .grande{
+  font-family:var(--serif); font-size:clamp(21px,3.1vw,46px);
+  line-height:1.24; font-weight:600; letter-spacing:-.015em;
+}
+.realce .media{font-size:clamp(16px,1.95vw,28px);line-height:1.42;color:var(--tinta-70)}
 
-/* ---------- código ---------- */
-pre.codigo {
-  font-family: var(--mono); font-size: clamp(10px, 1.18vw, 14px);
-  line-height: 1.62; color: var(--tinta);
-  background: rgba(255,253,248,.85); border: 1px solid var(--borda);
-  border-radius: 12px; padding: clamp(12px, 1.7vw, 20px);
-  overflow-x: auto; box-shadow: var(--sombra);
+/* ---------- lei + código ---------- */
+blockquote.lei{
+  font-family:var(--serif); font-size:clamp(15px,1.85vw,27px);
+  line-height:1.46; color:var(--tinta); font-style:italic;
 }
-pre.codigo .k { color: var(--sage); font-weight: 600; }
-pre.codigo .c { color: var(--tinta-45); }
+blockquote.lei b{font-style:normal;background:rgba(179,92,56,.18);padding:0 5px;border-radius:4px}
+.lei-fonte{font-size:clamp(11px,1.2vw,16px);color:var(--tinta-45);margin-top:clamp(8px,1.2vh,14px);font-style:normal;font-weight:600}
 
-/* ---------- fluxo da arquitetura ---------- */
-.fluxo { display: grid; gap: clamp(8px, 1.2vh, 14px); }
-.faixa {
-  display: grid; grid-template-columns: clamp(88px,11vw,140px) 1fr;
-  gap: clamp(12px, 2vw, 22px); align-items: center;
-  background: rgba(255,253,248,.72); border: 1px solid var(--borda);
-  border-radius: 14px; padding: clamp(12px, 1.8vw, 20px); box-shadow: var(--sombra);
+pre.codigo{
+  font-family:var(--mono); font-size:clamp(11px,1.32vw,19px);
+  line-height:1.62; color:var(--tinta);
+  background:rgba(255,253,248,.88); border:1px solid var(--borda);
+  border-radius:14px; padding:clamp(13px,1.8vw,26px);
+  overflow-x:auto; box-shadow:var(--sombra);
 }
-.faixa .qual {
-  font-family: var(--serif); font-size: clamp(12px, 1.4vw, 16px); font-weight: 600;
-  color: var(--terracota); line-height: 1.2;
-}
-.faixa.logica .qual { color: var(--sage); }
-.faixa .oque { font-size: clamp(12px, 1.4vw, 16px); color: var(--tinta-70); line-height: 1.5; }
-.faixa .oque b { color: var(--tinta); }
-.seta { text-align: center; color: var(--tinta-20); font-size: 17px; line-height: 1; }
+pre.codigo .k{color:var(--sage);font-weight:600}
+pre.codigo .c{color:var(--tinta-45)}
 
 /* ---------- números ---------- */
-.numero { font-family: var(--serif); font-size: clamp(30px, 4.4vw, 54px); font-weight: 700; line-height: 1; letter-spacing: -.02em; }
-.numero.destaque { color: var(--terracota); }
-.numero small { font-size: .42em; font-weight: 600; color: var(--tinta-45); margin-left: 4px; }
-.rotulo { font-size: clamp(11px, 1.2vw, 13px); color: var(--tinta-70); line-height: 1.4; margin-top: 9px; }
+.numeros{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(11px,1.5vw,22px)}
+@media (max-width:900px){.numeros{grid-template-columns:1fr}}
+.nbox{
+  background:rgba(255,253,248,.72); border:1px solid var(--borda);
+  border-radius:16px; padding:clamp(15px,2vw,30px); box-shadow:var(--sombra);
+  display:flex; flex-direction:column; justify-content:flex-start;
+}
+.nbox.foco{border-color:rgba(179,92,56,.45);background:linear-gradient(150deg,var(--terracota-suave),rgba(255,253,248,.8))}
+.numero{
+  font-family:var(--serif); font-size:clamp(42px,6.4vw,96px); font-weight:700;
+  line-height:.95; letter-spacing:-.035em;
+}
+.numero.destaque{color:var(--terracota)}
+.numero small{font-size:.38em;font-weight:600;color:var(--tinta-45);margin-left:3px;letter-spacing:0}
+.nbox .rotulo{
+  font-size:clamp(14px,1.6vw,23px); line-height:1.34; color:var(--tinta-70);
+  margin-top:clamp(9px,1.4vh,18px);
+}
+
+/* ---------- balanço final (slide 9) ---------- */
+.balanco{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.7vw,26px)}
+@media (max-width:900px){.balanco{grid-template-columns:1fr}}
+.coluna{
+  background:rgba(255,253,248,.72); border:1px solid var(--borda);
+  border-radius:16px; padding:clamp(15px,2vw,30px); box-shadow:var(--sombra);
+}
+.coluna > h3{
+  font-family:var(--serif); font-size:clamp(18px,2.3vw,34px); font-weight:700;
+  line-height:1.1; margin-bottom:clamp(11px,1.7vh,22px);
+  padding-bottom:clamp(9px,1.3vh,16px); border-bottom:2px solid var(--borda);
+}
+.coluna.entrega > h3{color:var(--sage)}
+.coluna.falta > h3{color:var(--terracota)}
+.coluna ul{list-style:none;display:grid;gap:clamp(8px,1.3vh,17px)}
+.coluna ul li{
+  display:grid; grid-template-columns:auto 1fr; gap:clamp(9px,1.1vw,15px);
+  align-items:baseline;
+  font-size:clamp(15px,1.8vw,26px); line-height:1.3; color:var(--tinta-70);
+}
+.coluna ul li::before{
+  content:""; width:8px; height:8px; border-radius:50%;
+  background:var(--sage); flex:none; transform:translateY(-.15em);
+}
+.coluna.falta ul li::before{background:var(--terracota)}
+.coluna ul li b{color:var(--tinta);font-weight:650}
 
 /* ---------- navegação ---------- */
-.barra {
-  position: fixed; left: 0; right: 0; bottom: 0; height: 3px;
-  background: rgba(51,41,31,.07); z-index: 30;
-}
-.barra i { display: block; height: 100%; background: var(--terracota); transition: width .32s cubic-bezier(.22,.9,.3,1); }
+.barra{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(51,41,31,.07);z-index:30}
+.barra i{display:block;height:100%;background:var(--terracota);transition:width .32s cubic-bezier(.22,.9,.3,1)}
 
-.nav {
-  position: fixed; bottom: clamp(14px, 2.4vh, 26px); right: clamp(16px, 3vw, 40px);
-  display: flex; align-items: center; gap: 9px; z-index: 31;
+.nav{
+  position:fixed; bottom:clamp(12px,2vh,24px); right:clamp(16px,2.6vw,38px);
+  display:flex; align-items:center; gap:10px; z-index:31;
 }
-.nav button {
-  width: 34px; height: 34px; border-radius: 9px; cursor: pointer;
-  border: 1px solid var(--borda); background: rgba(255,253,248,.88);
-  color: var(--tinta-70); font-size: 14px; line-height: 1;
-  display: grid; place-items: center; transition: all .16s;
+.nav button{
+  width:38px;height:38px;border-radius:10px;cursor:pointer;
+  border:1px solid var(--borda);background:rgba(255,253,248,.9);
+  color:var(--tinta-70);font-size:15px;line-height:1;
+  display:grid;place-items:center;transition:all .16s;
 }
-.nav button:hover:not(:disabled) { background: #fff; color: var(--terracota); border-color: var(--terracota); }
-.nav button:disabled { opacity: .3; cursor: default; }
-.nav .conta { font-size: 12px; color: var(--tinta-45); font-variant-numeric: tabular-nums; min-width: 46px; text-align: center; font-weight: 600; }
+.nav button:hover:not(:disabled){background:#fff;color:var(--terracota);border-color:var(--terracota)}
+.nav button:disabled{opacity:.3;cursor:default}
+.nav .conta{font-size:14px;color:var(--tinta-45);font-variant-numeric:tabular-nums;min-width:52px;text-align:center;font-weight:700}
 
-.marca {
-  position: fixed; bottom: clamp(14px, 2.4vh, 26px); left: clamp(16px, 3vw, 40px);
-  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--tinta-45); font-weight: 600; z-index: 31;
+.marca{
+  position:fixed;bottom:clamp(12px,2vh,24px);left:clamp(16px,2.6vw,38px);
+  font-size:12px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--tinta-45);font-weight:700;z-index:31;
 }
-@media (max-width: 640px) { .marca { display: none; } }
+@media (max-width:680px){.marca{display:none}}
 
-.dica {
-  position: fixed; top: clamp(12px, 2vh, 22px); right: clamp(16px, 3vw, 40px);
-  font-size: 11px; color: var(--tinta-45); z-index: 31;
-  opacity: 1; transition: opacity .6s; pointer-events: none;
+.dica{
+  position:fixed;top:clamp(12px,2vh,22px);right:clamp(16px,2.6vw,38px);
+  font-size:12px;color:var(--tinta-45);z-index:31;
+  opacity:1;transition:opacity .6s;pointer-events:none;
 }
-.dica.some { opacity: 0; }
+.dica.some{opacity:0}
 
-/* ---------- impressão ---------- */
-@media print {
-  body { overflow: visible; background: #fff; }
-  .deck { height: auto; }
-  .slide { display: flex !important; position: relative; height: 100vh; page-break-after: always; animation: none; }
-  .nav, .barra, .dica, .marca { display: none !important; }
+@media print{
+  body{overflow:visible;background:#fff}
+  .deck{height:auto}
+  .slide{display:flex!important;position:relative;height:100vh;page-break-after:always;animation:none;overflow:hidden}
+  .nav,.barra,.dica,.marca{display:none!important}
 }
 </style>
 </head>
@@ -242,145 +270,142 @@ pre.codigo .c { color: var(--tinta-45); }
   <!-- 1 ─ CAPA -->
   <section class="slide ativo">
     <div class="etiqueta">INF99003 · Projeto em Ciência e Inovação · Ciclo 2</div>
-    <h1>Protocolos em rota</h1>
-    <p class="sub" style="margin-top:18px">
-      Planejamento automatizado para a <strong>conformidade normativa</strong> das
-      visitas domiciliares de Agentes Comunitários de Saúde — com a rota já
-      resolvida por grafos.
+    <h1>Protocolos<br>em rota</h1>
+    <p class="linha-forte" style="margin-top:clamp(16px,2.4vh,30px)">
+      Planejamento automatizado para as visitas domiciliares
+      dos Agentes Comunitários de Saúde.
     </p>
-    <div class="capa-meta">
-      <div><b>Grupo</b>Grupo B</div>
-      <div><b>Domínio</b>Atenção Primária à Saúde · SUS</div>
-      <div><b>Abordagem</b>Roteamento por grafos + PDDL</div>
+    <div class="autores">
+      <div class="nomes">
+        Gabriel Pieruccini Knopp · Arthur Andrade da Silva ·
+        Izadora Candotti de Oliveira
+      </div>
+      <div class="curso">GRUPO B · ATENÇÃO PRIMÁRIA À SAÚDE · SUS</div>
     </div>
   </section>
 
   <!-- 2 ─ PROBLEMA / FOCO -->
   <section class="slide">
     <div class="etiqueta">Problema &amp; foco</div>
-    <h2>Metade do problema é o trajeto.<br>A outra metade é a norma.</h2>
-    <div class="grade g2" style="margin-top:6px">
-      <div class="cartao">
-        <h3>O problema do enunciado</h3>
-        <p>O ACS precisa visitar as famílias do seu território no prazo adequado,
-        com equipe limitada. Georreferenciamento, prioridade clínica e intervalo
-        máximo entre visitas.</p>
+    <h2>Metade é trajeto.<br>Metade é norma.</h2>
+    <div class="termos">
+      <div class="termo">
+        <b>O enunciado</b>
+        <span>rota · equipe · urgência · intervalo entre visitas</span>
       </div>
-      <div class="cartao">
-        <h3>Nosso recorte</h3>
-        <p><strong>Um ACS, um turno, rota já definida.</strong> A pergunta passa a
-        ser o que fazer <em class="dest">dentro</em> e <em class="dest">entre</em>
-        as visitas.</p>
+      <div class="termo">
+        <b>Nosso recorte</b>
+        <span>um agente · um turno · rota já definida</span>
       </div>
-    </div>
-    <div class="realce" style="margin-top:16px">
-      <p style="font-size:clamp(13px,1.55vw,18px);line-height:1.5">
-        Chegar na casa certa não basta: o atendimento só é <strong>legal</strong>
-        se o agente tiver habilitação, equipamento, supervisão e insumo — e
-        alguns desses acabam no meio do turno.
-      </p>
+      <div class="termo verde">
+        <b>O que sobra</b>
+        <span>o que fazer <em class="dest">dentro</em> e <em class="dest">entre</em> as visitas</span>
+      </div>
     </div>
   </section>
 
-  <!-- 3 ─ ARTIGOS -->
+  <!-- 3 ─ O QUE É PLANNING -->
   <section class="slide">
-    <div class="etiqueta">Artigos · o que a literatura já resolve</div>
-    <h2>Quatro frentes e uma lacuna</h2>
-    <div class="grade g2">
-      <div class="cartao">
-        <h3>Roteamento em saúde domiciliar</h3>
-        <p>O HHCRSP é o VRP com restrições próprias — inclusive
-        <strong>requisitos de qualificação</strong>.</p>
-        <p class="fonte">Fikar &amp; Hirsch (2017) · Cissé et al. (2017)</p>
+    <div class="etiqueta">Vocabulário mínimo</div>
+    <h2 class="menor">Planejamento automatizado</h2>
+    <div class="termos col4">
+      <div class="termo centro">
+        <b>Estado</b>
+        <span>o mundo descrito como fatos</span>
       </div>
-      <div class="cartao">
-        <h3>Planejamento clássico</h3>
-        <p>STRIPS, busca heurística, h_max/h_add e planejamento
-        <strong>ótimo com garantia</strong>.</p>
-        <p class="fonte">Fikes &amp; Nilsson (1971) · Bonet &amp; Geffner (2001) · Helmert &amp; Domshlak (2009)</p>
+      <div class="termo centro">
+        <b>Ação</b>
+        <span>pré-condições &rarr; efeitos</span>
       </div>
-      <div class="cartao">
-        <h3>Planejamento em protocolos de saúde</h3>
-        <p>Diretrizes clínicas <strong>traduzidas para domínios de
-        planejamento</strong>, gerando planos de cuidado.</p>
-        <p class="fonte">González-Ferrer et al. (2013) · Bradbrook et al. (2005)</p>
+      <div class="termo centro">
+        <b>Objetivo</b>
+        <span>fatos que devem valer no fim</span>
       </div>
-      <div class="cartao">
-        <h3>LLM como planejadora</h3>
-        <p>Geração autônoma de planos executáveis é limitada —
-        <strong>≈12% de sucesso</strong> no melhor modelo avaliado.</p>
-        <p class="fonte">Valmeekam et al. (2023), NeurIPS</p>
+      <div class="termo centro">
+        <b>Planejador</b>
+        <span>busca a sequência que leva um ao outro</span>
       </div>
     </div>
-    <div class="realce verde" style="margin-top:16px">
-      <p style="font-size:clamp(13px,1.5vw,17px);line-height:1.5">
-        <strong>A lacuna.</strong> A literatura trata qualificação como
-        <em class="dest">rótulo estático</em> — o agente <i>i</i> pode atender o
-        paciente <i>j</i>. Na lei brasileira ela é <strong>condição dinâmica e
-        encadeada</strong>, e a supervisão exigida é um recurso que o próprio
-        deslocamento consome.
-      </p>
+    <div class="realce verde" style="margin-top:clamp(16px,2.4vh,32px)">
+      <p class="grande">Descreve-se <em class="dest">as regras</em> — não o algoritmo.</p>
     </div>
   </section>
 
-  <!-- 4 ─ QUESTÃO INICIAL -->
+  <!-- 4 ─ ARTIGOS -->
+  <section class="slide">
+    <div class="etiqueta">Artigos</div>
+    <h2 class="menor">Quatro frentes, uma lacuna</h2>
+    <div class="artigos">
+      <div class="artigo">
+        <h3>Roteamento em saúde domiciliar</h3>
+        <p>Fikar &amp; Hirsch (2017)<br>Cissé et al. (2017)</p>
+      </div>
+      <div class="artigo">
+        <h3>Planejamento clássico</h3>
+        <p>Fikes &amp; Nilsson (1971)<br>Bonet &amp; Geffner (2001) · Helmert &amp; Domshlak (2009)</p>
+      </div>
+      <div class="artigo">
+        <h3>Planning em protocolos clínicos</h3>
+        <p>González-Ferrer et al. (2013)<br>Bradbrook et al. (2005)</p>
+      </div>
+      <div class="artigo">
+        <h3>LLM como planejadora</h3>
+        <p>Valmeekam et al. (2023) · ≈12%</p>
+      </div>
+    </div>
+    <div class="realce" style="margin-top:clamp(15px,2.2vh,30px)">
+      <p class="grande">Qualificação:
+        <em class="dest">rótulo estático</em> na literatura,
+        <em class="dest">condição dinâmica</em> na lei.</p>
+    </div>
+  </section>
+
+  <!-- 5 ─ QUESTÃO INICIAL -->
   <section class="slide">
     <div class="etiqueta">Questão inicial</div>
-    <h2 style="max-width:20ch">A pergunta que guia o trabalho</h2>
     <div class="realce">
-      <p style="font-family:var(--serif);font-size:clamp(17px,2.5vw,31px);line-height:1.34;font-weight:600">
-        Com a rota física já definida, o Planejamento Automatizado agrega algo
-        <em class="dest">mensurável</em> frente a um programa simples que percorra
-        a mesma rota cumprindo os mesmos protocolos?
-      </p>
+      <p class="grande">Com a rota já definida,<br>
+      o Planning agrega algo <em class="dest">mensurável</em>?</p>
     </div>
-    <div class="grade g2" style="margin-top:18px">
-      <div class="cartao">
-        <h3>Hipótese nula (a objeção honesta)</h3>
-        <p>“Um laço <code style="font-family:var(--mono);font-size:.92em">for</code>
-        faria o mesmo.” — a <strong>redundância tecnológica</strong>.</p>
+    <div class="termos col2" style="margin-top:clamp(18px,2.6vh,34px)">
+      <div class="termo">
+        <b>Hipótese nula</b>
+        <span>“um laço <code style="font-family:var(--mono);font-size:.92em">for</code> faria o mesmo”</span>
       </div>
-      <div class="cartao">
-        <h3>Como testamos</h3>
-        <p>Implementamos esse laço de verdade, como <strong>grupo de
-        controle</strong>, com a mesma tabela de custos. E medimos.</p>
+      <div class="termo verde">
+        <b>Como testamos</b>
+        <span>implementamos o laço como grupo de controle</span>
       </div>
     </div>
   </section>
 
-  <!-- 5 ─ PROPOSTA -->
+  <!-- 6 ─ PROPOSTA -->
   <section class="slide">
     <div class="etiqueta">Proposta de abordagem</div>
-    <h2>Duas camadas, cada paradigma no seu lugar</h2>
-    <div class="fluxo">
-      <div class="faixa">
-        <div class="qual">Camada geométrica</div>
-        <div class="oque"><b>Em que ordem visitar.</b> Matriz de distâncias,
-        Vizinho Mais Próximo + 2-opt. Entrega a rota e o custo de desviar até a UBS.</div>
+    <h2>Duas camadas</h2>
+    <div class="termos">
+      <div class="termo">
+        <b>Geométrica &nbsp;·&nbsp; grafos</b>
+        <span>em que ordem visitar</span>
       </div>
-      <div class="seta">▼</div>
-      <div class="faixa logica">
-        <div class="qual">Camada lógica</div>
-        <div class="oque"><b>O que fazer em cada parada.</b> Domínio PDDL: condições
-        legais, encaminhamento obrigatório e <b>recursos finitos</b> — insumos que
-        só se repõem na UBS, supervisão que o deslocamento encerra.</div>
+      <div class="termo verde">
+        <b>Lógica &nbsp;·&nbsp; PDDL</b>
+        <span>o que fazer em cada parada</span>
       </div>
     </div>
-    <div class="grade g3" style="margin-top:16px">
-      <div class="cartao"><h3>O planejador nunca escolhe a rota</h3><p>Ele só anda
-      pelas arestas que o roteirizador autorizou.</p></div>
-      <div class="cartao"><h3>Contrato mínimo</h3><p>Ordem das paradas + matriz de
-      custos. Trocar por OSRM ou OR-Tools não muda o domínio.</p></div>
-      <div class="cartao"><h3>Decisão que sobra</h3><p><strong>Onde sair da rota</strong>
-      para reabastecer — e em que ordem agir dentro da casa.</p></div>
+    <div class="realce" style="margin-top:clamp(16px,2.4vh,32px)">
+      <p class="grande">O que acopla as paradas:</p>
+      <p class="media" style="margin-top:clamp(8px,1.2vh,14px)">
+        insumo só se repõe na UBS &nbsp;·&nbsp; supervisão acaba ao sair da casa
+      </p>
     </div>
   </section>
 
-  <!-- 6 ─ JUSTIFICATIVA 1 -->
+  <!-- 7 ─ JUSTIFICATIVA 1 -->
   <section class="slide">
     <div class="etiqueta">Justificativa · por que planejamento</div>
-    <h2>A lei já está escrita como uma ação STRIPS</h2>
-    <div class="realce" style="margin-bottom:14px">
+    <h2 class="menor">A lei já é uma ação STRIPS</h2>
+    <div class="realce" style="margin-bottom:clamp(13px,1.9vh,24px)">
       <blockquote class="lei">
         “<b>desde que</b> o Agente Comunitário de Saúde <b>tenha concluído curso
         técnico</b> e <b>tenha disponíveis os equipamentos adequados</b>, são
@@ -395,73 +420,58 @@ pre.codigo .c { color: var(--tinta-45); }
                    (supervisao-ativa ?ag))         <span class="c">; "assistidas por nível superior"</span>
 <span class="k">:effect</span>       (and (pa-ok ?p)
                    (pendencia-encaminhamento ?p))  <span class="c">; "encaminhando o paciente"</span></pre>
-    <p class="sub" style="margin-top:14px;font-size:clamp(13px,1.5vw,18px)">
-      Um <code style="font-family:var(--mono)">if/else</code>
-      <strong>codifica</strong> a regra. O domínio PDDL <strong>é</strong> a regra.
-    </p>
   </section>
 
-  <!-- 7 ─ JUSTIFICATIVA 2 -->
+  <!-- 8 ─ EVIDÊNCIA -->
   <section class="slide">
-    <div class="etiqueta">Justificativa · evidência preliminar</div>
-    <h2>O que medimos até agora</h2>
-    <div class="grade g3">
-      <div class="cartao">
-        <div class="numero">0%</div>
-        <div class="rotulo"><strong>Ganho mediano de custo</strong> sobre o laço
-        simples. Em rota com insumo sobrando, ele já acerta o ótimo.</div>
+    <div class="etiqueta">Evidência preliminar</div>
+    <h2 class="menor">O que medimos</h2>
+    <div class="numeros">
+      <div class="nbox">
+        <div class="numero">0<small>%</small></div>
+        <div class="rotulo">ganho mediano de custo</div>
       </div>
-      <div class="cartao" style="border-color:rgba(179,92,56,.4)">
+      <div class="nbox foco">
         <div class="numero destaque">17<small>%</small></div>
-        <div class="rotulo"><strong>Falsos negativos do laço simples:</strong> 5 de
-        30 turnos declarados inviáveis <em class="dest">havendo</em> plano válido.</div>
+        <div class="rotulo"><strong>falsos negativos</strong> do laço simples</div>
       </div>
-      <div class="cartao">
-        <div class="numero">0 <small>nós</small></div>
-        <div class="rotulo"><strong>Prova de inviabilidade</strong> quando falta uma
-        condição legal. O laço só sabe dizer “não consegui”.</div>
+      <div class="nbox">
+        <div class="numero">0<small> nós</small></div>
+        <div class="rotulo">para <strong>provar</strong> inviabilidade legal</div>
       </div>
     </div>
-    <div class="realce verde" style="margin-top:18px">
-      <p style="font-size:clamp(12.5px,1.5vw,17px);line-height:1.5">
-        <strong>O mecanismo dos 17%.</strong> O laço aciona a supervisão, <em class="dest">depois</em>
-        descobre que faltam fitas e desvia até a UBS — e o desvio invalida a
-        supervisão já acionada. Gasta duas janelas na mesma casa e fica sem
-        janelas antes do fim do turno. O planejador deduz sozinho que basta
-        <strong>desviar antes de acionar</strong>. Essa ordem não está escrita em
-        nenhuma linha do domínio.
+    <div class="realce verde" style="margin-top:clamp(16px,2.4vh,32px)">
+      <p class="grande">Ele desviou <em class="dest">antes</em> de acionar a supervisão.</p>
+      <p class="media" style="margin-top:clamp(8px,1.2vh,14px)">
+        Essa ordem não está escrita em nenhuma linha do domínio.
       </p>
     </div>
   </section>
 
-  <!-- 8 ─ FECHAMENTO -->
+  <!-- 9 ─ FECHAMENTO -->
   <section class="slide">
     <div class="etiqueta">Onde estamos</div>
-    <h2>Resultado honesto, próximos passos claros</h2>
-    <div class="grade g2">
-      <div class="cartao">
-        <h3 style="color:var(--sage)">O que o planejador entrega</h3>
-        <ul class="lista" style="margin-top:10px;gap:8px">
-          <li>Corretude sob escassez de recursos</li>
-          <li>Prova de inviabilidade, não só falha</li>
-          <li>Otimalidade com garantia formal</li>
-          <li>Declaratividade: muda a norma, não o código</li>
+    <h2 class="menor">Entrega e lacunas</h2>
+    <div class="balanco">
+      <div class="coluna entrega">
+        <h3>Entrega</h3>
+        <ul>
+          <li>Corretude sob escassez</li>
+          <li>Prova de inviabilidade</li>
+          <li>Otimalidade garantida</li>
+          <li>Declaratividade</li>
         </ul>
       </div>
-      <div class="cartao">
-        <h3 style="color:var(--terracota)">O que ainda falta</h3>
-        <ul class="lista" style="margin-top:10px;gap:8px">
-          <li>Validar os <code style="font-family:var(--mono);font-size:.9em">.pddl</code> no Fast Downward</li>
-          <li>Usar prioridade e intervalo máximo para <strong>selecionar</strong> o turno</li>
-          <li>Estender para múltiplos agentes</li>
-          <li>Custos por API de mapas, não por haversine</li>
+      <div class="coluna falta">
+        <h3>Falta</h3>
+        <ul>
+          <li>Validar no Fast Downward</li>
+          <li>Prioridade e intervalo</li>
+          <li>Múltiplos agentes</li>
+          <li>API de mapas</li>
         </ul>
       </div>
     </div>
-    <p class="sub" style="margin-top:20px;font-size:clamp(13px,1.6vw,19px)">
-      O trunfo do trabalho não é “usamos Planning”. É
-      <strong>medimos onde Planning ajuda neste problema — e onde não ajuda.</strong>
-    </p>
   </section>
 
 </div>
@@ -470,7 +480,7 @@ pre.codigo .c { color: var(--tinta-45); }
 <div class="dica" id="dica">← → para navegar</div>
 <div class="nav">
   <button id="ant" aria-label="Slide anterior">←</button>
-  <span class="conta" id="conta">1 / 8</span>
+  <span class="conta" id="conta">1 / 9</span>
   <button id="prox" aria-label="Próximo slide">→</button>
 </div>
 <div class="barra"><i id="progresso"></i></div>
@@ -505,7 +515,6 @@ pre.codigo .c { color: var(--tinta-45); }
     else if (e.key === 'End') { e.preventDefault(); mostrar(slides.length - 1); }
   });
 
-  // navegação por toque
   let x0 = null;
   document.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
   document.addEventListener('touchend', (e) => {
