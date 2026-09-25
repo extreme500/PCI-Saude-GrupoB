@@ -276,14 +276,14 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
 <div class="par bloco">
   <div class="tela">
     <div class="etiqueta">Vocabulário mínimo</div>
-    <h2 class="menor">O que é planejamento automatizado</h2>
-    <p class="linha-forte" style="max-width:74ch;margin-bottom:9px">Uma área clássica
-    de IA. Em vez de programar <em class="dest">como</em> resolver, você descreve as
-    regras do mundo — e um algoritmo genérico procura sozinho a sequência de ações
-    que leva da situação atual até o objetivo.</p>
+    <h2 class="menor">O que é planejamento automatizado?</h2>
+    <p class="linha-forte" style="max-width:74ch;margin-bottom:9px">Em vez de programar
+    <em class="dest">como</em> resolver, você descreve as regras do mundo, e um
+    algoritmo genérico procura sozinho a sequência de ações que leva da situação atual
+    até o objetivo.</p>
     <div class="termos col4">
       <div class="termo centro"><b>Estado</b><span>o mundo descrito como fatos</span></div>
-      <div class="termo centro"><b>Ação</b><span>pré-condições &rarr; efeitos</span></div>
+      <div class="termo centro"><b>Ação</b><span>pré-condições &rarr; efeitos<br>(é o formato chamado STRIPS)</span></div>
       <div class="termo centro"><b>Objetivo</b><span>fatos que devem valer no fim</span></div>
       <div class="termo centro"><b>Planejador</b><span>busca a sequência que leva um ao outro</span></div>
     </div>
@@ -314,6 +314,25 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     <p class="diga">“O ponto importante é este: você descreve <strong>as regras</strong>,
     não o algoritmo. Você não programa <em>como</em> resolver — você declara
     <em>o que</em> vale, e a busca é genérica.”</p>
+    <h4 class="verde">O que é STRIPS (o termo aparece no slide 7)</h4>
+    <p><strong>S</strong>tanford <strong>R</strong>esearch <strong>I</strong>nstitute
+    <strong>P</strong>roblem <strong>S</strong>olver — Fikes &amp; Nilsson, 1971. Era
+    um planejador, mas o que ficou foi a <strong>representação</strong> que leva o
+    nome dele. Uma ação STRIPS tem exatamente três listas:</p>
+    <ul>
+      <li><strong>pré-condições</strong> — fatos que precisam valer para a ação
+      poder acontecer;</li>
+      <li><strong>lista de adição</strong> — fatos que passam a valer depois;</li>
+      <li><strong>lista de remoção</strong> — fatos que deixam de valer depois.</li>
+    </ul>
+    <p>Só isso. Sem laço, sem condicional, sem aritmética. Todo o poder expressivo é
+    “<em>se estes fatos valem, você pode fazer isto; e depois estes passam a valer e
+    aqueles não</em>”. É o ancestral do PDDL — no nosso domínio, a linha
+    <code>:requirements :strips</code> declara exatamente esse fragmento.</p>
+    <p>Se quiser dar o nome aqui, uma frase basta: <em>“esse formato de ação, com
+    pré-condições e efeitos, se chama STRIPS — é de 1971 e é a base do que a gente
+    usa até hoje.”</em> O slide 7 depende de a plateia ter ouvido isso.</p>
+
     <h4>Analogia rápida, se sentir a plateia perdida</h4>
     <p>“É a diferença entre ensinar o caminho e entregar o mapa com as regras de
     trânsito. Com o mapa e as regras, ele acha caminho para qualquer destino — e
@@ -341,9 +360,9 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
       <p>Valmeekam et al. (2023) · ≈12%</p></div>
     </div>
     <div class="realce" style="margin-top:10px"><p class="frase">A literatura trata a
-    qualificação do agente como uma <em class="dest">etiqueta fixa</em>: ou ele pode
-    atender aquele paciente, ou não pode. Na lei brasileira ela depende de condições
-    que <em class="dest">mudam durante o próprio turno</em>.</p></div>
+    habilitação do agente como uma <em class="dest">etiqueta fixa</em>: ou ele pode
+    atender aquele paciente, ou não pode. Na lei, a permissão soma várias condições —
+    e algumas delas <em class="dest">se gastam ao longo do turno</em>.</p></div>
   </div>
   <div class="fala">
     <div class="crono">Slide 4 · ~1 min 50 s — o slide mais importante da banca</div>
@@ -360,6 +379,27 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     qualificação não é um rótulo — é uma condição composta que muda durante o
     turno, porque a supervisão exigida é um recurso que o próprio deslocamento
     consome. É essa a lacuna.”</p>
+    <h4>Como a habilitação “se gasta” durante o turno</h4>
+    <p>Pergunta provável, e a resposta precisa ser exata. O § 4º exige
+    <strong>três condições simultâneas</strong>, e elas não são do mesmo tipo:</p>
+    <ul>
+      <li><strong>curso técnico concluído</strong> — não muda no turno; essa parte
+      é fixa mesmo, como na literatura;</li>
+      <li><strong>equipamento disponível</strong> — também fixa, no nosso modelo;</li>
+      <li><strong>assistência de profissional de nível superior</strong> —
+      <strong>essa acaba</strong> quando o agente sai da residência;</li>
+      <li>e, para a glicemia, ainda existe a <strong>fita reagente</strong>, que se
+      gasta a cada medição.</li>
+    </ul>
+    <p>Ou seja: não é o diploma que oscila. É que a <strong>permissão legal é uma
+    conjunção</strong>, e parte dos conjuntos se consome. Às 9h o agente pode medir
+    glicemia na casa A; às 10h, na casa B, o mesmo agente não pode — não porque
+    perdeu a habilitação, mas porque usou a última fita e já gastou a supervisão.</p>
+    <div class="seg"><b>A frase precisa, se cobrarem:</b> “a literatura modela
+    ‘agente <i>i</i> atende paciente <i>j</i>’ como matriz fixa de compatibilidade.
+    Aqui a permissão depende do estado: ela é a mesma pessoa, mas o que ela pode
+    fazer muda conforme o que ela ainda tem.”</div>
+
     <h4 class="verde">O precedente que blinda a escolha</h4>
     <p>González-Ferrer et al. (2013) traduzem <strong>diretrizes clínicas</strong>
     para um domínio de planejamento HTN e geram planos de cuidado. É o argumento
@@ -484,6 +524,10 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     <p class="diga">“Três condições conjuntivas e um efeito obrigatório. Isso é
     exatamente um esquema de ação STRIPS — as pré-condições e os efeitos do slide 3.
     A lei já está escrita no formalismo.”</p>
+    <p><strong>Se você não nomeou STRIPS no slide 3</strong>, faça agora em uma
+    frase: “STRIPS é o formato clássico de ação em planejamento, de 1971 —
+    pré-condições, o que passa a valer e o que deixa de valer.” Sem isso o título do
+    slide não significa nada para quem é de fora.</p>
     <h4>A frase de fechamento</h4>
     <p class="diga">“Um <code>if/else</code> em Python <strong>codifica</strong> a
     regra. O domínio PDDL <strong>é</strong> a regra. Se a norma mudar, a gente
@@ -532,6 +576,24 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     sobe para 2,1% porque um grupo menor (11 instâncias) puxa para cima, com máximo
     de 10,3%. Reportamos as duas porque a distribuição é torta: muitos zeros e
     poucos ganhos grandes. Dar só a média sugeriria um ganho típico que não existe.</p>
+
+    <h4>O que é uma “janela de supervisão”</h4>
+    <p><strong>É termo nosso, não da lei</strong> — e vale declarar isso se
+    perguntarem. A lei exige que o procedimento seja “assistido por profissional de
+    saúde de nível superior, membro da equipe”. Na prática, o ACS aciona o
+    enfermeiro da equipe para acompanhar aquele atendimento.</p>
+    <p>Modelamos esse acionamento como recurso finito: uma <strong>janela</strong> é
+    um episódio de assistência. O agente abre com <code>acionar-supervisao</code>, e
+    ela vale <strong>enquanto ele estiver naquela residência</strong> — sair da casa
+    fecha a janela.</p>
+    <p><strong>Por isso “duas janelas na mesma casa” é desperdício:</strong> o guloso
+    abriu a supervisão para aferir a pressão, só então descobriu que faltavam fitas,
+    desviou até a UBS — e o deslocamento fechou a janela. Ao voltar, teve de abrir
+    uma <strong>segunda</strong> para a mesma casa.</p>
+    <div class="cuidado"><b>Seja honesto sobre o parâmetro.</b> O número de janelas
+    por turno é escolha nossa de modelagem, não norma. A lei exige supervisão; ela
+    não diz “oito por turno”. Se perguntarem de onde saiu o número, a resposta é:
+    “arbitramos uma por residência, e está declarado como parâmetro configurável”.</div>
 
     <h4>O que é “0 nós para provar inviabilidade”</h4>
     <p><strong>Nós</strong> são estados expandidos durante a busca. Zero significa
@@ -595,15 +657,15 @@ code{font-family:var(--mono);font-size:.9em;background:rgba(51,41,31,.06);paddin
     <h2 class="menor">Entrega e lacunas</h2>
     <div class="balanco">
       <div class="coluna entrega"><h3>Entrega</h3>
-        <ul><li>Corretude sob escassez <b>de recursos</b></li>
-        <li>Prova de inviabilidade, <b>não só falha</b></li>
-        <li>Otimalidade com <b>garantia formal</b></li>
-        <li>Declaratividade: <b>muda a norma, não o código</b></li></ul></div>
+        <ul><li>Corretude sob escassez de recursos</li>
+        <li>Prova de inviabilidade, não só falha</li>
+        <li>Otimalidade com garantia formal</li>
+        <li>Declaratividade: muda a norma, não o código</li></ul></div>
       <div class="coluna falta"><h3>Falta</h3>
-        <ul><li>Validar os planos <b>no Fast Downward</b></li>
-        <li>Prioridade e intervalo <b>na seleção do turno</b></li>
-        <li>Estender para <b>múltiplos agentes</b></li>
-        <li>Custos reais <b>por API de mapas</b></li></ul></div>
+        <ul><li>Validar os planos no Fast Downward</li>
+        <li>Prioridade e intervalo na seleção do turno</li>
+        <li>Estender para múltiplos agentes</li>
+        <li>Custos reais por API de mapas</li></ul></div>
     </div>
   </div>
   <div class="fala">

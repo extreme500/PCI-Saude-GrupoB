@@ -289,7 +289,7 @@ prática consolidada, não norma — no nosso protótipo é parâmetro configur�
 | **APS / UBS / eSF** | Atenção Primária à Saúde / Unidade Básica de Saúde / equipe de Saúde da Família |
 | **HHCRSP** | *Home Health Care Routing and Scheduling Problem* — o problema completo, do qual fizemos um recorte |
 | **VRP / TSP** | *Vehicle Routing Problem* / *Traveling Salesman Problem* |
-| **STRIPS** | Formalismo de planejamento: ação = pré-condições + adições + remoções |
+| **STRIPS** | *Stanford Research Institute Problem Solver* (Fikes & Nilsson, 1971). O formalismo que leva esse nome: uma ação é **pré-condições** + **lista de adição** + **lista de remoção**, e nada mais. Sem laço, sem condicional, sem aritmética. É o fragmento básico do PDDL (`:requirements :strips`) |
 | **PDDL** | *Planning Domain Definition Language* — a linguagem em que escrevemos o domínio |
 | **Domínio × Problema** | Domínio = as regras (ações). Problema = a instância (objetos, estado inicial, objetivo) |
 | **Grounding** | Instanciar as ações com variáveis em ações concretas sem variáveis |
@@ -299,6 +299,8 @@ prática consolidada, não norma — no nosso protótipo é parâmetro configur�
 | **GBFS** | *Greedy Best-First Search* — ignora o custo já gasto; rápido e subótimo |
 | **Satisfaciente** | Busca que acha *um* plano válido, sem garantir que seja o melhor |
 | **Falso negativo** | Dizer "impossível" quando existe solução — o erro que medimos no executor guloso |
+| **Janela de supervisão** | **Termo nosso, não da lei.** Um episódio de assistência do profissional de nível superior exigido pelo art. 3º § 4º. O agente abre com `acionar-supervisao` e ela vale só enquanto ele está naquela residência — sair da casa fecha. O número por turno é parâmetro configurável |
+| **Ganho mediano de custo** | Mediana de `(custo_guloso − custo_ótimo) / custo_guloso` sobre as instâncias comparáveis. Mediana 0% = em pelo menos metade delas o guloso já achava o ótimo |
 
 ---
 
