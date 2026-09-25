@@ -17,7 +17,7 @@ Três arquivos, três usos diferentes.
 Duração alvo: **~10 minutos** + perguntas. A cronometragem por slide está na
 versão do orador.
 
-## Estrutura dos 8 slides
+## Estrutura dos 9 slides
 
 1. Capa — título e autores
 2. **Problema & foco** — o recorte e por que ele é defensável
