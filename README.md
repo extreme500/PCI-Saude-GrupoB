@@ -50,6 +50,9 @@ python prototipo/experimentos/rodar_experimentos.py --experimento e2
 ## Estrutura
 
 ```
+projeto/
+  PROJETO-CICLO2.md           documento do projeto nas 9 secoes exigidas pelo guia
+
 apresentacao/
   slides.html                 deck para projetar (8 slides, paleta Creme)
   slides-orador.html          mesmos slides + roteiro de fala e cronometragem
