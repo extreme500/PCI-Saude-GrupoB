@@ -1,0 +1,118 @@
+{
+  "_meta": {
+    "descricao": "Microarea ficticia de uma equipe de Saude da Familia. As coordenadas sao reais (regiao Bom Fim / Rio Branco, Porto Alegre-RS) para que a matriz de distancias tenha ordem de grandeza realista, mas TODOS os pacientes, condicoes clinicas e datas sao ficticios. Nenhum dado pessoal real foi utilizado.",
+    "fonte_das_regras": "As flags requer_* seguem a Lei 11.350/2006 art. 3o (red. Lei 13.595/2018): par. 4o I a V (pressao arterial, glicemia capilar, temperatura axilar, orientacao de medicacao e verificacao antropometrica, em carater excepcional e sob as condicoes legais) e par. 3o IV 'c' / V 'c' (verificacao do estado vacinal de crianca, gestante e pessoa idosa). Ver docs/04-fontes.md.",
+    "intervalo_maximo_padrao_dias": 30,
+    "observacao_intervalo": "A referencia de 1 visita/mes por familia e a media historicamente praticada na Estrategia Saude da Familia; a PNAB (Portaria 2.436/2017) orienta priorizar por risco e vulnerabilidade sem fixar criterio numerico. Tratado aqui como parametro configuravel, nao como norma.",
+    "observacao_protecao_respiratoria": "O campo exige_protecao_respiratoria NAO decorre de norma: ele so e lido pelo dominio estendido, que contem protocolos sinteticos criados para medir o comportamento do metodo sob complexidade normativa maior."
+  },
+
+  "ubs": {
+    "id": "ubs",
+    "nome": "UBS Santa Cecilia (ficticia)",
+    "lat": -30.0397,
+    "lon": -51.2189
+  },
+
+  "recursos": {
+    "fitas_glicemia_por_carga": 2,
+    "janelas_supervisao_no_turno": 10,
+    "doses_alcool_por_carga": 6,
+    "mascaras_por_carga": 2,
+    "capacidade_coletor": 3,
+    "comentario_fitas": "Capacidade da bolsa do ACS por carga. Valor baixo de proposito: e o que forca o planejador a decidir QUANDO desviar ate a UBS para repor.",
+    "comentario_supervisao": "Numero de acionamentos do profissional de nivel superior da equipe no turno. Art. 3o par. 4o exige que os procedimentos sejam 'assistidos por profissional de saude de nivel superior, membro da equipe'. O numero em si e parametro nosso, nao norma.",
+    "comentario_sinteticos": "doses_alcool_por_carga, mascaras_por_carga e capacidade_coletor so sao usados pelo dominio estendido."
+  },
+
+  "agente": {
+    "id": "acs1",
+    "nome": "ACS da microarea 3",
+    "curso_tecnico_concluido": true,
+    "equipamento_disponivel": true,
+    "comentario": "Estas duas flags sao as condicoes do caput do art. 3o par. 4o. Altere qualquer uma para false e o planejador deve provar que o protocolo se torna inviavel."
+  },
+
+  "pacientes": [
+    {
+      "id": "p1", "nome": "Paciente 01", "lat": -30.0362, "lon": -51.2141,
+      "grupo": "pessoa_idosa", "condicoes": ["hipertensao"],
+      "requer_pa": true, "requer_glicemia": false, "requer_temperatura": false,
+      "requer_antropometria": false, "requer_orientacao_medicacao": true,
+      "requer_vacinal": true, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 27, "intervalo_maximo_dias": 30, "prioridade": 2
+    },
+    {
+      "id": "p2", "nome": "Paciente 02", "lat": -30.0341, "lon": -51.2203,
+      "grupo": "adulto", "condicoes": ["diabetes_mellitus_2"],
+      "requer_pa": true, "requer_glicemia": true, "requer_temperatura": false,
+      "requer_antropometria": false, "requer_orientacao_medicacao": false,
+      "requer_vacinal": false, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 31, "intervalo_maximo_dias": 30, "prioridade": 3
+    },
+    {
+      "id": "p3", "nome": "Paciente 03", "lat": -30.0308, "lon": -51.2167,
+      "grupo": "gestante", "condicoes": ["pre_natal_2o_trimestre"],
+      "requer_pa": true, "requer_glicemia": false, "requer_temperatura": false,
+      "requer_antropometria": true, "requer_orientacao_medicacao": false,
+      "requer_vacinal": true, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 14, "intervalo_maximo_dias": 15, "prioridade": 3
+    },
+    {
+      "id": "p4", "nome": "Paciente 04", "lat": -30.0435, "lon": -51.2246,
+      "grupo": "adulto", "condicoes": ["diabetes_mellitus_2", "hipertensao"],
+      "requer_pa": true, "requer_glicemia": true, "requer_temperatura": false,
+      "requer_antropometria": false, "requer_orientacao_medicacao": false,
+      "requer_vacinal": false, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 35, "intervalo_maximo_dias": 30, "prioridade": 3
+    },
+    {
+      "id": "p5", "nome": "Paciente 05", "lat": -30.0471, "lon": -51.2158,
+      "grupo": "crianca", "condicoes": ["puericultura"],
+      "requer_pa": false, "requer_glicemia": false, "requer_temperatura": false,
+      "requer_antropometria": true, "requer_orientacao_medicacao": false,
+      "requer_vacinal": true, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 22, "intervalo_maximo_dias": 30, "prioridade": 2
+    },
+    {
+      "id": "p6", "nome": "Paciente 06", "lat": -30.0389, "lon": -51.2281,
+      "grupo": "pessoa_idosa", "condicoes": ["diabetes_mellitus_2"],
+      "requer_pa": false, "requer_glicemia": true, "requer_temperatura": false,
+      "requer_antropometria": false, "requer_orientacao_medicacao": true,
+      "requer_vacinal": true, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 29, "intervalo_maximo_dias": 30, "prioridade": 2
+    },
+    {
+      "id": "p7", "nome": "Paciente 07", "lat": -30.0334, "lon": -51.2094,
+      "grupo": "adulto", "condicoes": ["sintomatico_respiratorio_em_investigacao"],
+      "requer_pa": true, "requer_glicemia": false, "requer_temperatura": true,
+      "requer_antropometria": false, "requer_orientacao_medicacao": false,
+      "requer_vacinal": false, "exige_protecao_respiratoria": true,
+      "dias_desde_ultima_visita": 18, "intervalo_maximo_dias": 30, "prioridade": 1
+    },
+    {
+      "id": "p8", "nome": "Paciente 08", "lat": -30.0452, "lon": -51.2119,
+      "grupo": "pessoa_idosa", "condicoes": ["diabetes_mellitus_2", "hipertensao"],
+      "requer_pa": true, "requer_glicemia": true, "requer_temperatura": false,
+      "requer_antropometria": false, "requer_orientacao_medicacao": false,
+      "requer_vacinal": true, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 33, "intervalo_maximo_dias": 30, "prioridade": 3
+    },
+    {
+      "id": "p9", "nome": "Paciente 09", "lat": -30.0318, "lon": -51.2229,
+      "grupo": "adulto", "condicoes": ["sem_condicao_cronica"],
+      "requer_pa": false, "requer_glicemia": false, "requer_temperatura": false,
+      "requer_antropometria": false, "requer_orientacao_medicacao": false,
+      "requer_vacinal": false, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 12, "intervalo_maximo_dias": 30, "prioridade": 1
+    },
+    {
+      "id": "p10", "nome": "Paciente 10", "lat": -30.0489, "lon": -51.2205,
+      "grupo": "lactante", "condicoes": ["puerperio"],
+      "requer_pa": true, "requer_glicemia": false, "requer_temperatura": false,
+      "requer_antropometria": true, "requer_orientacao_medicacao": false,
+      "requer_vacinal": true, "exige_protecao_respiratoria": false,
+      "dias_desde_ultima_visita": 20, "intervalo_maximo_dias": 15, "prioridade": 3
+    }
+  ]
+}
