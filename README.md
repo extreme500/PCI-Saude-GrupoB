@@ -48,6 +48,9 @@ python -m acsplan planejar --sem-curso-tecnico
 # experimentos
 python -m acsplan experimentos                      # todos
 python -m acsplan experimentos --experimento e4     # um só
+
+# testes de fumaça e de regressão
+python -m acsplan.testes
 ```
 
 ---
@@ -72,6 +75,7 @@ acsplan/                      o sistema
   saida/roteiro.py            [4] roteiro do turno para o agente
   dados/                      microárea de exemplo e gerador de instâncias
   experimentos/rodar.py       E1 a E6
+  testes.py                   testes de fumaça e de regressão
 
 projeto/                      documento do projeto (md + docx + gerador)
 docs/                         análise, modelagem, método e fontes
