@@ -178,22 +178,27 @@ Três afirmações que, se forem para o relatório como estão, são atacáveis:
 
 ## 6. Limitações honestas (declare todas no relatório)
 
-- **Um único agente.** O enunciado menciona tamanho de equipe; o protótipo não
+- **Um único agente.** O enunciado menciona tamanho de equipe; o sistema não
   trata múltiplos ACS. É a extensão natural, e é onde o problema volta a ser
   HHCRSP de verdade.
-- **Prioridade e intervalo máximo entre visitas estão nos dados mas não entram
-  na função objetivo.** O uso correto deles é numa etapa *anterior* ao
-  roteamento: selecionar quais pacientes entram no turno. Hoje o turno atende
-  todos. É a lacuna mais visível em relação ao enunciado do Ciclo 2.
-- **Custos de deslocamento são estimados por haversine × 1,3 a 4,5 km/h**, não
-  por API de mapas. A troca por OSRM/Google não muda nenhuma outra camada — o
-  contrato entre elas é só a matriz.
+- ~~**Prioridade e intervalo máximo entre visitas estão nos dados mas não
+  entram na função objetivo.**~~ **Resolvido:** existe agora uma camada de
+  seleção (`acsplan/selecao/politica.py`) que decide quem entra no turno a
+  partir de prioridade e atraso, sob orçamento de tempo, e o nível de urgência
+  também induz restrições de precedência no roteamento. O que permanece fora é
+  a função objetivo do planejador, que minimiza tempo e não urgência atendida.
+- ~~**Custos de deslocamento são estimados por haversine.**~~ **Parcialmente
+  resolvido:** o provedor OSRM está implementado e devolve tempo de percurso
+  real pelas ruas, com cache em disco e queda automática para haversine sem
+  rede. O padrão continua sendo haversine, para que os experimentos não
+  dependam de conectividade.
 - **Estoque modelado por níveis discretos**, não por fluentes numéricos, para
   manter STRIPS puro. Com capacidade grande isso incharia o domínio.
-- **Planejador próprio**, não Fast Downward. Ele implementa um subconjunto de
+- **Planejador próprio**, não Fast Downward. **Continua em aberto, e é a maior
+  ameaça à validade do trabalho.** Ele implementa um subconjunto de
   PDDL e é lento comparado a planejadores de produção. Os arquivos `.pddl` são
   padrão e podem ser validados em um planejador consagrado
-  (`executar_fast_downward()` em `planejador.py`) — **façam isso antes da
+  (`executar_fast_downward()` em `acsplan/logica/planejador.py`) — **façam isso antes da
   entrega final**; é barato e blinda o trabalho contra a crítica de que os
   resultados dependem de uma implementação caseira.
 - **As instâncias sintéticas não são epidemiologicamente calibradas.** Elas

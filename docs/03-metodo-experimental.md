@@ -1,223 +1,218 @@
 # Método experimental
 
-Este documento registra as perguntas, as hipóteses, as variáveis e os
-resultados obtidos, na organização que o Ciclo 2 pede (método científico).
+Documento interno de trabalho. Registra as perguntas, as variáveis, o desenho
+dos experimentos e as medições obtidas até agora.
 
-Reprodução: `python prototipo/experimentos/rodar_experimentos.py`
+> **Atenção ao usar estes números.** Eles vêm de execuções de desenvolvimento,
+> com o planejador escrito pelo grupo e ainda sem verificação cruzada contra um
+> planejador de referência. O documento do projeto
+> ([`projeto/PROJETO-CICLO2.md`](../projeto/PROJETO-CICLO2.md)) descreve o que
+> **será** medido; este arquivo registra o que já saiu do que está construído.
+
+Reprodução: `python -m acsplan experimentos`
 
 ---
 
 ## Pergunta de pesquisa
 
-> Numa arquitetura em que a rota física já está fixada por um roteirizador,
-> o Planejamento Automatizado agrega algo mensurável em relação a um executor
-> procedural simples que percorra a mesma rota cumprindo os mesmos protocolos?
+> Numa arquitetura em que a rota física já está fixada por um roteirizador, o
+> Planejamento Automatizado agrega algo mensurável em relação a um executor
+> procedural que percorra a mesma rota cumprindo os mesmos protocolos?
 
-Essa formulação é deliberadamente cética. A hipótese nula é a objeção da
-"redundância tecnológica": *um laço `for` faria o mesmo*.
-
----
-
-## Hipóteses
-
-| # | Hipótese | Status |
-|---|---|---|
-| **H1** | O plano ótimo tem custo menor que o do executor guloso quando há escassez de insumos. | **Parcialmente confirmada** — ganho existe mas é pequeno (mediana 0%). |
-| **H2** | O executor guloso produz **falsos negativos**: declara inviável um turno que tem plano válido. | **Confirmada** — 5 em 30 instâncias (17%). |
-| **H3** | O planejamento ótimo (heurística admissível) escala pior que o satisfaciente. | **Confirmada** — ver E1. |
-| **H4** | A detecção de inviabilidade é barata quando ela é lógica e cara quando é de recurso. | **Confirmada** — 0 nós vs. 332 nós. |
+A formulação admite resposta negativa, e o desenho foi feito para permitir que
+ela apareça.
 
 ---
 
 ## Variáveis
 
-- **Independentes:** número de pacientes na microárea; semente da instância;
-  estratégia de busca; capacidade de insumos; número de janelas de supervisão;
-  habilitação legal do ACS.
+- **Independentes:** número de pacientes; semente da instância; estratégia de
+  busca; domínio (legal ou estendido); método de roteamento; provedor de
+  distâncias; capacidade de insumos; janelas de supervisão; orçamento do turno;
+  habilitação legal do agente; precedência ativa ou não.
 - **Dependentes:** custo do plano (minutos); número de ações; tempo de busca;
-  nós expandidos e gerados; sucesso/insucesso.
-- **Controladas:** mesma rota, mesmo domínio PDDL, mesmos protocolos e
-  **mesma tabela de custos** para as duas abordagens — o executor guloso lê os
-  custos do próprio `dominio.pddl` (`custos_do_dominio()`), justamente para
-  eliminar divergência de medição entre os grupos comparados.
+  nós expandidos; custo da rota; cobertura de urgência e de atraso; sucesso ou
+  insucesso.
+- **Controladas:** mesma rota, mesmo domínio, mesmos protocolos e **mesma tabela
+  de custos** para os dois grupos comparados. O executor procedural lê os custos
+  do próprio `.pddl` (`custos_do_dominio()`), para eliminar divergência de
+  medição.
 
 ---
 
-## Grupo de controle: o executor guloso
+## Grupo de controle
 
-`prototipo/camada_logica/executor_guloso.py` é o adversário honesto, não um
-espantalho. Ele percorre a rota, cumpre os mesmos protocolos legais, aciona a
-supervisão quando precisa e reabastece quando fica sem fitas.
+`acsplan/logica/executor_guloso.py` percorre a rota, cumpre os mesmos protocolos
+legais e sintéticos, aciona supervisão, higieniza, veste máscara e reabastece
+quando precisa. Não é um espantalho.
 
-O que ele **não** faz é antecipar: só descobre que precisa de insumo no momento
-do uso, e resolve desviando a partir da parada em que estiver.
-
-Essa é a diferença que o experimento isola.
+O que ele **não** faz, e é a variável isolada, é antecipar: só descobre que falta
+um recurso no momento de usá-lo, e então desvia a partir da parada em que
+estiver.
 
 ---
 
-## E1 — Escalabilidade
+## E1 — Escalabilidade (domínio legal)
 
-Mediana de 3 sementes por tamanho. Limite de 20 s para N=4..14 e de
-90 s para N=15..20; nenhuma execucao atingiu o limite.
+Mediana de 3 sementes por tamanho, limite de 25 s.
 
 ```
   N   ações |           A*/h_max |           A*/h_add |               GBFS
       inst. |     t(s)     custo |     t(s)     custo |     t(s)     custo
 --------------------------------------------------------------------------
-  4      67 |     0.06       153 |     0.01       153 |     0.02       153
-  5      88 |     0.12       178 |     0.02       178 |     0.03       178
-  6     111 |     0.27       202 |     0.05       233 |     0.04       226
-  7     136 |     0.57       231 |     0.08       271 |     0.07       261
-  8     163 |     0.95       268 |     0.10       298 |     0.22       332
-  9     192 |     1.11       313 |     0.11       367 |     0.54       395
- 10     223 |     1.70       330 |     0.13       384 |     0.32       412
- 11     256 |     2.97       371 |     0.21       446 |     0.32       464
- 12     291 |     2.61       377 |     0.18       465 |     0.46       430
- 13     328 |     4.22       400 |     0.22       487 |     1.15       490
- 14     367 |     5.40       411 |     0.26       501 |     1.00       507
- 15     408 |     6.07       412 |     0.28       479 |     0.46       497
- 16     451 |     8.55       422 |     0.28       492 |     0.52       510
- 17     496 |     9.78       441 |     0.42       511 |     0.76       539
- 18     543 |    13.27       450 |     0.47       527 |     0.96       555
- 19     592 |    17.24       467 |     0.84       510 |     0.93       572
- 20     643 |    22.62       535 |     1.29       593 |     2.25       655
+  4      83 |     0.05       133 |     0.01       133 |     0.02       133
+  6     133 |     0.20       222 |     0.04       222 |     0.05       222
+  8     191 |     0.57       279 |     0.10       299 |     0.08       290
+ 10     257 |     1.41       325 |     0.17       384 |     0.33       372
+ 12     331 |     3.22       390 |     0.25       446 |     0.27       437
+ 14     426 |     5.80       449 |     0.34       501 |     0.88       510
 ```
 
-**Leitura:**
+A busca ótima permanece viável na faixa de um turno real (10 a 15 visitas). As
+satisfacientes são de 5 a 17 vezes mais rápidas e entregam planos de 10 a 20%
+piores; até N=7 as três empatam, porque todas alcançam o ótimo.
 
-- O número de ações instanciadas cresce de forma suave (≈ 26 por paciente): o
-  grounding não é o gargalo. A poda por predicados estáticos (`proxima-parada`,
-  `residencia-de`, `prox`) faz a maior parte do trabalho.
-- **A\*/h_max** dá custo comprovadamente mínimo e **não estourou o limite em
-  nenhum tamanho testado**: 0,95 s em 8 pacientes, 5,4 s em 14 e 22,6 s em 20.
-  O crescimento é claramente super-linear (≈ 24× entre N=8 e N=20 para 2,5×
-  mais pacientes), mas a faixa de interesse prático — um turno de ACS tem
-  ordem de 10 a 15 visitas — está confortavelmente dentro do viável.
-- **As buscas satisfacientes são 5 a 15× mais rápidas e entregam planos 10 a
-  25% piores.** A partir de N=6 elas já não acham o ótimo.
-- Isso corrige a afirmação de que "planejadores não otimizam custo": eles
-  otimizam, com garantia formal — o que não fazem é escalar como um
-  solucionador de PO dedicado.
+Isso corrige a afirmação de que planejadores não otimizam custo: eles otimizam,
+com garantia formal. O que não fazem é escalar como um solucionador de Pesquisa
+Operacional dedicado.
 
-## E2 — Planejador ótimo × executor guloso
+## E2 — Planejamento × executor procedural
 
-30 microáreas sorteadas, 8 pacientes, 2 fitas por carga.
+30 microáreas de 8 pacientes.
 
 | Resultado | Instâncias |
 |---|---|
-| Planejador achou plano de custo menor | 11 |
-| Empate (o guloso já era ótimo) | 14 |
-| Guloso melhor que o ótimo | **0** |
-| Guloso declarou inviável **havendo** plano válido | **5** |
+| Planejamento achou plano mais barato | 6 |
+| Empate (o procedural já era ótimo) | 17 |
+| Procedural melhor que o ótimo | **0** *(teste de sanidade do h_max)* |
+| **Falso negativo do procedural** | **7 de 30** |
 
-Folga do guloso sobre o ótimo: média **2,14%**, mediana **0,00%**, máxima
-**10,33%**. Maior ganho absoluto: 300 → 269 min (31 min).
+Folga de custo do procedural: média 1,27%, **mediana 0,00%**, máxima 7,62%.
 
-**A linha "guloso melhor que o ótimo = 0" é um teste de sanidade**, não um
-resultado: se fosse diferente de zero, h_max não seria admissível e o
-planejador estaria errado. Vale manter no relatório como evidência de corretude.
+A linha "procedural melhor que o ótimo = 0" não é resultado, é verificação de
+corretude: valor diferente de zero indicaria que h_max não é admissível.
 
-**O resultado principal é o dos falsos negativos.** Nas 5 instâncias, o
-mecanismo foi verificado nos planos e é sempre o mesmo:
+**O resultado relevante são os falsos negativos.** O mecanismo é sempre o mesmo:
+o procedural aciona a supervisão, só então detecta a falta de insumo, desvia até
+a unidade, e o deslocamento encerra a assistência já mobilizada, consumindo dois
+acionamentos na mesma residência. O planejamento deriva das pré-condições que o
+desvio deve preceder o acionamento.
 
-> O guloso aciona a supervisão para aferir a PA, **depois** descobre que faltam
-> fitas, desvia até a UBS — e o desvio invalida a supervisão já acionada.
-> Gasta duas janelas na mesma residência e fica sem janelas antes do fim do
-> turno. O planejador deduz que basta **desviar antes de acionar a supervisão**
-> e fecha o turno com uma janela por residência.
+A proporção subiu em relação às primeiras execuções, quando o domínio modelava
+apenas dois dos cinco incisos do § 4º. Com os cinco, mais pacientes exigem
+supervisão e a pressão sobre esse recurso aumenta.
 
-Nenhuma linha do domínio PDDL diz em que ordem fazer isso. A ordem é deduzida
-das pré-condições. É a resposta empírica — com número — à pergunta "o que o
-Planning faz que 10 linhas de Python não fazem".
+**Ameaça a declarar:** o executor procedural poderia ser corrigido para esse caso
+específico. O argumento não é que ele seja incorrigível, e sim que cada regra
+nova exigiria uma correção manual análoga, enquanto o domínio declarativo a
+absorve sem alteração de código.
 
-**Ameaça à validade a declarar:** o executor guloso poderia ser corrigido para
-esse caso específico (bastaria checar o estoque antes de acionar a supervisão).
-O argumento não é que o guloso seja incorrigível — é que **cada regra nova exige
-uma correção manual dessas**, enquanto o domínio declarativo absorve a regra
-sem mudança de código. A honestidade aqui fortalece o trabalho.
+## E3 — Provas de inviabilidade
 
-## E3 — Prova de inviabilidade
+| Cenário | Veredito | Nós expandidos | Tempo |
+|---|---|---|---|
+| Agente sem curso técnico (lógica) | SEM PLANO | **0** | 0,0003 s |
+| Supervisões insuficientes (recurso) | SEM PLANO | 286 | 0,117 s |
 
-| Cenário | Planejador | Nós expandidos | Tempo | Guloso |
-|---|---|---|---|---|
-| (a) ACS sem curso técnico (**lógica**) | SEM PLANO | **0** | 0,0002 s | falhou |
-| (b) 4 janelas para 8 residências (**recurso**) | SEM PLANO | **332** | 0,109 s | falhou |
+A inviabilidade lógica é detectada sem expandir um único estado: nenhuma ação
+produz o fato exigido nem no problema relaxado, e como a relaxação só facilita o
+problema, a impossibilidade está demonstrada. A inviabilidade por recurso é
+invisível à relaxação, que ignora efeitos de remoção e não percebe o contador
+decrescer; sua demonstração requer exaurir o espaço de estados.
 
-Nos dois casos o guloso só sabe dizer "não consegui"; o planejador diz
-"**é impossível**" — e essa distinção é informação gerencial (a equipe precisa
-remanejar pacientes, não tentar de novo).
+## E4 — Roteirização: algoritmo genético × vizinho mais próximo + 2-opt
 
-Mas o custo da prova depende do tipo de inviabilidade:
+Média de 5 microáreas por tamanho, camada geométrica isolada.
 
-- **(a) lógica:** nenhuma ação do domínio relaxado produz `(pa-ok ?p)`, então
-  a relaxação detecta a inalcançabilidade sem expandir um único nó.
-- **(b) de recurso:** a relaxação **ignora efeitos de remoção**, logo não
-  "vê" o contador de janelas baixando. A inviabilidade só aparece exaurindo o
-  espaço de estados.
+```
+  N |           nn2opt |               AG |            diferença
+    |    custo    t(s) |    custo    t(s) |       min          %
+------------------------------------------------------------------
+  8 |    106.0    0.00 |    101.0    0.41 |      +5.0      +4.7%
+ 12 |    127.8    0.00 |    124.4    0.52 |      +3.4      +2.7%
+ 16 |    162.6    0.00 |    139.4    0.66 |     +23.2     +14.3%
+ 20 |    183.8    0.00 |    168.8    0.81 |     +15.0      +8.2%
+ 30 |    223.6    0.01 |    213.8    1.12 |      +9.8      +4.4%
+```
 
-Esse contraste é uma propriedade conhecida das heurísticas de relaxação por
-deleção, e o experimento a reproduz de forma limpa.
+O AG encontra rotas mais baratas em **todos** os tamanhos testados, e a vantagem
+não desaparece nas instâncias pequenas, como se esperaria se ambos alcançassem o
+ótimo. A explicação provável está na precedência: o 2-opt só a respeita
+*recusando* movimentos, o que o prende mais cedo num ótimo local, enquanto o AG
+repara a ordem depois de cruzar e mutar.
+
+**Isto precisa ser reexaminado** antes de virar afirmação: falta rodar com a
+precedência desativada, para separar o efeito do operador do efeito da restrição.
+
+## E5 — Política de seleção do turno
+
+12 microáreas de 14 pacientes, orçamento de 240 min, turno médio de 6 pacientes.
+A linha de base corta o turno pelo tamanho sem critério, com o **mesmo número**
+de pacientes, para isolar o critério de escolha.
+
+| Cobertura | Ordem do arquivo | Com política |
+|---|---|---|
+| Pacientes em atraso | 37,4% | **72,6%** |
+| Urgência alta | 50,0% | **100,0%** |
+
+## E6 — Custo da complexidade normativa
+
+Mesma busca ótima nos dois domínios, limite de 20 s.
+
+| N | Legal: ações / t(s) / custo | Estendido: ações / t(s) / custo |
+|---|---|---|
+| 3 | 61 / 0,02 / 104 | 226 / 3,79 / 110 |
+| 4 | 83 / 0,05 / 132 | 275 / 10,25 / 142 |
+| 5 | 107 / 0,09 / 171 | 324 / 17,47 / 183 |
+| 6 | 133 / 0,17 / 202 | 373 / **estourou o limite** |
+
+Três protocolos sintéticos derrubam o limite da busca ótima de cerca de 14
+pacientes para menos de 6, um fator de aproximadamente 100 no tempo. Em uso real
+isso obrigaria a trocar a garantia de otimalidade por busca satisfaciente, o que
+é decisão de engenharia e não detalhe de implementação.
 
 ---
 
-## Ameaças à validade (declarar todas)
+## Ameaças à validade
 
-1. **Planejador próprio.** Os números vêm de uma implementação didática, não do
-   Fast Downward. Os arquivos `.pddl` são padrão; rodar uma amostra em um
-   planejador consagrado (`executar_fast_downward()` em `planejador.py`) antes
-   da entrega final blinda o trabalho contra essa crítica. **Pendente.**
-2. **Instâncias sintéticas não calibradas.** Variam estrutura combinatória, não
-   estimam prevalência real. Não apresentar as proporções como dados do SUS.
+1. **Planejador próprio, ainda sem verificação cruzada.** A mais relevante. O
+   plano é submeter os mesmos `.pddl` ao Fast Downward e comparar vereditos e
+   custo ótimo.
+2. **Um único agente.** Dimensionamento de equipe fora do escopo.
 3. **Custos de ação estimados**, não medidos em campo.
-4. **N pequeno** (30 sementes em E2). Suficiente para evidenciar o fenômeno,
-   insuficiente para intervalo de confiança estreito.
-5. **A rota é entrada, não variável.** Este experimento não avalia a qualidade
-   do roteirizador; uma rota diferente muda os custos de desvio e portanto a
-   magnitude dos ganhos.
-6. **O guloso é uma implementação nossa.** Ver a ameaça discutida em E2.
+4. **Instâncias sintéticas** variam estrutura combinatória, não representam
+   prevalência epidemiológica.
+5. **Amostras pequenas** (30 sementes em E2, 5 em E4, 12 em E5).
+6. **E4 confunde dois efeitos** (operador e precedência), como anotado acima.
+7. **O executor procedural é implementação nossa**, discutido em E2.
 
 ---
 
-## Conclusão
+## Registro de correções
 
-A hipótese nula ("um laço `for` faria o mesmo") **não se sustenta**, mas
-tampouco o planejamento se justifica pelo motivo que parecia óbvio no início.
-O ganho de custo é marginal (mediana 0%). O que o planejador entrega e o
-executor procedural não entrega é:
+Quatro correções durante o desenvolvimento mudaram resultados e ficam
+registradas, porque todas são material de discussão.
 
-1. **corretude sob escassez** — 17% de falsos negativos eliminados;
-2. **prova de inviabilidade**, distinguindo "não consegui" de "é impossível";
-3. **garantia de otimalidade**, quando h_max cabe no orçamento de tempo;
-4. **declaratividade** — mudar a regra é editar o domínio, não o código.
+**1. Ciclo no grafo da rota.** Com a UBS como objeto único, as arestas inicial e
+final fechavam um ciclo, e A\*/h_max exauria 105 mil nós sem achar plano numa
+instância de 8 pacientes. Desdobrando em `ubs` e `ubs-fim`, a mesma instância
+passou a ser resolvida em menos de meio segundo.
 
-É um resultado mais modesto e mais defensável do que "Planning resolve o
-HHCRSP", e é o tipo de resultado que o Ciclo 2 pede.
+**2. Divergência de precificação entre os grupos comparados.** A ação
+`retornar-a-rota` não tinha incremento explícito de custo, então o parser lhe
+aplicava o custo unitário padrão de STRIPS, enquanto o executor procedural a
+cobrava como zero. Foi detectada porque a diferença de custo não fechava com a
+diferença de contagem de ações. A conferência "a diferença de custo bate com a
+diferença de ações?" é barata e pegou um erro real.
 
+**3. Hipótese de nomes únicos no grounding.** A instanciação descartava
+combinações de parâmetros com objetos repetidos. Inofensivo até o domínio
+estendido ter dois contadores do mesmo tipo na mesma ação: a glicemia consome
+uma fita e ocupa espaço no coletor, e a combinação legítima `(n2, n1, n3, n2)`
+era descartada por repetir `n2`, deixando a ação sem nenhuma instância válida.
+O planejador passou a "provar" inviabilidade onde havia plano. **É o mais
+perigoso dos quatro**, porque se manifesta como um resultado plausível em vez
+de um erro visível.
 
----
-
-## Registro de correções durante o desenvolvimento
-
-Duas correções feitas durante a construção do protótipo merecem registro,
-porque as duas mudaram resultados e as duas são material de discussão:
-
-1. **Ciclo no grafo da rota.** Na primeira versão a UBS era um único objeto, o
-   que fechava um ciclo entre a última e a primeira aresta da rota. A\*/h_max
-   expandiu 105 mil nós em 60 s **sem achar plano** numa instância de 8
-   pacientes. Desdobrando a UBS em `ubs` e `ubs-fim`, a mesma instância passou
-   a ser resolvida em **0,46 s com 1.438 nós**. A diferença entre um modelo
-   inviável e um viável foi uma decisão de modelagem, não de algoritmo.
-
-2. **Divergência de precificação entre os grupos comparados.** A ação
-   `retornar-a-rota` não tinha `(increase (total-cost) …)` explícito, então o
-   parser lhe aplicava o custo unitário padrão de STRIPS (1), enquanto o
-   executor guloso a cobrava como 0. Os dois grupos estavam sendo medidos com
-   réguas diferentes — exatamente o tipo de erro que invalidaria a comparação.
-   Foi detectado porque a diferença de custo (2 min) não fechava com a
-   diferença de contagem de ações (1 acionamento de supervisão × 3 min). Após
-   corrigir o domínio, os números fecham: 289 − 286 = 3 = 1 × 3.
-
-   **Lição metodológica:** a conferência "a diferença de custo bate com a
-   diferença de ações?" é barata e pegou um erro real. Vale manter como
-   verificação de rotina.
+**4. Linha de base inválida no E5.** A primeira versão comparava a política
+contra uma fatia da própria lista de atrasados, o que não media nada.

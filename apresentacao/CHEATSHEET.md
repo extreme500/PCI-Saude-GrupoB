@@ -306,7 +306,7 @@ prática consolidada, não norma — no nosso protótipo é parâmetro configur�
 
 ## 5. Os números que já temos
 
-Medidos com o protótipo (`python prototipo/experimentos/rodar_experimentos.py`).
+Medidos com o protótipo (`python -m acsplan experimentos`).
 Detalhamento em [`docs/03-metodo-experimental.md`](../docs/03-metodo-experimental.md).
 
 | Medida | Valor |

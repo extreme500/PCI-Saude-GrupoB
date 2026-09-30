@@ -46,8 +46,16 @@ Texto literal:
 | inciso II | ação `medir-glicemia-capilar` |
 | "encaminhando o paciente para a unidade de referência" | efeito `(pendencia-encaminhamento ?p)`, quitado por `registrar-encaminhamento` |
 
-Os incisos III, IV e V **não** foram modelados — decisão de escopo do
-protótipo, não omissão da norma.
+**Os cinco incisos estão modelados.** Os incisos III, IV e V receberam,
+respectivamente, as ações `aferir-temperatura-axilar`,
+`orientar-administracao-medicacao` e `verificacao-antropometrica`, todas sob as
+mesmas condições cumulativas do caput.
+
+Atenção a uma assimetria que a modelagem preserva: nos incisos I e II o
+encaminhamento é incondicional ("encaminhando o paciente"), enquanto no inciso
+III é condicional ("com o devido encaminhamento do paciente, **quando
+necessário**"). Por isso só as duas primeiras ações produzem a pendência de
+encaminhamento.
 
 ### 1.2 Lei nº 11.350/2006, art. 3º, § 3º (mesma redação)
 
@@ -102,6 +110,20 @@ configurável, não norma** — e deve ser apresentado assim no relatório.
 | custos das ações (minutos) | 2 a 5 | estimativas nossas de ordem de grandeza; **não** foram medidas em campo |
 
 Todos são configuráveis. Nenhum deve ser apresentado como dado do SUS.
+
+---
+
+## 2.1 O domínio estendido é ficção declarada
+
+Além dos parâmetros acima, o arquivo `dominio-estendido.pddl` contém **três
+protocolos que não existem em norma alguma**: higienização das mãos com consumo
+de insumo, proteção respiratória com estoque finito e descarte de
+perfurocortante em coletor de capacidade limitada.
+
+Eles estão marcados `[SINTETICO]` em todas as ocorrências e existem apenas para
+medir como o método se comporta quando a complexidade normativa cresce. **Não
+devem ser apresentados como exigência legal em nenhuma circunstância.** O
+domínio fiel à norma é o `dominio-legal.pddl`.
 
 ---
 

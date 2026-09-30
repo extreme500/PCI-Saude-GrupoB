@@ -1,6 +1,9 @@
 # Modelagem PDDL: decisões e por quê
 
-Referência do arquivo [`prototipo/camada_logica/dominio.pddl`](../prototipo/camada_logica/dominio.pddl).
+Referência dos arquivos
+[`acsplan/logica/dominios/dominio-legal.pddl`](../acsplan/logica/dominios/dominio-legal.pddl)
+e
+[`acsplan/logica/dominios/dominio-estendido.pddl`](../acsplan/logica/dominios/dominio-estendido.pddl).
 
 ---
 
@@ -96,14 +99,73 @@ Isso é o que cria o acoplamento entre a reposição de insumos e a supervisão 
 é a origem do resultado principal do experimento E2, em que o executor guloso
 desperdiça janelas ao desviar depois de já ter acionado a supervisão.
 
+### 2.5 Precedência por urgência sem sair de STRIPS
+
+O nível de urgência, calculado a partir da prioridade clínica e do atraso, induz
+uma restrição de ordem: urgência alta antes de urgência baixa. Expressar isso
+exigiria quantificação universal ("todos os urgentes já visitados"), que STRIPS
+não tem.
+
+A solução usa o mesmo truque de contador dos insumos. `(altos-pendentes n)`
+começa no número de pacientes de urgência alta, `iniciar-visita-urgente`
+decrementa, e `iniciar-visita-adiavel` exige que o contador esteja em zero. São
+três variantes de início de visita (urgente, comum e adiável) em vez de uma.
+
+Quando a precedência está desativada, nenhum paciente recebe os fatos de
+urgência e o contador nasce em zero, de modo que só a variante comum se aplica
+e a restrição desaparece sozinha, sem `if` em lugar nenhum.
+
+### 2.6 Dois domínios, e por quê
+
+`dominio-legal.pddl` contém somente regras com base em norma vigente, e cada
+ação traz no comentário o dispositivo que a fundamenta. Os cinco incisos do
+art. 3º § 4º estão modelados. Vale notar a assimetria preservada do inciso III:
+seu texto condiciona o encaminhamento a "quando necessário", e por isso a
+aferição de temperatura **não** produz `pendencia-encaminhamento`, ao contrário
+dos incisos I e II, cujo encaminhamento é incondicional.
+
+`dominio-estendido.pddl` acrescenta três protocolos marcados `[SINTETICO]`:
+higienização das mãos, proteção respiratória e descarte de perfurocortante.
+Nenhum consta de norma. Existem para medir o comportamento do método sob
+complexidade normativa crescente, e a separação em dois arquivos é o que
+permite não confundir lei com suposição nossa.
+
+A comparação entre eles é o experimento E6, e o resultado é forte: três
+protocolos adicionais derrubam o limite da busca ótima de cerca de 14 pacientes
+para menos de 6.
+
 ---
 
-## 3. Mapa ação ↔ norma
+## 3. A armadilha do grounding
+
+Vale registrar porque custou tempo e porque o sintoma era enganoso.
+
+A instanciação de ações descartava combinações de parâmetros com objetos
+repetidos, assumindo hipótese de nomes únicos. Isso é inofensivo enquanto
+nenhuma ação tem dois contadores do mesmo tipo. O domínio estendido quebrou
+essa premissa: `medir-glicemia-capilar` consome uma fita **e** ocupa espaço no
+coletor, e a combinação legítima `(n2, n1, n3, n2)` era descartada por repetir
+`n2`.
+
+O efeito não foi um erro, foi um **resultado plausível**: o planejador passou a
+responder "inviável" para turnos perfeitamente executáveis. Sem desconfiar e ir
+atrás de qual fato do objetivo estava inalcançável, isso teria ido para o
+relatório como se fosse uma propriedade do problema.
+
+As combinações degeneradas que a remoção readmite são eliminadas pela poda
+estática, porque predicados como `(prox ?n ?n)` nunca constam do estado inicial.
+
+---
+
+## 4. Mapa ação ↔ norma
 
 | Ação | Base | Pré-condições relevantes |
 |---|---|---|
 | `aferir-pressao-arterial` | art. 3º § 4º I | curso técnico + equipamento + supervisão |
 | `medir-glicemia-capilar` | art. 3º § 4º II | idem + uma fita em estoque |
+| `aferir-temperatura-axilar` | art. 3º § 4º III | idem, **sem** obrigação de encaminhamento |
+| `orientar-administracao-medicacao` | art. 3º § 4º IV | idem |
+| `verificacao-antropometrica` | art. 3º § 4º V | idem |
 | `registrar-encaminhamento` | art. 3º § 4º I e II (*"encaminhando o paciente"*) | pendência aberta |
 | `verificar-caderneta-vacinal` | art. 3º § 3º IV "c" e V "c" | **nenhuma das três** — atividade típica |
 | `registrar-visita` | art. 3º § 3º II | tudo quitado e sem pendência |
@@ -117,12 +179,12 @@ esquecimento.
 
 ---
 
-## 4. Teste de declaratividade
+## 5. Teste de declaratividade
 
 O argumento "mudou a regra, não mudou o código" é verificável em um comando:
 
 ```bash
-python prototipo/orquestrador.py --sem-curso-tecnico
+python -m acsplan planejar --sem-curso-tecnico
 ```
 
 Isso remove um único fato do estado inicial. Nenhuma linha de Python muda.
@@ -145,13 +207,14 @@ material de discussão.
 
 ---
 
-## 5. Limitações do domínio
+## 6. Limitações do domínio
 
 - Um único agente. Múltiplos ACS exigiriam repensar a alocação de pacientes,
   e o problema voltaria a ser HHCRSP completo.
+- A precedência só liga os extremos de urgência. Encadear todos os níveis
+  produziria uma ordem quase total e esvaziaria a otimização geométrica.
 - Sem janelas de tempo por paciente e sem duração real das ações (custos são
   estimativas de ordem de grandeza, não medições).
-- Incisos III, IV e V do § 4º não modelados.
-- Prioridade clínica e intervalo máximo entre visitas estão nos dados, mas não
-  entram no objetivo nem na seleção do turno. É a lacuna mais visível em
-  relação ao enunciado do Ciclo 2.
+- Prioridade clínica e intervalo máximo entram na seleção do turno e na
+  precedência, mas não na função objetivo do planejador: ele minimiza tempo,
+  não urgência atendida.
