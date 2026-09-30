@@ -1,48 +1,53 @@
 # PCI-Saude-GrupoB
 
-Projeto em Ciência e Inovação (INF99003) — **Ciclo 2**
+Projeto em Ciência e Inovação (INF99003), Ciclo 2
 Planejamento de visitas domiciliares de Agentes Comunitários de Saúde na APS/SUS.
 
-> **Branch `feat/prototipo-planning`** — protótipo da abordagem híbrida
-> *roteamento por grafos + Planejamento Automatizado (PDDL)*.
+Gabriel Pieruccini Knopp · Arthur Andrade da Silva · Izadora Candotti de Oliveira
 
 ---
 
-## A ideia em um parágrafo
+## A ideia
 
-O roteamento físico (em que ordem visitar as casas) é resolvido por uma
-heurística de grafos, que é o que ela faz bem. O **Planejamento Automatizado**
-cuida do que um roteirizador não sabe fazer: garantir que cada atendimento
-cumpra as condições legais do art. 3º da Lei 11.350/2006 — curso técnico,
-equipamento disponível, assistência de profissional de nível superior,
-encaminhamento obrigatório — sob **recursos finitos** (fitas de glicemia que só
-se repõem na UBS, número limitado de acionamentos da supervisão no turno).
+O roteamento físico (em que ordem visitar as casas) é resolvido por algoritmos
+de grafos, que é o que eles fazem bem. O **Planejamento Automatizado** cuida do
+que um roteirizador não sabe fazer: garantir que cada atendimento cumpra as
+condições legais do art. 3º da Lei 11.350/2006 (curso técnico, equipamento
+disponível, assistência de profissional de nível superior, encaminhamento
+obrigatório) sob **recursos finitos**, que só se repõem na unidade de saúde.
 
-A escolha do paradigma não é estética. A norma que rege o trabalho do ACS já
-tem a forma *"a ação X só é permitida se A ∧ B ∧ C, e executar X obriga Y"* —
-que é literalmente um esquema de ação STRIPS. Ver
-[`docs/01-analise-da-proposta.md`](docs/01-analise-da-proposta.md), seção 2.
+A escolha do paradigma não é estética. A norma que rege o trabalho do ACS já tem
+a forma *"a ação X só é permitida se A ∧ B ∧ C, e executar X obriga Y"*, que é
+literalmente um esquema de ação STRIPS.
+
+Documento do projeto: [`projeto/PROJETO-CICLO2.md`](projeto/PROJETO-CICLO2.md)
+(e a versão `.docx` ao lado).
 
 ---
 
 ## Como rodar
 
-Não há dependências. Python 3.10+ e mais nada — nem instalar planejador.
+Python 3.10+, sem dependências obrigatórias.
 
 ```bash
-# pipeline completo sobre a microárea de exemplo
-python prototipo/orquestrador.py
+# pipeline completo: seleção, roteamento, planejamento, comparação
+python -m acsplan planejar
 
-# buscas alternativas
-python prototipo/orquestrador.py --estrategia astar-hadd   # rápida, subótima
-python prototipo/orquestrador.py --estrategia gbfs         # mais rápida ainda
+# o roteiro do turno no formato que o agente usa
+python -m acsplan roteiro --orcamento 240 --salvar roteiro.txt
+
+# algoritmo genético e distâncias reais de rua (OSRM, cai para haversine offline)
+python -m acsplan planejar --metodo ag --distancias osrm
+
+# domínio com protocolos sintéticos (mais pesado: prefira busca satisfaciente)
+python -m acsplan planejar --dominio estendido --max-pacientes 4 --estrategia gbfs
 
 # teste de declaratividade: remove UM fato do estado inicial
-python prototipo/orquestrador.py --sem-curso-tecnico
+python -m acsplan planejar --sem-curso-tecnico
 
-# os três experimentos
-python prototipo/experimentos/rodar_experimentos.py
-python prototipo/experimentos/rodar_experimentos.py --experimento e2
+# experimentos
+python -m acsplan experimentos                      # todos
+python -m acsplan experimentos --experimento e4     # um só
 ```
 
 ---
@@ -50,84 +55,70 @@ python prototipo/experimentos/rodar_experimentos.py --experimento e2
 ## Estrutura
 
 ```
-projeto/
-  PROJETO-CICLO2.md           documento do projeto nas 9 secoes exigidas pelo guia
+acsplan/                      o sistema
+  cli.py                      interface de linha de comando
+  selecao/politica.py         [1] quem entra no turno (prioridade + atraso)
+  geo/
+    distancias.py             matriz de custos: haversine ou OSRM, com cache
+    roteirizador.py           [2] ordem das paradas + precedência por urgência
+    genetico.py               algoritmo genético com reparo de precedência
+  logica/
+    dominios/
+      dominio-legal.pddl      só regras com base em norma vigente
+      dominio-estendido.pddl  o legal + 3 protocolos SINTÉTICOS
+    gerador_problema.py       traduz (dados + rota) em problema PDDL
+    planejador.py             [3] parser PDDL, grounding, A*/GBFS
+    executor_guloso.py        linha de base procedural para comparação
+  saida/roteiro.py            [4] roteiro do turno para o agente
+  dados/                      microárea de exemplo e gerador de instâncias
+  experimentos/rodar.py       E1 a E6
 
-apresentacao/
-  slides.html                 deck para projetar (8 slides, paleta Creme)
-  slides-orador.html          mesmos slides + roteiro de fala e cronometragem
-  CHEATSHEET.md               bibliografia comentada, glossario e numeros
-
-docs/
-  01-analise-da-proposta.md   por que a abordagem é válida, e onde ela falha
-  02-modelagem-pddl.md        decisões de modelagem e o mapa ação ↔ norma legal
-  03-metodo-experimental.md   hipóteses, variáveis, resultados, ameaças à validade
-  04-fontes.md                texto literal das leis; o que é norma, parâmetro e ficção
-
-prototipo/
-  orquestrador.py                  pipeline completo + relatório no terminal
-  dados/
-    microarea_exemplo.json         8 pacientes fictícios, coordenadas reais
-    gerador_instancias.py          instâncias sintéticas para os experimentos
-  camada_geo/
-    roteirizador.py                haversine + vizinho mais próximo + 2-opt
-  camada_logica/
-    dominio.pddl                   o domínio de planejamento (comentado com a base legal)
-    gerador_problema.py            traduz (dados + rota) → problema PDDL
-    planejador.py                  parser PDDL + grounding + A*/GBFS (sem dependências)
-    executor_guloso.py             linha de base: o "script simples" de Python
-  experimentos/
-    rodar_experimentos.py          E1 escalabilidade, E2 vs. guloso, E3 inviabilidade
+projeto/                      documento do projeto (md + docx + gerador)
+docs/                         análise, modelagem, método e fontes
+apresentacao/                 slides, versão do orador e cheatsheet
 ```
 
-O arquivo `camada_logica/problema_gerado.pddl` é **gerado** — não editar à mão.
+---
+
+## As quatro camadas
+
+| | Decide | Como |
+|---|---|---|
+| **1. Seleção** | quem entra no turno | escore de prioridade clínica e atraso, sob orçamento de tempo |
+| **2. Roteamento** | em que ordem visitar | vizinho mais próximo + 2-opt, ou algoritmo genético; distâncias por haversine ou OSRM |
+| **3. Planejamento** | o que fazer em cada parada | domínio PDDL (STRIPS com custos), busca A\*/h_max, A\*/h_add ou GBFS |
+| **4. Saída** | o que o agente recebe | roteiro passo a passo, só com o essencial |
+
+O contrato entre 2 e 3 é estreito de propósito: a camada geométrica entrega a
+ordem das paradas, a matriz de custos e o custo de desvio até a unidade, e o
+planejador não pode alterar a ordem recebida. Trocar o roteirizador não exige
+mudar uma linha do domínio.
 
 ---
 
-## Resultados principais
+## Os dois domínios
 
-Detalhes e tabelas completas em
-[`docs/03-metodo-experimental.md`](docs/03-metodo-experimental.md).
+`dominio-legal.pddl` contém **somente** regras com base em norma vigente, e cada
+ação traz no comentário o dispositivo que a fundamenta. Os cinco incisos do
+art. 3º § 4º estão modelados, inclusive a assimetria do inciso III, cujo
+encaminhamento é condicional ("quando necessário") e por isso não é imposto como
+efeito.
 
-**A pergunta cética que guiou o trabalho:** com a rota já fixa, o planejador faz
-algo que um laço `for` não faria?
-
-| | |
-|---|---|
-| Ganho de custo sobre o executor guloso | mediana **0%**, média 2,1%, máx. 10,3% |
-| Turnos que o guloso declarou inviáveis **havendo** plano válido | **5 de 30 (17%)** |
-| Prova de inviabilidade lógica (ACS sem curso técnico) | **0 nós expandidos**, 0,2 ms |
-| Prova de inviabilidade de recurso (faltam janelas) | 332 nós, 109 ms |
-| Planejamento ótimo (A\*/h_max) | 0,95 s com 8 casas; 5,4 s com 14; 22,6 s com 20 |
-
-**A resposta honesta é matizada:** o planejador quase não economiza
-deslocamento. O que ele entrega é corretude sob escassez, prova de
-inviabilidade, garantia de otimalidade e declaratividade.
-
-O mecanismo por trás dos 17% foi verificado nos planos: o guloso aciona a
-supervisão, **depois** descobre que faltam fitas, desvia até a UBS — e o desvio
-invalida a supervisão já acionada, gastando duas janelas na mesma casa. O
-planejador deduz sozinho que basta desviar **antes** de acionar a supervisão.
-Essa ordem não está escrita em lugar nenhum do domínio; ela sai das
-pré-condições.
-
----
-
-## Limitações conhecidas
-
-Declaradas por extenso em
-[`docs/01-analise-da-proposta.md`](docs/01-analise-da-proposta.md) (seção 6).
-Em resumo: um único agente; prioridade clínica e intervalo máximo entre visitas
-presentes nos dados mas fora da função objetivo; custos estimados por haversine
-em vez de API de mapas; planejador didático em vez do Fast Downward; instâncias
-sintéticas não calibradas epidemiologicamente.
+`dominio-estendido.pddl` é o mesmo domínio acrescido de **três protocolos
+hipotéticos**, marcados `[SINTETICO]`: higienização das mãos, proteção
+respiratória e descarte de perfurocortante. Eles não constam de norma alguma e
+existem para medir como o método se comporta quando a complexidade normativa
+cresce. O resultado dessa comparação é o experimento E6.
 
 ---
 
 ## Fidelidade factual
 
 Pacientes, condições e datas são **fictícios**. As coordenadas são reais apenas
-para dar ordem de grandeza à matriz de distâncias. As regras clínicas modeladas
-vêm do texto literal da Lei 11.350/2006 (redação da Lei 13.595/2018) e da PNAB
-— transcrito com links em [`docs/04-fontes.md`](docs/04-fontes.md), que também
-separa o que é norma, o que é parâmetro escolhido por nós e o que é ficção.
+para dar ordem de grandeza à matriz de distâncias. As regras clínicas vêm do
+texto literal da Lei 11.350/2006 (redação da Lei 13.595/2018) e da PNAB,
+transcrito com links em [`docs/04-fontes.md`](docs/04-fontes.md), que separa o
+que é norma, o que é parâmetro escolhido por nós e o que é ficção.
+
+O número de janelas de supervisão por turno, a capacidade de insumos e os custos
+das ações em minutos são **parâmetros nossos**, não normas.
