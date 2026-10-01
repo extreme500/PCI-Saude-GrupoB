@@ -449,7 +449,14 @@ def _soma(iteravel, default=0.0):
 
 def heuristica(tarefa: TarefaPlanejamento, estado: frozenset[int],
                modo: str) -> float:
-    """h_max (admissivel) ou h_add (informativa, porem inadmissivel)."""
+    """h_max (admissivel), h_add (informativa) ou zero (busca cega).
+
+    O modo "zero" devolve sempre 0 e desliga qualquer orientacao: A* com h=0
+    vira busca de custo uniforme, e GBFS com h=0 vira profundidade. Serve de
+    linha de base sem tecnologia de planejamento.
+    """
+    if modo == "zero":
+        return 0.0
     combinar = max if modo == "hmax" else _soma
     custo = _custos_relaxados(tarefa, estado, combinar)
     alvos = [custo.get(f, float("inf")) for f in tarefa.objetivo_pos]
@@ -483,6 +490,12 @@ ESTRATEGIAS = {
     "astar-hmax":   ("hmax", True,  True),
     "astar-hadd":   ("hadd", True,  False),
     "gbfs":         ("hadd", False, False),
+    # Buscas CEGAS, sem nenhuma tecnologia de planejamento. Existem para
+    # responder a pergunta "um algoritmo trivial sobre o mesmo modelo
+    # declarativo faria o mesmo?". Se fizerem, o valor do trabalho esta na
+    # modelagem declarativa, e nao no planejador.
+    "ucs":          ("zero", True,  True),   # custo uniforme (Dijkstra)
+    "dfs":          ("zero", False, False),  # profundidade, o mais trivial
 }
 
 
@@ -512,7 +525,10 @@ def resolver(tarefa: TarefaPlanejamento, estrategia: str = "astar-hadd",
                          "objetivo inalcancavel (deteccao na relaxacao)")
 
     contador = itertools.count()
-    fronteira = [(h_inicial, next(contador), tarefa.estado_inicial, 0, [])]
+    # Em DFS a fronteira e uma pilha: o desempate inverte o contador para que
+    # o no gerado por ultimo seja expandido primeiro.
+    ordem = (lambda c: -c) if estrategia == "dfs" else (lambda c: c)
+    fronteira = [(h_inicial, ordem(next(contador)), tarefa.estado_inicial, 0, [])]
     melhor_g = {tarefa.estado_inicial: 0}
     expandidos = gerados = 0
 
@@ -545,7 +561,9 @@ def resolver(tarefa: TarefaPlanejamento, estrategia: str = "astar-hadd",
             melhor_g[sucessor] = novo_g
             gerados += 1
             f = (novo_g + h) if usa_g else h
-            heapq.heappush(fronteira, (f, next(contador), sucessor, novo_g,
+            if estrategia == "dfs":
+                f = -len(plano) - 1      # profundidade: mais fundo primeiro
+            heapq.heappush(fronteira, (f, ordem(next(contador)), sucessor, novo_g,
                                        plano + [acao.assinatura]))
 
     return Resultado(False, [], 0, expandidos, gerados,

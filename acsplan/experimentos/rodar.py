@@ -365,13 +365,14 @@ def experimento_e6(tamanhos=(3, 4, 5, 6), sementes=(1, 2),
 # ---------------------------------------------------------------------------
 
 from .avancados import (experimento_e7, experimento_e8,  # noqa: E402
-                        experimento_e9, experimento_e10)
+                        experimento_e9, experimento_e10,
+                        experimento_e11)
 
 EXPERIMENTOS = {
     "e1": experimento_e1, "e2": experimento_e2, "e3": experimento_e3,
     "e4": experimento_e4, "e5": experimento_e5, "e6": experimento_e6,
     "e7": experimento_e7, "e8": experimento_e8, "e9": experimento_e9,
-    "e10": experimento_e10,
+    "e10": experimento_e10, "e11": experimento_e11,
 }
 
 

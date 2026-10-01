@@ -293,3 +293,90 @@ def experimento_e10(tamanhos=(4, 5, 6), n_sementes: int = 15,
     print("  descobrir cada interacao antes de respeita-la. E isso que o")
     print("  planejamento dispensa, e e sobre isso que a conclusao do trabalho")
     print("  deve se apoiar, nao sobre a taxa de falsos negativos isolada.")
+
+
+# ---------------------------------------------------------------------------
+#  E11 - um algoritmo trivial sobre o mesmo modelo faz a mesma coisa?
+# ---------------------------------------------------------------------------
+
+def experimento_e11(tamanhos=(4, 5, 6, 7, 8, 10), sementes=(1, 2, 3),
+                    dominio: str = "legal", limite_segundos: float = 25.0,
+                    limite_expansoes: int = 600_000) -> None:
+    """Separa o valor da MODELAGEM DECLARATIVA do valor do PLANEJADOR.
+
+    Ate aqui o planejamento foi comparado com um procedimento escrito a mao.
+    Mas existe uma terceira possibilidade, que e a mais incomoda para o
+    trabalho: pegar o mesmo dominio declarativo e varre-lo com uma busca
+    trivial, sem nenhuma heuristica.
+
+    Se a busca cega resolver, o merito nao e do planejador: e de ter
+    modelado o problema declarativamente, e qualquer busca completa serviria.
+    Se ela nao resolver, a tecnologia de planejamento esta fazendo trabalho
+    que nenhum algoritmo trivial faz.
+
+    UCS (custo uniforme, h=0) e completa e otima, e e exatamente o A* sem a
+    heuristica. DFS e o mais trivial que existe. As duas operam sobre as
+    MESMAS acoes instanciadas que o planejador usa.
+    """
+    preparar, _, regua = _ctx()
+    regua(f"E11 - BUSCA CEGA x PLANEJAMENTO (dominio {dominio})")
+    print("  Todas as estrategias varrem o MESMO modelo declarativo e as")
+    print("  mesmas acoes instanciadas. A unica diferenca e a orientacao da")
+    print("  busca. 'ucs' e A* com h=0; 'dfs' e profundidade pura.")
+    print()
+    print(f"  Mediana de {len(sementes)} sementes. '--' = nao concluiu em "
+          f"{limite_segundos:.0f}s ou {limite_expansoes} expansoes.")
+    print("  (N) ao lado do custo = so N sementes concluiram. Nesses casos a")
+    print("  mediana e sobre um SUBCONJUNTO e nao e comparavel entre colunas.")
+    print()
+    print(f"  {'N':>3} | {'A*/h_max':>18} | {'GBFS':>18} | "
+          f"{'UCS (h=0)':>18} | {'DFS':>18}")
+    print(f"  {'':>3} | {'nos':>10}{'custo':>8} | {'nos':>10}{'custo':>8} | "
+          f"{'nos':>10}{'custo':>8} | {'nos':>10}{'custo':>8}")
+    print("  " + "-" * 84)
+
+    estrategias = ("astar-hmax", "gbfs", "ucs", "dfs")
+    resumo: dict[str, list] = {e: [] for e in estrategias}
+
+    for n in tamanhos:
+        celulas = []
+        for estrategia in estrategias:
+            nos, custos, ok = [], [], 0
+            for semente in sementes:
+                dados = gerador.gerar(n, semente)
+                _, tarefa = preparar(dados, f"e11-{dominio}-{n}-{semente}",
+                                     dominio=dominio)
+                r = resolver(tarefa, estrategia, limite_segundos=limite_segundos,
+                             limite_expansoes=limite_expansoes)
+                if r.sucesso:
+                    ok += 1
+                    nos.append(r.expandidos)
+                    custos.append(r.custo)
+            if ok:
+                # Quantas sementes concluiram vai junto do numero, porque
+                # medianas sobre subconjuntos diferentes NAO sao comparaveis
+                # entre colunas, e isso induz a erro com facilidade.
+                marca = "" if ok == len(sementes) else f"({ok})"
+                celulas.append(f"{statistics.median(nos):>10.0f}"
+                               f"{str(int(statistics.median(custos))) + marca:>8}")
+                resumo[estrategia].append((n, statistics.median(nos), ok))
+            else:
+                celulas.append(f"{'--':>10}{'--':>8}")
+                resumo[estrategia].append((n, None, 0))
+        print(f"  {n:>3} | " + " | ".join(celulas))
+
+    print()
+    print("  Fator de expansao em relacao ao A*/h_max (mediana por tamanho):")
+    base = {n: v for n, v in [(x[0], x[1]) for x in resumo["astar-hmax"]] if v}
+    for estrategia in ("ucs", "dfs"):
+        fatores = [v / base[n] for n, v, ok in resumo[estrategia]
+                   if ok and v and n in base]
+        if fatores:
+            print(f"    {estrategia:<5}: {min(fatores):.0f}x a {max(fatores):.0f}x")
+        else:
+            print(f"    {estrategia:<5}: nao concluiu em nenhum tamanho")
+    print()
+    print("  LEITURA: se a busca cega resolve os mesmos tamanhos, o merito e da")
+    print("  modelagem declarativa e nao do planejador, e o trabalho precisa")
+    print("  dizer isso. Se ela para antes, a diferenca entre os limites e")
+    print("  exatamente o que a tecnologia de planejamento esta comprando.")
