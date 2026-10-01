@@ -111,32 +111,45 @@ def _():
     # A diferenca de custo entre os dois planos tem de ser explicada pela
     # diferenca de contagem de acoes. Foi essa conferencia que revelou que
     # retornar-a-rota era cobrada de formas diferentes nos dois lados.
+    #
+    # ATENCAO: a primeira versao deste teste usava UMA instancia e saia calado
+    # quando ela era inviavel. Com a semente que estava fixada, o executor
+    # falhava e o teste passava sem verificar coisa alguma. Agora varre varias
+    # sementes e EXIGE um minimo de casos efetivamente exercitados.
     from collections import Counter
-    dados = gerador.gerar(6, 3)
-    roteamento, tarefa = _tarefa(dados)
-    otimo = resolver(tarefa, "astar-hmax", limite_segundos=30)
-    guloso = executor_guloso.executar(dados, roteamento, DOMINIOS["legal"])
-    if not (otimo.sucesso and guloso.sucesso):
-        return  # instancia inviavel nao serve para este teste
-    custos = {a.assinatura.split("(")[0]: a.custo for a in tarefa.acoes}
-    a = Counter(x.split("(")[0] for x in otimo.plano)
-    b = Counter(x.split("(")[0] for x in guloso.plano)
-    previsto = sum(custos.get(t, 0) * (b[t] - a[t]) for t in set(a) | set(b)
-                   if t not in ("mover", "desviar-para-ubs"))
-    observado = guloso.custo - otimo.custo
-    assert abs(previsto - observado) <= 2, (previsto, observado)
+    exercitados = 0
+    for semente in range(1, 13):
+        dados = gerador.gerar(6, semente)
+        roteamento, tarefa = _tarefa(dados)
+        otimo = resolver(tarefa, "astar-hmax", limite_segundos=30)
+        guloso = executor_guloso.executar(dados, roteamento, DOMINIOS["legal"])
+        if not (otimo.sucesso and guloso.sucesso):
+            continue
+        exercitados += 1
+        custos = {a.assinatura.split("(")[0]: a.custo for a in tarefa.acoes}
+        a = Counter(x.split("(")[0] for x in otimo.plano)
+        b = Counter(x.split("(")[0] for x in guloso.plano)
+        previsto = sum(custos.get(t, 0) * (b[t] - a[t]) for t in set(a) | set(b)
+                       if t not in ("mover", "desviar-para-ubs"))
+        observado = guloso.custo - otimo.custo
+        assert abs(previsto - observado) <= 2, (semente, previsto, observado)
+    assert exercitados >= 5, f"so {exercitados} instancias exercitaram a asercao"
 
 
 @teste("o plano otimo nunca perde para o executor procedural")
 def _():
     # Se isto falhar, h_max nao e admissivel e a garantia de otimalidade caiu.
-    for semente in (1, 2, 3, 4, 5):
+    # Tambem exige minimo de casos exercitados, pelo mesmo motivo acima.
+    exercitados = 0
+    for semente in range(1, 13):
         dados = gerador.gerar(6, semente)
         roteamento, tarefa = _tarefa(dados)
         otimo = resolver(tarefa, "astar-hmax", limite_segundos=30)
         guloso = executor_guloso.executar(dados, roteamento, DOMINIOS["legal"])
         if otimo.sucesso and guloso.sucesso:
+            exercitados += 1
             assert otimo.custo <= guloso.custo, (semente, otimo.custo, guloso.custo)
+    assert exercitados >= 5, f"so {exercitados} instancias exercitaram a asercao"
 
 
 @teste("inviabilidade logica e provada sem expandir nenhum no")
