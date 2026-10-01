@@ -7,6 +7,9 @@ E3  Provas de inviabilidade: logica x de recurso.
 E4  Roteirizacao: algoritmo genetico x vizinho mais proximo com 2-opt.
 E5  Politica de selecao do turno: o que muda quando ela entra.
 E6  Dominio legal x dominio estendido: custo da complexidade normativa.
+E7  E se o executor procedural for corrigido? (em avancados.py)
+E8  Ablacao: de onde vem a vantagem do algoritmo genetico. (em avancados.py)
+E9  Busca satisfaciente x procedural corrigido. (em avancados.py)
 
 Uso:
     python -m acsplan experimentos
@@ -361,9 +364,14 @@ def experimento_e6(tamanhos=(3, 4, 5, 6), sementes=(1, 2),
 
 # ---------------------------------------------------------------------------
 
+from .avancados import (experimento_e7, experimento_e8,  # noqa: E402
+                        experimento_e9, experimento_e10)
+
 EXPERIMENTOS = {
     "e1": experimento_e1, "e2": experimento_e2, "e3": experimento_e3,
     "e4": experimento_e4, "e5": experimento_e5, "e6": experimento_e6,
+    "e7": experimento_e7, "e8": experimento_e8, "e9": experimento_e9,
+    "e10": experimento_e10,
 }
 
 

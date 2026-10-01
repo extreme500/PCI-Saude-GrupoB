@@ -264,7 +264,7 @@ def construir_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("experimentos", help="executa os experimentos")
     sp.add_argument("--experimento",
-                    choices=["e1", "e2", "e3", "e4", "e5", "e6", "todos"],
+                    choices=["e1","e2","e3","e4","e5","e6","e7","e8","e9","e10","todos"],
                     default="todos")
     sp.set_defaults(func=comando_experimentos)
 
