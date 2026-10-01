@@ -50,8 +50,30 @@ class ResultadoGuloso:
 
 
 def executar(dados: dict, roteamento: dict, caminho_dominio: str,
-             *, estendido: bool = False) -> ResultadoGuloso:
-    """Simula o ACS seguindo a rota e cumprindo os protocolos de forma reativa."""
+             *, estendido: bool = False,
+             antecipar: bool = False) -> ResultadoGuloso:
+    """Simula o ACS seguindo a rota e cumprindo os protocolos.
+
+    Com `antecipar=False` o executor e REATIVO: so descobre que falta um
+    recurso no momento de usa-lo. E a variante usada como grupo de controle.
+
+    Com `antecipar` ligado ele recebe uma correcao manual: ao chegar numa
+    residencia, confere de antemao se os recursos bastam para o que aquela
+    parada exige e, se nao bastarem, desvia ANTES de acionar a supervisao.
+
+    Ha DUAS variantes da correcao, e a distincao entre elas e metodologica,
+    nao tecnica:
+
+      "legal"    confere apenas as fitas de glicemia. E a correcao que
+                 alguem escreveria observando o dominio legal, que e o unico
+                 em que o modo de falha foi observado.
+      "completo" confere tambem os recursos do dominio estendido.
+
+    A diferenca existe porque medir se a correcao GENERALIZA exige aplica-la
+    a regras que ela nao conhecia. Usar a variante "completo" contra o
+    dominio estendido seria dar a resposta de antemao e o experimento nao
+    mediria nada.
+    """
     custos = custos_do_dominio(caminho_dominio)
     agente = dados["agente"]
     id_agente = agente["id"]
@@ -177,6 +199,25 @@ def executar(dados: dict, roteamento: dict, caminho_dominio: str,
             else:
                 registrar(f"conferir-protecao-dispensada({id_agente}, {parada}, {local})",
                           custos["conferir-protecao-dispensada"])
+
+        # ---- correcao dirigida: conferir os recursos ANTES de comecar ----
+        if antecipar:
+            precisa_fita = bool(paciente.get("requer_glicemia"))
+            # a correcao "legal" so conhece as fitas, porque foi escrita
+            # observando o dominio em que o modo de falha apareceu
+            falta = (precisa_fita and fitas < 1)
+            if estendido and antecipar == "completo":
+                procedimentos_p4 = sum(
+                    1 for c in ("requer_pa", "requer_glicemia",
+                                "requer_temperatura", "requer_antropometria",
+                                "requer_orientacao_medicacao")
+                    if paciente.get(c))
+                falta = falta or (precisa_fita and coletor < 1)
+                falta = falta or (procedimentos_p4 > 0 and alcool < 1)
+                falta = falta or (paciente.get("exige_protecao_respiratoria")
+                                  and mascaras < 1)
+            if falta:
+                desviar(parada, local)
 
         nivel = modelos.nivel_urgencia(paciente, intervalo)
         if precede and nivel == 3:
