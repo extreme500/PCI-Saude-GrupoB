@@ -74,11 +74,13 @@ acsplan/                      o sistema
     executor_guloso.py        linha de base procedural para comparação
   saida/roteiro.py            [4] roteiro do turno para o agente
   dados/                      microárea de exemplo e gerador de instâncias
-  experimentos/rodar.py       E1 a E6
+  experimentos/
+    rodar.py                  E1 a E6: medem o sistema
+    avancados.py              E7 a E10: tentam derrubar as conclusões
   testes.py                   testes de fumaça e de regressão
 
 projeto/                      documento do projeto (md + docx + gerador)
-docs/                         análise, modelagem, método e fontes
+docs/                         análise, modelagem, método, fontes e conclusões
 apresentacao/                 slides, versão do orador e cheatsheet
 ```
 
@@ -113,6 +115,25 @@ hipotéticos**, marcados `[SINTETICO]`: higienização das mãos, proteção
 respiratória e descarte de perfurocortante. Eles não constam de norma alguma e
 existem para medir como o método se comporta quando a complexidade normativa
 cresce. O resultado dessa comparação é o experimento E6.
+
+---
+
+## Conclusões
+
+Leitura completa em
+[`docs/05-analise-e-conclusoes.md`](docs/05-analise-e-conclusoes.md).
+
+Os experimentos E7 a E10 foram construídos para **refutar** o que os seis
+primeiros pareciam demonstrar, e três conseguiram. A tese inicial (o
+planejamento encontra planos que um programa procedural não encontraria) **não
+se sustenta**: corrigido, o procedural encontra os mesmos planos, e ainda mais
+baratos que a busca satisfaciente.
+
+O que sobreviveu está no E10. Diante de **regras novas**, a correção manual
+escrita para as regras antigas entrega benefício zero (68% de falsos negativos,
+igual ao executor sem correção nenhuma), enquanto o planejamento vai de 0% a 0%
+sem tocar em código. A conclusão defensável é sobre **custo de manutenção sob
+mudança normativa**, não sobre capacidade de encontrar planos.
 
 ---
 
