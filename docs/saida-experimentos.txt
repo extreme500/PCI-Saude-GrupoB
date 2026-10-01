@@ -1,0 +1,243 @@
+Saida bruta da suite completa de experimentos.
+Execucao: 2026-10-01 03:44
+Comando : python -m acsplan experimentos
+Commit  : 3330fe9
+Maquina : Windows, Python 3.14.6
+
+Os CUSTOS sao deterministicos (mesma semente, mesmo resultado).
+Os TEMPOS variam entre execucoes conforme a carga da maquina.
+========================================================================
+
+
+==============================================================================
+  E1 - ESCALABILIDADE DAS ESTRATEGIAS DE BUSCA (dominio legal)
+==============================================================================
+  Mediana de 3 sementes por tamanho. '--' = estourou o limite de 25s.
+
+    N   acoes |           A*/h_max |           A*/h_add |               GBFS
+        inst. |     t(s)     custo |     t(s)     custo |     t(s)     custo
+  --------------------------------------------------------------------------
+    4      83 |     0.05       133 |     0.01       133 |     0.02       133
+    5     107 |     0.10       182 |     0.03       182 |     0.03       182
+    6     133 |     0.20       222 |     0.04       222 |     0.05       222
+    7     161 |     0.43       238 |     0.05       238 |     0.08       238
+    8     191 |     0.59       279 |     0.10       299 |     0.08       290
+    9     223 |     0.90       289 |     0.12       326 |     0.18       314
+   10     257 |     1.39       325 |     0.16       384 |     0.31       372
+   11     293 |     2.57       363 |     0.21       419 |     0.25       410
+   12     331 |     3.47       390 |     0.26       446 |     0.27       437
+   13     383 |     4.30       431 |     0.26       475 |     0.75       485
+   14     426 |     5.79       449 |     0.29       501 |     0.80       510
+
+  LEITURA: h_max e admissivel (custo garantidamente minimo) e e a que
+  cresce mais rapido; as satisfacientes sao mais rapidas e entregam
+  planos piores. '*' = alguma semente nao terminou.
+
+==============================================================================
+  E2 - PLANEJAMENTO x EXECUTOR PROCEDURAL
+==============================================================================
+  30 microareas sorteadas com 8 pacientes.
+
+  instancias comparaveis                : 23
+  planejamento achou plano mais barato  : 6
+  empate (o procedural ja era otimo)    : 17
+  procedural melhor que o otimo         : 0   (tem de ser 0: teste de sanidade do h_max)
+  FALSO NEGATIVO do procedural          : 7   (declarou inviavel havendo plano valido)
+  planejamento estourou o limite        : 0
+
+  folga de custo do procedural: media 1.27%, mediana 0.00%, maxima 7.62%
+  maior ganho absoluto: semente 2, 302 -> 279 min (23 min)
+
+  LEITURA: o ganho tipico de custo e pequeno. O resultado que importa
+  sao os falsos negativos, em que o procedural desperdica um recurso
+  escasso por nao antecipar e conclui que o turno e impossivel.
+
+==============================================================================
+  E3 - PROVAS DE INVIABILIDADE
+==============================================================================
+  (a) INVIABILIDADE LOGICA - ACS sem curso tecnico concluido
+      planejamento : SEM PLANO em 0.0003s, 0 nos expandidos
+      motivo       : objetivo inalcancavel (deteccao na relaxacao)
+      procedural   : falhou
+      -> nenhuma acao produz o fato exigido nem no problema relaxado,
+         entao a impossibilidade e demonstrada sem expandir um no.
+
+  (b) INVIABILIDADE DE RECURSO - so 4 janelas de supervisao
+      planejamento : SEM PLANO em 0.1179s, 286 nos expandidos
+      motivo       : espaco de estados exaurido: problema sem solucao
+      procedural   : falhou
+      -> a relaxacao ignora efeitos de remocao e nao 've' o contador
+         baixar; a prova exige exaurir o espaco de estados.
+
+  LEITURA: o planejamento distingue 'nao consegui' de 'e impossivel'.
+  O custo dessa prova depende do TIPO de inviabilidade.
+
+==============================================================================
+  E4 - ROTEIRIZACAO: ALGORITMO GENETICO x VIZINHO MAIS PROXIMO + 2-OPT
+==============================================================================
+  5 microareas por tamanho. Custo em minutos de caminhada,
+  medindo apenas a camada geometrica (a camada logica nao entra aqui).
+
+    N |           nn2opt |               AG |            diferenca
+      |    custo    t(s) |    custo    t(s) |       min          %
+  ------------------------------------------------------------------
+    8 |    106.0    0.00 |    101.0    0.41 |      +5.0      +4.7%
+   12 |    127.8    0.00 |    124.4    0.53 |      +3.4      +2.7%
+   16 |    162.6    0.00 |    139.4    0.68 |     +23.2     +14.3%
+   20 |    183.8    0.00 |    168.8    0.81 |     +15.0      +8.2%
+   30 |    223.6    0.01 |    213.8    1.10 |      +9.8      +4.4%
+
+  LEITURA: o AG encontra rotas mais baratas em todos os tamanhos
+  testados, e a vantagem nao desaparece nas instancias pequenas. A
+  explicacao provavel esta na precedencia: o 2-opt so a respeita
+  RECUSANDO movimentos, o que o prende mais cedo num otimo local,
+  enquanto o AG repara a ordem depois de cruzar e mutar, e por isso
+  explora regioes que o refino local nao alcanca.
+
+  O preco e o tempo: cerca de 1s contra alguns milissegundos. Para um
+  turno planejado uma vez por dia isso e irrelevante, mas e o tipo de
+  medicao que precisa ser refeita antes de generalizar a afirmacao.
+
+==============================================================================
+  E5 - POLITICA DE SELECAO DO TURNO
+==============================================================================
+  12 microareas de 14 pacientes, orcamento de 240 min.
+  Compara o turno completo com o turno selecionado por prioridade
+  clinica e atraso em relacao ao intervalo maximo entre visitas.
+
+  pacientes por turno (media)           : 6.0 de 14
+
+                                          ordem do arquivo    com politica
+  ------------------------------------------------------------------------
+  cobertura dos pacientes em atraso                  37.4%           72.6%
+  cobertura dos de urgencia alta                     50.0%          100.0%
+
+  A coluna 'ordem do arquivo' simula o que acontece quando se corta
+  o turno pelo tamanho sem criterio: pegam-se os N primeiros da lista.
+
+  LEITURA: a politica existe para que o corte do turno nao seja
+  arbitrario. Prioridade e intervalo maximo saem dos dados e passam
+  a decidir quem e atendido, que era a lacuna mais visivel do projeto
+  em relacao ao enunciado.
+
+==============================================================================
+  E6 - CUSTO DA COMPLEXIDADE NORMATIVA: DOMINIO LEGAL x ESTENDIDO
+==============================================================================
+  O dominio estendido acrescenta tres protocolos SINTETICOS
+  (higienizacao, protecao respiratoria e descarte de perfurocortante),
+  cada um com recurso finito. Limite de 20s por execucao.
+
+    N |                      LEGAL |                  ESTENDIDO
+      |   acoes     t(s)     custo |   acoes     t(s)     custo
+  --------------------------------------------------------------
+    3 |      61     0.02     104.0 |     226     3.96     110.5
+    4 |      83     0.05     131.5 |     275    10.58     141.5
+    5 |     107     0.09     171.0 |     324    17.84     183.0
+    6 |     133     0.18     202.0 |     373       --        --
+
+  LEITURA: e o resultado que justifica manter os dois dominios. Cada
+  protocolo acrescentado multiplica o espaco de estados, e a busca
+  otima deixa de ser viavel muito antes. Em producao isso obrigaria a
+  trocar a garantia de otimalidade por busca satisfaciente, o que e
+  uma decisao de engenharia e nao um detalhe de implementacao.
+
+==============================================================================
+  E7 - A OBJECAO MAIS FORTE: E SE O PROCEDURAL FOR CORRIGIDO?
+==============================================================================
+  O executor REATIVO so descobre que falta recurso ao usa-lo. O
+  CORRIGIDO recebe UMA correcao manual dirigida ao unico modo de
+  falha observado: conferir os recursos ao chegar na residencia e
+  desviar ANTES de acionar a supervisao.
+
+  40 microareas de 8 pacientes.
+
+  instancias com plano valido existente  : 40
+  (planejamento sem plano, descartadas)   : 0
+
+                                           REATIVO     CORRIGIDO
+  --------------------------------------------------------------
+  falsos negativos                      9/40 (22%)     0/40 (0%)
+  folga media de custo                       1.20%         1.40%
+  folga maxima de custo                      7.62%         7.83%
+  atingiu o otimo                                          28/40
+
+  LEITURA: este experimento decide o valor do trabalho, e a resposta
+  honesta pode nao ser a que se gostaria. Dois numeros importam:
+  quanto a correcao recupera, e quanto ainda sobra depois dela.
+
+==============================================================================
+  E8 - ABLACAO: DE ONDE VEM A VANTAGEM DO ALGORITMO GENETICO
+==============================================================================
+  O E4 mostrou o AG ganhando em todos os tamanhos, inclusive nos
+  pequenos, onde se esperaria empate. A hipotese levantada la foi
+  que a vantagem viesse da precedencia, que o 2-opt so respeita
+  recusando movimentos. Aqui a precedencia e ligada e desligada.
+
+    N |           SEM precedencia |           COM precedencia
+      |   nn2opt      AG    ganho |   nn2opt      AG    ganho
+  --------------------------------------------------------------
+    8 |     99.1    97.8     1.4% |    106.0    97.8     7.8%
+   16 |    130.4   130.4     0.0% |    155.6   134.6    13.5%
+   30 |    177.2   177.8    -0.3% |    220.1   213.2     3.1%
+
+  LEITURA: se o ganho encolher na coluna da esquerda, a vantagem do
+  AG vinha mesmo da precedencia. Se persistir nas duas colunas, a
+  explicacao dada no E4 estava errada e o 2-opt simplesmente para
+  cedo demais.
+
+==============================================================================
+  E9 - NA PRATICA SE USA BUSCA SATISFACIENTE. O GANHO SOBREVIVE?
+==============================================================================
+  O E6 mostrou que a busca otima deixa de caber quando a
+  complexidade normativa cresce. Em uso real a escolha seria GBFS.
+  A comparacao justa, entao, e GBFS contra o procedural CORRIGIDO,
+  que e a alternativa realista do outro lado.
+
+  instancias comparaveis                     : 25
+  GBFS nao achou plano havendo um            : 0
+  procedural corrigido falhou                : 0
+
+  GBFS acima do otimo (media)                : +4.73%
+  GBFS em relacao ao procedural corrigido    : +2.83%
+  instancias em que GBFS ficou PIOR que ele  : 16/25
+
+  LEITURA: se o GBFS ficar pior que o procedural corrigido, entao na
+  unica configuracao que de fato escalaria o planejamento perde
+  tambem em custo, e o que resta a seu favor e a garantia de achar
+  plano quando existe, mais a declaratividade.
+
+==============================================================================
+  E10 - A CORRECAO MANUAL GENERALIZA PARA REGRAS NOVAS?
+==============================================================================
+  A correcao do E7 foi escrita olhando o dominio LEGAL. Aqui ela e
+  submetida ao dominio ESTENDIDO, que tem tres recursos finitos a
+  mais, SEM receber nenhum ajuste novo: a variante usada confere
+  apenas as fitas, que era tudo o que ela conhecia.
+
+  Os recursos novos sao ESCASSOS de proposito (3 doses de
+  alcool, coletor para 1, 1 mascara(s)). Com
+  folga eles nunca restringiriam e o teste nao mediria nada.
+
+  O planejamento usa GBFS, porque a busca otima nao cabe neste
+  dominio (E6). Achar um plano prova que o turno era exequivel.
+
+    N |  planeja |        REATIVO |  CORRECAO ANTIGA |  CORRECAO NOVA
+      |       ok |    falsos neg. |      falsos neg. |    falsos neg.
+  --------------------------------------------------------------------------
+    4 |       15 |    12/15 (80%) |      12/15 (80%) |      0/15 (0%)
+    5 |       11 |     6/11 (55%) |       6/11 (55%) |      0/11 (0%)
+    6 |       14 |     9/14 (64%) |       9/14 (64%) |      0/14 (0%)
+  --------------------------------------------------------------------------
+  TOT |       40 |    27/40 (68%) |      27/40 (68%) |      0/40 (0%)
+
+  COLUNAS: 'correcao antiga' e a do E7, que so conhece as fitas.
+  'correcao nova' e a mesma ideia reescrita sabendo dos tres
+  recursos acrescentados. O planejamento nao recebeu ajuste algum
+  nos dois casos: ele le as regras do dominio.
+
+  LEITURA: se a correcao antiga falhar e a nova funcionar, entao o
+  executor procedural nao e incapaz, e sim DEPENDENTE de alguem
+  descobrir cada interacao antes de respeita-la. E isso que o
+  planejamento dispensa, e e sobre isso que a conclusao do trabalho
+  deve se apoiar, nao sobre a taxa de falsos negativos isolada.
+

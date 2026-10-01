@@ -10,6 +10,12 @@ dos experimentos e as medições obtidas até agora.
 > **será** medido; este arquivo registra o que já saiu do que está construído.
 
 Reprodução: `python -m acsplan experimentos`
+Saída bruta da última execução completa:
+[`saida-experimentos.txt`](saida-experimentos.txt)
+
+Os **custos** são determinísticos (mesma semente, mesmo resultado); os **tempos**
+variam entre execuções conforme a carga da máquina, tipicamente na casa dos 5%.
+As tabelas abaixo são de uma execução específica.
 
 ---
 
@@ -119,6 +125,11 @@ produz o fato exigido nem no problema relaxado, e como a relaxação só facilit
 problema, a impossibilidade está demonstrada. A inviabilidade por recurso é
 invisível à relaxação, que ignora efeitos de remoção e não percebe o contador
 decrescer; sua demonstração requer exaurir o espaço de estados.
+
+> **Os experimentos E7 a E10, que refutam boa parte do que está abaixo, estão
+> em [`05-analise-e-conclusoes.md`](05-analise-e-conclusoes.md).** Leia os dois
+> documentos juntos: o E2 acima não sobreviveu ao E7, e o E4 abaixo não
+> sobreviveu ao E8.
 
 ## E4 — Roteirização: algoritmo genético × vizinho mais próximo + 2-opt
 
