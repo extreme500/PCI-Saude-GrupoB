@@ -345,6 +345,62 @@ sec("Hipótese");
     + "dos dois caminhos de erro realmente se materializou.");
 }
 
+// ====================================================== 6b. OBJETIVOS
+sec("Objetivos");
+{
+  const s = pres.addSlide({ masterName: "BASE", sectionTitle: "Objetivos" });
+  etiqueta(s, "Objetivos");
+  titulo(s, "O que será modelado, construído e medido");
+
+  s.addShape(pres.ShapeType.roundRect, {
+    x: M, y: 1.92, w: W, h: 1.18, rectRadius: 0.09, fill: { color: TERRA_SUAVE },
+    line: { type: "none" }, objectName: "og" });
+  s.addText("OBJETIVO GERAL", { x: M + 0.32, y: 2.04, w: 4, h: 0.26,
+    fontSize: 11.5, bold: true, color: TERRA, charSpacing: 1.6,
+    isTextBox: true, margin: 0 });
+  s.addText("Modelar, implementar e validar um sistema de apoio ao planejamento "
+    + "de turnos de visitas domiciliares, e mensurar em que dimensões o "
+    + "paradigma supera um executor procedural equivalente.", {
+    x: M + 0.32, y: 2.34, w: W - 0.64, h: 0.66, fontSize: 15.5, color: TINTA,
+    fontFace: "Cambria", isTextBox: true, margin: 0, lineSpacing: 20 });
+
+  const grupos = [
+    ["Formalizar", "A norma em domínio PDDL",
+     "Traduzir os §§ 3º e 4º do art. 3º da Lei 11.350/2006 e as diretrizes da "
+     + "PNAB em ações, pré-condições e efeitos."],
+    ["Construir", "O sistema e o ambiente de medição",
+     "A camada geométrica, o tradutor para PDDL, o executor procedural de "
+     + "referência e a saída legível pelo agente."],
+    ["Validar", "Os experimentos e a independência",
+     "Escalabilidade, qualidade de plano e reconhecimento de inviabilidade, "
+     + "com conferência em planejador de referência."],
+  ];
+  const lg = (W - 0.52) / 3;
+  grupos.forEach(([verbo, t, d], i) => {
+    s.addShape(pres.ShapeType.roundRect, {
+      x: M + (lg + 0.26) * i, y: 3.38, w: lg, h: 2.1, rectRadius: 0.1,
+      fill: { color: CARTAO }, line: { color: "E6DCCB", width: 0.75 },
+      shadow: SOMBRA(), objectName: "obj" + i });
+    s.addText(verbo, { x: M + (lg + 0.26) * i + 0.26, y: 3.58, w: lg - 0.52,
+      h: 0.34, fontSize: 17, bold: true, color: i === 2 ? SAGE : TERRA,
+      fontFace: "Cambria", isTextBox: true, margin: 0 });
+    s.addText(t, { x: M + (lg + 0.26) * i + 0.26, y: 3.96, w: lg - 0.52,
+      h: 0.52, fontSize: 14, bold: true, color: TINTA, isTextBox: true,
+      margin: 0, lineSpacing: 17 });
+    s.addText(d, { x: M + (lg + 0.26) * i + 0.26, y: 4.54, w: lg - 0.52,
+      h: 0.78, fontSize: 12.5, color: TINTA70, isTextBox: true, margin: 0,
+      lineSpacing: 15.5 });
+  });
+
+  fechoLinha(s, 5.7, "Os sete objetivos específicos cabem nesses três verbos, e "
+    + "a ordem entre eles é a ordem do trabalho.");
+  s.addNotes("Este slide responde a secao 4 do guia. Nao leia os tres cartoes: "
+    + "diga que os sete objetivos especificos se agrupam em formalizar a norma, "
+    + "construir o sistema e validar com medicao, e que a verificacao em "
+    + "planejador de referencia e objetivo declarado, nao detalhe. Se "
+    + "perguntarem quantos sao, sao sete, e estao listados no documento.");
+}
+
 // ===================================================== 7. A ARQUITETURA
 sec("Proposta");
 {
@@ -509,41 +565,56 @@ sec("Achados");
     + "40 microareas sorteadas.");
 }
 
-// ================================================= 11. ONDE ISSO NOS DEIXA
+// =========================================== 12. REFORMULACAO DA HIPOTESE
 sec("Fecho");
 {
   const s = pres.addSlide({ masterName: "BASE", sectionTitle: "Fecho" });
-  etiqueta(s, "Onde isso nos deixa");
-  titulo(s, "A pergunta certa não é se encontra o plano");
+  etiqueta(s, "Reformulação da hipótese");
+  titulo(s, "O que o trabalho passa a defender");
 
+  // Caixa deliberadamente igual em forma a do slide da hipotese, e diferente
+  // em cor: ali a hipotese estava em aberto, aqui e a que sobreviveu.
   s.addShape(pres.ShapeType.roundRect, {
-    x: M, y: 1.92, w: W, h: 1.55, rectRadius: 0.09, fill: { color: SAGE_SUAVE },
-    line: { type: "none" }, objectName: "tese" });
-  s.addText("O executor procedural depende de alguém descobrir cada interação "
-    + "entre regras antes de respeitá-la. O planejamento, não.", {
-    x: M + 0.34, y: 2.12, w: W - 0.68, h: 1.16, fontSize: 20, bold: true,
+    x: M, y: 1.92, w: W, h: 1.62, rectRadius: 0.09, fill: { color: SAGE_SUAVE },
+    line: { type: "none" }, objectName: "nova-hipotese" });
+  s.addText("Manter a norma como especificação declarativa preserva a corretude "
+    + "do sistema diante de regras novas, a um custo de busca que ainda cabe "
+    + "num turno real.", {
+    x: M + 0.34, y: 2.12, w: W - 0.68, h: 1.24, fontSize: 20, bold: true,
     color: TINTA, fontFace: "Cambria", isTextBox: true, margin: 0,
     lineSpacing: 26 });
 
-  cartao(s, { x: M, y: 3.74, w: 5.52, h: 1.86, nome: "sobrevive",
-    rotulo: "O QUE SUSTENTAMOS", corRotulo: SAGE,
-    titulo: "Declaratividade e prova",
-    corpo: "Regra nova é absorvida sem tocar no código de busca, e a "
-         + "inviabilidade é demonstrada, não apenas constatada." });
+  // Falsificavel nas duas direcoes: e o que a torna uma hipotese, e nao um lema
+  const pernas = [
+    ["Tire a declaratividade", "e sobra o programa procedural",
+     "Ele resolve bem as regras que alguém já analisou, e falha quando elas mudam."],
+    ["Tire a busca heurística", "e sobra a varredura cega",
+     "Ela absorve regra nova sem esforço, e não chega ao tamanho de um turno."],
+  ];
+  pernas.forEach(([cond, meio, cons], i) => {
+    const x = M + (5.78) * i;
+    s.addShape(pres.ShapeType.roundRect, {
+      x, y: 3.78, w: 5.52, h: 1.72, rectRadius: 0.1, fill: { color: CARTAO },
+      line: { color: "E6DCCB", width: 0.75 }, shadow: SOMBRA(),
+      objectName: "perna" + i });
+    s.addText([
+      { text: cond, options: { bold: true, color: TERRA, fontSize: 16 } },
+      { text: "  " + meio, options: { color: TINTA70, fontSize: 13 } },
+    ], { x: x + 0.26, y: 3.98, w: 5.0, h: 0.6, fontFace: "Cambria",
+         isTextBox: true, margin: 0, lineSpacing: 19 });
+    s.addText(cons, { x: x + 0.26, y: 4.62, w: 5.0, h: 0.66, fontSize: 13.5,
+      color: TINTA70, isTextBox: true, margin: 0, lineSpacing: 17 });
+  });
 
-  cartao(s, { x: M + 5.78, y: 3.74, w: 5.52, h: 1.86, nome: "caiu",
-    rotulo: "O QUE NÃO SUSTENTAMOS", corRotulo: TERRA,
-    titulo: "Economia e exclusividade",
-    corpo: "Não economiza deslocamento, e não encontra planos que um programa "
-         + "corrigido não encontraria." });
-
-  fechoLinha(s, 5.84, "A pergunta vira: o que mantém o sistema correto quando a "
-    + "norma muda, sem deixar de caber num turno real?");
-  s.addNotes("Fecho. O trunfo do trabalho nao e ter usado Planning. E termos "
-    + "medido COMO ele ajuda neste problema, inclusive descobrindo que a "
-    + "resposta nao era a que esperavamos. Se a banca perguntar o que sobrou: "
-    + "declaratividade com efeito medido, e prova de inviabilidade. Se "
-    + "perguntar o que caiu: economia de tempo e exclusividade de capacidade.");
+  fechoLinha(s, 5.68, "Nenhuma das duas metades sozinha resolve. Planejamento "
+    + "Automatizado é o nome da combinação.");
+  s.addNotes("A caixa tem a MESMA forma da do slide 6, e cor diferente de "
+    + "proposito: la a hipotese estava em aberto, aqui e a que sobreviveu. Se "
+    + "quiser, aponte isso. Os dois cartoes sao o que torna a nova hipotese "
+    + "uma hipotese e nao um lema: ela e falsificavel nas duas direcoes, e "
+    + "cada direcao ja tem medicao. Se perguntarem o que caiu: economia de "
+    + "deslocamento e a ideia de que o planejamento acha planos que um "
+    + "programa corrigido nao acharia.");
 }
 
 (async () => {
