@@ -51,6 +51,10 @@ python -m acsplan experimentos --experimento e4     # um só
 
 # testes de fumaça e de regressão
 python -m acsplan.testes
+
+# verificação cruzada com planejador de referência (dependência opcional)
+pip install pyperplan
+python -m acsplan experimentos --experimento e12
 ```
 
 ---
@@ -70,13 +74,16 @@ acsplan/                      o sistema
       dominio-legal.pddl      só regras com base em norma vigente
       dominio-estendido.pddl  o legal + 3 protocolos SINTÉTICOS
     gerador_problema.py       traduz (dados + rota) em problema PDDL
-    planejador.py             [3] parser PDDL, grounding, A*/GBFS
+    planejador.py             [3] parser PDDL, grounding, A*/GBFS/cegas
+    verificacao.py            confronto com planejador de referência
+    compilacao.py             compila precondições negativas para STRIPS
     executor_guloso.py        linha de base procedural para comparação
   saida/roteiro.py            [4] roteiro do turno para o agente
   dados/                      microárea de exemplo e gerador de instâncias
   experimentos/
     rodar.py                  E1 a E6: medem o sistema
-    avancados.py              E7 a E10: tentam derrubar as conclusões
+    avancados.py              E7 a E11: tentam derrubar as conclusões
+    verificacao_cruzada.py    E12: confronta com planejador externo
   testes.py                   testes de fumaça e de regressão
 
 projeto/                      documento do projeto (md + docx + gerador)

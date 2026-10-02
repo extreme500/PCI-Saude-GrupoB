@@ -171,10 +171,12 @@ justifica o algoritmo genético (E8) e o que mais restringe o espaço de busca.
 Mantê-la ou não é escolha de escopo, e as duas opções são defensáveis, mas
 precisam ser declaradas.
 
-**A verificação cruzada com o Fast Downward continua sendo a maior ameaça.**
-Todos estes números vêm de um planejador escrito pelo grupo. O E10 é o
-resultado mais importante do trabalho e, por isso mesmo, o que mais precisa de
-confirmação independente.
+**A verificação cruzada foi feita.** O E12 submeteu os mesmos modelos ao
+pyperplan, implementação independente do grupo do Fast Downward, com
+concordância total sobre viabilidade e comprimento mínimo, inclusive nos casos
+inviáveis e no domínio estendido. O E10 continua sendo o resultado mais
+importante do trabalho, e agora se apoia num planejador cujo comportamento foi
+confirmado por uma segunda implementação.
 
 ---
 
@@ -193,7 +195,9 @@ modelagem com base legal (o encaminhamento condicional do inciso III).
 
 ## 7. Ameaças à validade que permanecem
 
-1. **Planejador próprio, sem verificação cruzada.** A mais relevante.
+1. ~~**Planejador próprio, sem verificação cruzada.**~~ **Fechada** pelo E12:
+   o pyperplan, implementação independente do grupo do Fast Downward,
+   concorda em 13 de 13 instâncias sobre viabilidade e comprimento mínimo.
 2. **Amostras pequenas:** 40 instâncias no E7 e no E10, 25 no E9, 8 por tamanho
    no E8.
 3. **A "correção nova" do E10 foi escrita por nós**, que já sabíamos o modo de

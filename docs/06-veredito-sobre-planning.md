@@ -211,9 +211,11 @@ do algoritmo genético como otimizador.
 
 ## 6. Ameaças que permanecem
 
-1. **Fast Downward.** A conferência cruzada entre A\*/h_max e UCS reduz o
-   risco, mas as duas compartilham parser e grounding. Um erro ali afetaria as
-   duas igualmente.
+1. ~~**Fast Downward.**~~ **Fechada.** A verificação cruzada foi feita com o
+   **pyperplan**, do mesmo grupo do Fast Downward (Helmert, Universidade de
+   Basileia), que tem parser, grounding e busca próprios. Concordância em
+   **13 de 13** instâncias, incluindo as inviáveis e o domínio estendido.
+   Detalhes no experimento E12 e em `acsplan/logica/verificacao.py`.
 2. **Amostras pequenas:** 3 sementes por tamanho no E11, 40 instâncias no E7 e
    no E10.
 3. **A busca trivial recebeu vantagem** (dedup de estados e poda por custo), o

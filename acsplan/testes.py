@@ -224,6 +224,23 @@ def _():
         shutil.rmtree(distancias.DIRETORIO_CACHE, ignore_errors=True)
 
 
+@teste("planejador de referencia concorda (pyperplan), se instalado")
+def _():
+    from .logica import verificacao
+    if not verificacao.pyperplan_disponivel():
+        return   # ambiente sem a dependencia opcional
+    for semente in (1, 2):
+        dados = gerador.gerar(3, semente)
+        roteamento = roteirizador.roteirizar(dados)
+        r = verificacao.comparar(dados, roteamento, DOMINIOS["legal"],
+                                 timeout=240)
+        assert r["transformacao_preserva"], semente
+        if r["deles_erro"] and not r["deles_sucesso"]:
+            continue   # erro do lado deles: inconclusivo, nao e divergencia
+        assert r["viabilidade_bate"], (semente, r)
+        assert r["comprimento_bate"] is not False, (semente, r)
+
+
 @teste("o arquivo de exemplo carrega e planeja")
 def _():
     with open(os.path.join(RAIZ, "dados", "microarea_exemplo.json"),
