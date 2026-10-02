@@ -16,7 +16,9 @@ O sistema tem tres camadas, executadas nesta ordem:
     [4] SAIDA        roteiro do turno, no formato que o agente usa
 
 Uso:
+    python -m acsplan dados
     python -m acsplan planejar
+    python -m acsplan planejar --dados minha-microarea.csv
     python -m acsplan planejar --metodo ag --distancias osrm
     python -m acsplan planejar --dominio estendido --orcamento 240
     python -m acsplan planejar --sem-curso-tecnico
@@ -30,12 +32,13 @@ import argparse
 import json
 import os
 
-from .dados import gerador, modelos
+from .dados import carregador, gerador, modelos
 from .geo import roteirizador
 from .logica import executor_guloso
 from .logica.gerador_problema import gerar_problema
 from .logica.planejador import (TarefaPlanejamento, carregar_dominio,
                                 carregar_problema, resolver)
+from .saida import inspecao
 from .saida import roteiro as saida_roteiro
 from .selecao import politica
 
@@ -61,8 +64,7 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
         n, semente = args.instancia_sintetica
         dados = gerador.gerar(n, semente)
     else:
-        with open(args.dados, encoding="utf-8") as arquivo:
-            dados = json.load(arquivo)
+        dados = carregador.carregar(args.dados)
 
     if args.sem_curso_tecnico:
         dados["agente"]["curso_tecnico_concluido"] = False
@@ -218,6 +220,20 @@ def comando_roteiro(args) -> None:
         print(f"\n[salvo em {args.salvar}]")
 
 
+def comando_dados(args) -> None:
+    """Mostra o que ha na microarea, sem planejar nada."""
+    if args.instancia_sintetica:
+        n, semente = args.instancia_sintetica
+        dados = gerador.gerar(n, semente)
+    else:
+        dados = carregador.carregar(args.dados)
+    inspecao.imprimir(dados, mostrar_matriz=args.matriz)
+    if args.exportar_csv:
+        carregador.exportar_csv(dados, args.exportar_csv)
+        print(f"  [tabela de pacientes exportada para {args.exportar_csv}]")
+        print()
+
+
 def comando_experimentos(args) -> None:
     from .experimentos import rodar
     rodar.main(args.experimento)
@@ -262,6 +278,16 @@ def construir_parser() -> argparse.ArgumentParser:
     sp.add_argument("--salvar", metavar="ARQUIVO")
     sp.set_defaults(func=comando_roteiro)
 
+    sp = sub.add_parser("dados", help="mostra a microarea: pacientes, mapa e recursos")
+    sp.add_argument("--dados", default=DADOS_PADRAO)
+    sp.add_argument("--instancia-sintetica", nargs=2, type=int,
+                    metavar=("N", "SEMENTE"))
+    sp.add_argument("--matriz", action="store_true",
+                    help="imprime a matriz completa de distancias")
+    sp.add_argument("--exportar-csv", metavar="ARQUIVO",
+                    help="grava a tabela de pacientes como CSV para planilha")
+    sp.set_defaults(func=comando_dados)
+
     sp = sub.add_parser("experimentos", help="executa os experimentos")
     sp.add_argument("--experimento",
                     choices=["e1","e2","e3","e4","e5","e6","e7","e8","e9","e10","e11","e12","todos"],
@@ -273,7 +299,24 @@ def construir_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> None:
     args = construir_parser().parse_args(argv)
-    args.func(args)
+    try:
+        args.func(args)
+    except carregador.ErroDeDados as erro:
+        # Erro nos dados de entrada nao e defeito do programa: o usuario
+        # precisa da linha e da coluna, nao de um traceback.
+        print()
+        print(f"  Erro nos dados de entrada: {erro}")
+        print()
+        print("  Formato esperado da planilha em docs/07-guia-dos-experimentos.md,")
+        print("  secao 1.3. Para gerar um modelo correto:")
+        print("    python -m acsplan dados --exportar-csv modelo.csv")
+        print()
+        raise SystemExit(2)
+    except FileNotFoundError as erro:
+        print()
+        print(f"  Arquivo nao encontrado: {erro.filename}")
+        print()
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

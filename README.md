@@ -29,9 +29,21 @@ Documento do projeto: [`projeto/PROJETO-CICLO2.md`](projeto/PROJETO-CICLO2.md)
 
 Python 3.10+, sem dependências obrigatórias.
 
+> **Não entendeu o que cada comando faz, ou de onde vêm os dados?**
+> [`docs/07-guia-dos-experimentos.md`](docs/07-guia-dos-experimentos.md)
+> explica os dados, o mapa, quem compara com quem em cada experimento e como
+> ler os resultados.
+
 ```bash
+# ver os dados, o mapa e os recursos, antes de planejar nada
+python -m acsplan dados
+
 # pipeline completo: seleção, roteamento, planejamento, comparação
 python -m acsplan planejar
+
+# usar a sua própria planilha de pacientes
+python -m acsplan dados --exportar-csv minha.csv    # gera o modelo
+python -m acsplan roteiro --dados minha.csv --orcamento 240
 
 # o roteiro do turno no formato que o agente usa
 python -m acsplan roteiro --orcamento 240 --salvar roteiro.txt
@@ -78,8 +90,14 @@ acsplan/                      o sistema
     verificacao.py            confronto com planejador de referência
     compilacao.py             compila precondições negativas para STRIPS
     executor_guloso.py        linha de base procedural para comparação
-  saida/roteiro.py            [4] roteiro do turno para o agente
-  dados/                      microárea de exemplo e gerador de instâncias
+  dados/
+    microarea_exemplo.csv     tabela de pacientes (edite em planilha)
+    microarea_exemplo.json    unidade, recursos e agente
+    carregador.py             leitura de CSV e JSON
+    gerador.py                instâncias sintéticas para os experimentos
+  saida/
+    roteiro.py                [4] roteiro do turno para o agente
+    inspecao.py               visão dos dados e mapa aproximado
   experimentos/
     rodar.py                  E1 a E6: medem o sistema
     avancados.py              E7 a E11: tentam derrubar as conclusões
@@ -87,7 +105,7 @@ acsplan/                      o sistema
   testes.py                   testes de fumaça e de regressão
 
 projeto/                      documento do projeto (md + docx + gerador)
-docs/                         análise, modelagem, método, fontes e conclusões
+docs/                         guia de uso, análise, modelagem, método e fontes
 apresentacao/                 slides, versão do orador e cheatsheet
 ```
 

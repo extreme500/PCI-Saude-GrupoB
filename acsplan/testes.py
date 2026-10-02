@@ -224,6 +224,58 @@ def _():
         shutil.rmtree(distancias.DIRETORIO_CACHE, ignore_errors=True)
 
 
+@teste("o CSV produz exatamente a mesma microarea que o JSON")
+def _():
+    from .dados import carregador
+    base = os.path.join(RAIZ, "dados", "microarea_exemplo")
+    j = carregador.carregar(base + ".json")
+    c = carregador.carregar(base + ".csv")
+    assert len(j["pacientes"]) == len(c["pacientes"])
+    campos = ["id", "grupo", "prioridade", "dias_desde_ultima_visita",
+              "intervalo_maximo_dias", "requer_pa", "requer_glicemia",
+              "requer_temperatura", "requer_antropometria",
+              "requer_orientacao_medicacao", "requer_vacinal",
+              "exige_protecao_respiratoria"]
+    for a, b in zip(j["pacientes"], c["pacientes"]):
+        for campo in campos:
+            assert a.get(campo) == b.get(campo), (a["id"], campo,
+                                                  a.get(campo), b.get(campo))
+        assert abs(a["lat"] - b["lat"]) < 1e-6
+        assert abs(a["lon"] - b["lon"]) < 1e-6
+    # e o plano resultante tem de ser identico
+    r_j, t_j = _tarefa(j)
+    r_c, t_c = _tarefa(c)
+    assert r_j["custo_rota"] == r_c["custo_rota"]
+
+
+@teste("uma planilha minima, so com id/lat/lon, carrega")
+def _():
+    from .dados import carregador
+    caminho = os.path.join(TMP, "minima.csv")
+    with open(caminho, "w", encoding="utf-8") as arquivo:
+        arquivo.writelines(l + "\n" for l in
+                           ["id,lat,lon", "p1,-30.036,-51.214",
+                            "p2,-30.034,-51.220"])
+    d = carregador.carregar(caminho)
+    assert len(d["pacientes"]) == 2
+    assert d["recursos"]["janelas_supervisao_no_turno"] == 2  # uma por paciente
+
+
+@teste("planilha malformada aponta a linha e a coluna")
+def _():
+    from .dados import carregador
+    caminho = os.path.join(TMP, "ruim.csv")
+    with open(caminho, "w", encoding="utf-8") as arquivo:
+        arquivo.writelines(l + "\n" for l in
+                           ["id,lat,lon", "p1,-30.03,-51.21", "p2,abc,-51.22"])
+    try:
+        carregador.carregar(caminho)
+    except carregador.ErroDeDados as erro:
+        assert "linha 3" in str(erro) and "lat" in str(erro), str(erro)
+    else:
+        raise AssertionError("deveria ter recusado a planilha")
+
+
 @teste("planejador de referencia concorda (pyperplan), se instalado")
 def _():
     from .logica import verificacao
