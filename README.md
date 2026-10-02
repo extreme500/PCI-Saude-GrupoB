@@ -106,7 +106,12 @@ acsplan/                      o sistema
 
 projeto/                      documento do projeto (md + docx + gerador)
 docs/                         guia de uso, análise, modelagem, método e fontes
-apresentacao/                 slides, versão do orador e cheatsheet
+apresentacao/
+  ciclo2-planejamento.pptx    deck do documento de planejamento (PowerPoint)
+  slides.html                 deck anterior, para projeção
+  slides-orador.html          versão do orador do deck anterior
+  CHEATSHEET.md               bibliografia comentada e glossário
+  gerador/                    script que reconstrói o .pptx
 ```
 
 ---
