@@ -70,7 +70,7 @@ A review.* Computers & Operations Research, 77, 86–95.
 
 **[2] Cissé, M.; Yalçındağ, S.; Kergosien, Y.; Şahin, E.; Lenté, C.; Matta, A.
 (2017).** *OR problems related to Home Health Care: A review of relevant routing
-and scheduling problems.* Operations Research for Health Care.
+and scheduling problems.* Operations Research for Health Care, v. 13-14, p. 1-22, 2017.
 <https://doi.org/10.1016/j.orhc.2017.06.001>
 
 - **O que faz:** revisa os problemas de Pesquisa Operacional ligados à saúde
@@ -86,6 +86,22 @@ and scheduling problems.* Operations Research for Health Care.
   (curso técnico ∧ equipamento ∧ supervisão ativa), em que a supervisão é um
   **recurso finito que o deslocamento consome**. Essa é a diferença que
   justifica trazer Planejamento para o problema.
+
+---
+
+**[2b] Brunskill, E.; Lesh, N. (2010).** *Routing for Rural Health: Optimizing Community
+Health Worker Visit Schedules.* AAAI Spring Symposium on AI for Development,
+Technical Report SS-10-01.
+<https://aaai.org/papers/01139-1139-routing-for-rural-health-optimizing-community-health-worker-visit-schedules/>
+
+- **O que faz:** artigo de posição de **duas páginas**. Propõe formular a programação
+  de visitas de agentes comunitários como problema de roteamento e agendamento, sugere
+  técnicas do caixeiro viajante com janelas de tempo, e delineia direções de pesquisa.
+- **Cuidado ao citar:** ele **não otimiza cronogramas** nem apresenta resultados. Dizer
+  que otimiza é exagerar o que o artigo faz, e é verificável em duas páginas.
+- **Por que está aqui:** é o trabalho mais próximo pelo lado da rota, e registra que uma
+  visita costuma gerar visitas de acompanhamento futuras, o que conversa diretamente com
+  a nossa camada de seleção do turno.
 
 ---
 

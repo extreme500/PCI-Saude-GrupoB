@@ -87,8 +87,12 @@ desfechos se manifeste.
 
 ## 3. Justificativa
 
-Sob a ótica do Manual de Oslo (OCDE/EUROSTAT, 2018), o projeto caracteriza-se como uma
-inovação de processo no setor público de saúde. O valor prático esperado não está na
+Sob a ótica do Manual de Oslo (OCDE; EUROSTAT, 2025), o projeto caracteriza-se como uma
+inovação de processo de negócio, aqui aplicada ao setor público de saúde. A quarta
+edição do manual reduziu os tipos de inovação a dois, de produto e de processo de
+negócio, e orienta a medição no setor empresarial, tratando o setor governamental à
+parte; a transposição feita aqui é analógica, e fica declarada como tal.
+O valor prático esperado não está na
 redução do tempo de deslocamento, que as ferramentas de roteirização já endereçam, e sim
 em três capacidades que o método procedural não oferece. A primeira é a corretude sob
 escassez: identificar sequências de atendimento executáveis em cenários nos quais um
@@ -179,8 +183,13 @@ próprias do contexto de saúde domiciliar. Duas revisões o consolidam: FIKAR e
 (2017) sistematizam cenários, modelos e métodos; CISSÉ *et al.* (2017) o caracterizam
 como extensão do VRP e identificam, entre as restrições laterais, a preferência do
 paciente e os requisitos de qualificação profissional. Especificamente para agentes
-comunitários, BRUNSKILL e LESH (2010) formulam a programação de visitas como problema de
-roteamento e otimizam cronogramas em contexto de saúde comunitária. Na camada
+comunitários, BRUNSKILL e LESH (2010) propõem formular a programação de visitas como
+problema de roteamento e agendamento, sugerindo técnicas derivadas do caixeiro viajante
+com janelas de tempo. Trata-se de um artigo de posição de duas páginas, que delineia
+direções de pesquisa em vez de apresentar resultados. Dele interessa ainda uma
+observação diretamente ligada à camada de seleção deste projeto: uma visita domiciliar
+costuma gerar visitas de acompanhamento futuras, característica pouco tratada na
+literatura combinatória de roteamento e escalonamento. Na camada
 geométrica, o refinamento 2-opt remonta a CROES (1958), e a análise das heurísticas
 construtivas a ROSENKRANTZ, STEARNS e LEWIS (1977).
 
@@ -211,9 +220,11 @@ pois, para essas ferramentas, a compatibilidade entre profissional e paciente é
 de entrada, não estado que evolui durante a execução. O planejamento simbólico, por sua
 vez, dispõe de ferramental maduro, mas com penetração aplicada restrita ao ambiente
 acadêmico. No SUS, o e-SUS APS inclui o aplicativo e-SUS Território, utilizado por
-agentes comunitários para cadastro territorial e registro de visitas; sua documentação
-oficial descreve funcionalidades de coleta e qualificação de informação, sem previsão de
-roteirização ou de verificação automática de conformidade normativa.
+agentes comunitários para cadastro territorial e registro de visitas. O manual de uso
+oficial da versão 3.1 do aplicativo descreve funcionalidades de cadastro e de registro
+de acompanhamento das visitas domiciliares, sem menção a rota, mapa, agenda ou
+planejamento, e sem verificação automática de conformidade normativa. A afirmação vale
+para essa versão do manual.
 
 Cruzando essas frentes, delimita-se a lacuna que o projeto ocupa. A literatura de
 roteamento em saúde domiciliar reconhece a qualificação profissional como restrição, mas
@@ -366,9 +377,15 @@ n. 1-2, p. 5-33, 2001. DOI: 10.1016/S0004-3702(01)00108-4.
 BRADBROOK, K.; WINSTANLEY, G.; GLASSPOOL, D.; FOX, J.; GRIFFITHS, R. AI Planning
 Technology as a Component of Computerised Clinical Practice Guidelines. In:
 **Artificial Intelligence in Medicine (AIME 2005)**. Lecture Notes in Computer Science,
-v. 3581. Berlin: Springer, 2005. DOI: 10.1007/11527770_26.
+v. 3581. Berlin: Springer, 2005. p. 171-180. DOI: 10.1007/11527770_26.
 
-BRASIL. **Lei nº 11.350, de 5 de outubro de 2006.** Brasília, 2006.
+BRASIL. **Lei nº 11.350, de 5 de outubro de 2006.** Regulamenta o § 5º do art. 198 da
+Constituição, dispõe sobre o aproveitamento de pessoal amparado pelo parágrafo único do
+art. 2º da Emenda Constitucional nº 51, de 14 de fevereiro de 2006, e dá outras
+providências. Brasília, 2006. Disponível em:
+https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2006/lei/l11350.htm.
+Acesso em: 1 out. 2026. [O art. 3º § 4º está na redação dada pela Lei nº 13.595/2018; a
+alteração posterior, da Lei nº 14.536/2023, incide apenas sobre o art. 2º-A.]
 
 BRASIL. **Lei nº 13.595, de 5 de janeiro de 2018.** Altera a Lei nº 11.350, de 5 de
 outubro de 2006, para dispor sobre a reformulação das atribuições, a jornada e as
@@ -383,18 +400,22 @@ Disponível em:
 https://www.in.gov.br/materia/-/asset_publisher/Kujrw0TZC2Mb/content/id/19308123.
 Acesso em: 22 set. 2026.
 
-BRASIL. Ministério da Saúde. **e-SUS Atenção Primária à Saúde: manual de utilização do
-aplicativo e-SUS APS Território.** Brasília, [s.d.]. Disponível em:
+BRASIL. Ministério da Saúde. Secretaria de Atenção Primária à Saúde. Departamento de
+Saúde da Família. **e-SUS Atenção Primária à Saúde: Manual de Uso do Aplicativo e-SUS
+Território, Versão 3.1.** Brasília: Ministério da Saúde, 2020. Disponível em:
 https://sisaps.saude.gov.br/esus/upload/docs/manual_utilizacao_aplicativo_esus_aps_territorio.pdf.
 Acesso em: 28 set. 2026.
 
 BRUNSKILL, E.; LESH, N. Routing for Rural Health: Optimizing Community Health Worker
-Visit Schedules. In: **AAAI Spring Symposium on Artificial Intelligence for Development**,
-2010.
+Visit Schedules. In: **AAAI Spring Symposium on Artificial Intelligence for Development**.
+Technical Report SS-10-01. Menlo Park: AAAI Press, 2010. Disponível em:
+https://aaai.org/papers/01139-1139-routing-for-rural-health-optimizing-community-health-worker-visit-schedules/.
+Acesso em: 1 out. 2026.
 
 CISSÉ, M.; YALÇINDAĞ, S.; KERGOSIEN, Y.; ŞAHIN, E.; LENTÉ, C.; MATTA, A. OR problems
 related to Home Health Care: A review of relevant routing and scheduling problems.
-**Operations Research for Health Care**, 2017. DOI: 10.1016/j.orhc.2017.06.001.
+**Operations Research for Health Care**, v. 13-14, p. 1-22, 2017.
+DOI: 10.1016/j.orhc.2017.06.001.
 
 CROES, G. A. A Method for Solving Traveling-Salesman Problems. **Operations Research**,
 v. 6, n. 6, p. 791-812, 1958. DOI: 10.1287/opre.6.6.791.
@@ -420,9 +441,11 @@ Difference Anyway? In: **Proceedings of the International Conference on Automate
 Planning and Scheduling (ICAPS)**, v. 19, n. 1, p. 162-169, 2009.
 DOI: 10.1609/icaps.v19i1.13370.
 
-OCDE; EUROSTAT. **Manual de Oslo 2018: diretrizes para a coleta, o relato e o uso de
-dados sobre inovação.** 4. ed. Paris: OECD Publishing, 2018.
-DOI: 10.1787/9789264304604-en.
+OCDE; EUROSTAT. **Manual de Oslo 2018: diretrizes para coleta, relatório e uso de dados
+sobre inovação.** 4. ed. Tradução de Finep, Fiesp e Senai-SP. Rio de Janeiro: Finep,
+2025. Disponível em:
+http://www.finep.gov.br/images/a-finep/5CNCTI/04_07_2025_Manual_de_Oslo.pdf.
+Acesso em: 1 out. 2026.
 
 ROSENKRANTZ, D. J.; STEARNS, R. E.; LEWIS, P. M. An Analysis of Several Heuristics for
 the Traveling Salesman Problem. **SIAM Journal on Computing**, v. 6, n. 3, p. 563-581,
