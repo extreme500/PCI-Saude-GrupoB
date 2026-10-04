@@ -496,3 +496,49 @@ se o OpenSSL recusar a cadeia, repetir pelo `curl`. **A verificação não é
 desligada em momento algum**: quem valida continua sendo uma autoridade
 certificadora, muda só quem monta o caminho até ela. Com isso,
 `--distancias osrm` passou a funcionar de verdade.
+
+
+---
+
+## Modal de deslocamento: a pé ou de carro
+
+O projeto **não restringe o ACS a andar a pé**. Essa suposição estava embutida
+numa constante de velocidade, o que fazia parecer decisão de escopo o que era
+só um valor padrão. Agora o modal é parâmetro declarado:
+
+```bash
+python -m acsplan planejar --instancia-sintetica 8 1 --modal carro
+python -m acsplan mapa     --instancia-sintetica 8 1 --modal pe
+```
+
+Cada modal traz as quatro coisas que mudam com ele, em `MODAIS`, dentro de
+`geo/distancias.py`:
+
+| | a pé | de carro |
+|---|---|---|
+| Velocidade suposta (haversine) | 4,5 km/h | 25 km/h |
+| Fator de malha urbana | 1,3 | 1,4 |
+| Perfil do OSRM | `foot` | `driving` |
+
+A velocidade de carro é a média urbana **com** paradas, semáforos e
+estacionamento, bem abaixo da velocidade de fluxo livre que o OSRM devolve
+(cerca de 34 km/h). O fator de malha é maior porque mão única e conversões
+proibidas alongam mais o percurso de carro do que o de pedestre.
+
+**O modal muda os custos**, então dois experimentos rodados em modais
+diferentes não se comparam entre si. Por isso o modal efetivo volta junto da
+matriz e é impresso no relatório. Numa microárea de oito pacientes, o mesmo
+plano de 49 ações custa 242 minutos a pé e 159 de carro.
+
+**Todos os experimentos deste repositório foram rodados a pé**, que é o
+padrão. Trocar o padrão exigiria refazê-los.
+
+### No mapa, os dois ao mesmo tempo
+
+As duas páginas HTML trazem um seletor **a pé / de carro** que troca o
+traçado na hora, sem regerar nada: as duas geometrias já vêm embutidas no
+arquivo. O seletor mostra a distância e o tempo reais de cada modal para
+aquela mesma rota.
+
+O seletor muda o **desenho**, não o plano. Os minutos do turno continuam
+sendo os do modal com que ele foi planejado, e a página diz qual foi.

@@ -8,7 +8,7 @@ novo. Tres perguntas:
 
   1. o laco converge, isto e, chega a uma rota valida?
   2. em quantas tentativas?
-  3. quanto custa a conformidade, em minutos de caminhada, comparando a
+  3. quanto custa a conformidade, em minutos de deslocamento, comparando a
      rota aceita com a primeira rota reprovada?
 
 Como a falha e forcada
@@ -122,7 +122,7 @@ def experimento_e13(tamanhos=(7, 8, 12), sementes=range(1, 16),
         media = statistics.mean(cego["delta"])
         print()
         print(f"  CUSTO DA CONFORMIDADE (rota aceita menos rota reprovada):")
-        print(f"    media {media:+.1f} min de caminhada, "
+        print(f"    media {media:+.1f} min de deslocamento, "
               f"minimo {min(cego['delta']):+d}, maximo {max(cego['delta']):+d}")
         if max(cego["delta"]) == 0 and min(cego["delta"]) == 0:
             print("    ou seja, ZERO: a rota que cumpre a norma custa o mesmo")

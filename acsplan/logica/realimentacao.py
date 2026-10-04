@@ -171,6 +171,7 @@ def planejar_com_realimentacao(
         dominio: str = "legal",
         metodo: str = roteirizador.METODO_PADRAO,
         provedor_distancia: str = "haversine",
+        modal: str | None = None,
         usar_precedencia: bool = True,
         roteador_ciente: bool = True,
         semente: int = 0,
@@ -194,7 +195,8 @@ def planejar_com_realimentacao(
     # a matriz nao muda entre tentativas: calcula uma vez e reaproveita,
     # senao cada tentativa refaria as chamadas de rede do provedor externo.
     pontos = [dados["ubs"]] + dados["pacientes"]
-    matriz, provedor = construir_matriz(pontos, provedor_distancia, silencioso)
+    matriz, provedor = construir_matriz(pontos, provedor_distancia, silencioso,
+                                        modal=modal)
     pronta = {"matriz": matriz, "provedor": provedor}
 
     tentativas: list[Tentativa] = []
@@ -203,6 +205,7 @@ def planejar_com_realimentacao(
     for variante in range(max_tentativas):
         roteamento = roteirizador.roteirizar(
             dados, metodo=metodo, provedor_distancia=provedor_distancia,
+            modal=modal,
             usar_precedencia=usar_precedencia and roteador_ciente,
             semente=semente, variante=variante, matriz_pronta=pronta,
             silencioso=True)

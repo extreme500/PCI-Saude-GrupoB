@@ -16,6 +16,11 @@ import json
 import os
 
 from ..dados import modelos
+from ..geo.distancias import MODAIS
+
+# Os dois modais desenhados. O modal com que o turno foi PLANEJADO esta em
+# roteamento["modal"]; este par aqui e so o que a pagina oferece no seletor.
+MODAIS_DESENHO = ("pe", "carro")
 
 PALETA = {
     "escuro": "#33291F", "medio": "#5C4F41", "bege": "#8A7A67",
@@ -102,19 +107,31 @@ def montar_contexto(estado: dict) -> dict:
                 "minuto": parada["minutos_chegada"],
             })
 
-    # Caminho pelas ruas, so para desenho. Os custos continuam vindo da
-    # camada de distancias; ver o cabecalho de geo/trajeto.py.
+    # Caminho pelas ruas, so para desenho, nos DOIS modais: o projeto nao
+    # restringe o agente a andar a pe, e quem apresenta precisa poder mostrar
+    # as duas hipoteses na hora que quiser. Os custos continuam vindo da
+    # camada de distancias, no modal com que o turno foi planejado.
     from ..geo import trajeto as tracador
-    traco = tracador.tracar(_pontos_da_rota(dados, roteamento["rota"]))
-    desvios = {}
-    for parada in paradas:
-        if parada["desvio"] and parada["id"]:
-            alvo = next((p for p in dados["pacientes"]
-                         if p["id"] == parada["id"]), None)
-            if alvo is not None:
-                linha = tracador.tracar_ida_e_volta(alvo, ubs)
-                if linha:
-                    desvios[parada["id"]] = _arredondar(linha)
+    pontos_finais = _pontos_da_rota(dados, roteamento["rota"])
+    trajetos, desvios = {}, {}
+    for nome_modal in MODAIS_DESENHO:
+        traco = tracador.tracar(pontos_finais, modal=nome_modal)
+        trajetos[nome_modal] = {
+            "linha": _arredondar(traco["linha"]) if traco else [],
+            "metros": round(traco["metros"]) if traco else 0,
+            "minutos": round(traco["segundos"] / 60) if traco else 0,
+            "ok": bool(traco),
+        }
+        por_modal = {}
+        for parada in paradas:
+            if parada["desvio"] and parada["id"]:
+                alvo = next((p for p in dados["pacientes"]
+                             if p["id"] == parada["id"]), None)
+                if alvo is not None:
+                    linha = tracador.tracar_ida_e_volta(alvo, ubs, nome_modal)
+                    if linha:
+                        por_modal[parada["id"]] = _arredondar(linha)
+        desvios[nome_modal] = por_modal
 
     selecao = dados.get("_selecao", {})
     tentativas = []
@@ -132,10 +149,14 @@ def montar_contexto(estado: dict) -> dict:
                 culpados = [c for c in (causa.get("baixo"), causa.get("alto")) if c]
             invertida = (i > 1 and realimentacao.mesma_volta_invertida(
                 t.rota, laco.tentativas[i - 2].rota))
-            traco_t = tracador.tracar(_pontos_da_rota(dados, t.rota))
+            pontos_t = _pontos_da_rota(dados, t.rota)
+            linhas_t = {}
+            for nome_modal in MODAIS_DESENHO:
+                tr = tracador.tracar(pontos_t, modal=nome_modal)
+                linhas_t[nome_modal] = _arredondar(tr["linha"]) if tr else []
             tentativas.append({
                 "numero": i, "rota": t.rota, "custo_rota": t.custo_rota,
-                "linha": _arredondar(traco_t["linha"]) if traco_t else [],
+                "linhas": linhas_t,
                 "sucesso": t.sucesso, "motivo": t.motivo,
                 "explicacao": explicacao, "invertida": bool(invertida),
                 "culpados": culpados,
@@ -150,13 +171,10 @@ def montar_contexto(estado: dict) -> dict:
         "coord": coord,
         "rota": roteamento["rota"],
         "custo_rota": roteamento["custo_rota"],
-        "trajeto": {
-            "linha": _arredondar(traco["linha"]) if traco else [],
-            "metros": round(traco["metros"]) if traco else 0,
-            "minutos": round(traco["segundos"] / 60) if traco else 0,
-            "provedor": "ruas" if traco else "reta",
-        },
+        "trajetos": trajetos,
         "desvios": desvios,
+        "modal_do_plano": roteamento.get("modal", "pe"),
+        "rotulos_modal": {k: v["rotulo"] for k, v in MODAIS.items()},
         "metodo": roteamento["metodo"],
         "provedor": roteamento["provedor_distancia"],
         "precedencias": {k: sorted(v) for k, v in
@@ -233,6 +251,15 @@ MAPA_HTML = """<!doctype html>
            margin-left:30px; }
   .legenda { font-size:13px; color:var(--bege); margin-top:12px;
              border-top:1px solid var(--borda); padding-top:10px; }
+  .modal { display:flex; align-items:center; gap:8px; margin-top:10px;
+           font-size:14px; color:var(--bege); flex-wrap:wrap; }
+  .modal button { font-family:inherit; font-size:14px; padding:5px 14px;
+                  border-radius:16px; border:1px solid var(--borda);
+                  background:var(--cartao); color:var(--medio); cursor:pointer; }
+  .modal button:hover { background:var(--quente); }
+  .modal button.on { background:var(--terracota); color:#fff;
+                     border-color:var(--terracota); font-weight:bold; }
+  .modal .info { color:var(--medio); }
   .pino { border-radius:50%; border:2px solid #fff; color:#fff;
           font-weight:bold; font-size:12px; text-align:center;
           box-shadow:0 1px 4px rgba(0,0,0,.4); }
@@ -247,6 +274,12 @@ MAPA_HTML = """<!doctype html>
 <header>
   <h1>Rota do turno, com o protocolo ja formalizado</h1>
   <div class="sub" id="sub"></div>
+  <div class="modal">
+    <span>Traçado:</span>
+    <button data-modal="pe">a pé</button>
+    <button data-modal="carro">de carro</button>
+    <span class="info" id="infoModal"></span>
+  </div>
 </header>
 <div class="corpo">
   <div style="position:relative">
@@ -310,8 +343,25 @@ D.paradas.forEach(p => ordemPorId[p.id] = p);
 const pontos = [];
 D.rota.forEach(id => { if (D.coord[id]) pontos.push(D.coord[id]); });
 // o traçado segue as ruas quando o serviço de rotas respondeu; senão, reta
-const linhaRota = (D.trajeto && D.trajeto.linha.length) ? D.trajeto.linha : pontos;
-L.polyline(linhaRota, {color:"#5C4F41", weight:4, opacity:.8}).addTo(mapa);
+let modalAtual = D.modal_do_plano in D.trajetos ? D.modal_do_plano : "pe";
+let camadaRota = null, camadasDesvio = [];
+
+function desenharTracado() {
+  if (camadaRota) mapa.removeLayer(camadaRota);
+  camadasDesvio.forEach(c => mapa.removeLayer(c));
+  camadasDesvio = [];
+  const tj = D.trajetos[modalAtual] || {linha: []};
+  camadaRota = L.polyline(tj.linha.length ? tj.linha : pontos,
+                          {color:"#5C4F41", weight:4, opacity:.8}).addTo(mapa);
+  const desv = (D.desvios || {})[modalAtual] || {};
+  D.paradas.filter(p => p.desvio && D.coord[p.id]).forEach(p => {
+    const caminho = (desv[p.id] && desv[p.id].length)
+      ? desv[p.id] : [D.coord[p.id], [D.ubs.lat, D.ubs.lon]];
+    camadasDesvio.push(L.polyline(caminho, {color:"#B35C38", weight:3,
+      dashArray:"7 6", opacity:.85}).addTo(mapa));
+  });
+  atualizarTextos();
+}
 
 L.marker([D.ubs.lat, D.ubs.lon], {icon: pino("U", "#33291F", 30)})
  .addTo(mapa).bindPopup(`<b>${D.ubs.nome}</b><br>ponto de partida, de retorno e de reposicao`);
@@ -338,25 +388,31 @@ D.pacientes.forEach(p => {
 });
 
 // desvios de reposicao, tracejados ate a unidade
-D.paradas.filter(p => p.desvio).forEach(p => {
-  if (!D.coord[p.id]) return;
-  const caminho = (D.desvios && D.desvios[p.id] && D.desvios[p.id].length)
-    ? D.desvios[p.id] : [D.coord[p.id], [D.ubs.lat, D.ubs.lon]];
-  L.polyline(caminho, {color:"#B35C38", weight:3, dashArray:"7 6",
-                       opacity:.85}).addTo(mapa);
-});
+
 
 mapa.fitBounds(L.polyline(pontos.concat([[D.ubs.lat, D.ubs.lon]])).getBounds(),
                {padding:[40,40]});
 
-const traj = D.trajeto || {provedor:"reta"};
-document.getElementById("sub").textContent =
-  `${D.paradas.length} visitas  ·  ${D.custo_rota} min de caminhada  ·  ` +
-  `roteirizador: ${D.metodo}  ·  distancias: ${D.provedor}` +
-  (traj.provedor === "ruas"
-     ? `  ·  tracado pelas ruas: ${(traj.metros/1000).toFixed(1)} km, ${traj.minutos} min a pe`
-     : "") +
-  `  ·  dados clinicos ficticios, coordenadas reais`;
+function atualizarTextos() {
+  const tj = D.trajetos[modalAtual] || {ok:false};
+  const rot = D.rotulos_modal[modalAtual] || modalAtual;
+  document.getElementById("sub").textContent =
+    `${D.paradas.length} visitas  ·  plano de ${D.plano.custo} min, calculado ` +
+    `${D.rotulos_modal[D.modal_do_plano] || D.modal_do_plano}  ·  ` +
+    `roteirizador: ${D.metodo}  ·  distancias: ${D.provedor}  ·  ` +
+    `dados clinicos ficticios, coordenadas reais`;
+  document.getElementById("infoModal").textContent = tj.ok
+    ? `${(tj.metros/1000).toFixed(1)} km e ${tj.minutos} min ${rot}, pelo traçado real das ruas`
+    : "serviço de rotas indisponível: ligando as coordenadas em linha reta";
+  document.querySelectorAll("[data-modal]").forEach(b => {
+    b.classList.toggle("on", b.dataset.modal === modalAtual);
+  });
+}
+
+document.querySelectorAll("[data-modal]").forEach(b => {
+  b.onclick = () => { modalAtual = b.dataset.modal; desenharTracado(); };
+});
+desenharTracado();
 
 document.getElementById("numeros").innerHTML = `
   <div><b>${D.plano.custo}</b><span>min de turno</span></div>
@@ -378,12 +434,10 @@ document.getElementById("legenda").innerHTML =
   `<b style="color:#BF9000">media</b>, <b style="color:#4A6B5B">baixa</b>. ` +
   `Linha cheia: a rota. Linha tracejada: desvio de reposicao decidido pelo planejamento. ` +
   `Pinos apagados e sem numero: familias adiadas para o proximo turno.` +
-  (traj.provedor === "ruas"
-    ? ` O tracado segue o caminho de pedestre pelas ruas (OSRM, perfil a pe). Os
-        minutos do plano continuam vindo do modelo de distancias do projeto, e nao
-        deste tracado.`.replace(/\s+/g, " ")
-    : ` O servico de rotas nao respondeu, entao o tracado liga as coordenadas em
-        linha reta.`.replace(/\s+/g, " "));
+  ` O traçado segue as ruas de verdade, no modal escolhido acima. Os minutos do
+    plano vêm do modelo de distâncias do projeto, no modal com que o turno foi
+    planejado, e não deste traçado: trocar o traçado muda o desenho, não o
+    plano.`.replace(/\s+/g, " ");
 </script>
 </body>
 </html>
@@ -473,7 +527,7 @@ def montar_passos(ctx: dict) -> list[dict]:
             "nota": (_nota_rota_nova(ctx, t) if t["numero"] > 1 else
                      "A rota entra congelada no passo seguinte."),
             "mapa": {"modo": "rota", "rota": t["rota"], "estado": "neutro",
-                     "linha": t.get("linha") or []},
+                     "linhas": t.get("linhas") or {}},
             "metricas": [{"valor": t["custo_rota"], "rotulo": "min de caminhada"}],
         })
         if t["sucesso"]:
@@ -492,7 +546,7 @@ def montar_passos(ctx: dict) -> list[dict]:
                 "nota": (f"{t['expandidos']} estados expandidos em "
                          f"{t['segundos']}s, com garantia de otimalidade."),
                 "mapa": {"modo": "rota", "rota": t["rota"],
-                         "estado": "aprovada", "linha": t.get("linha") or []},
+                         "estado": "aprovada", "linhas": t.get("linhas") or {}},
                 "metricas": [{"valor": t["acoes"], "rotulo": "acoes"},
                              {"valor": t["custo_plano"], "rotulo": "min de turno"}],
             })
@@ -509,7 +563,7 @@ def montar_passos(ctx: dict) -> list[dict]:
                          "inviabilidade e sensivel a ordem, isto e, vale para esta "
                          "rota e nao para o turno. Por isso vale voltar ao passo 2."),
                 "mapa": {"modo": "rota", "rota": t["rota"],
-                         "estado": "reprovada", "linha": t.get("linha") or [],
+                         "estado": "reprovada", "linhas": t.get("linhas") or {},
                          "destaques": t.get("culpados") or []},
                 "metricas": [{"valor": t["expandidos"], "rotulo": "estados exauridos"},
                              {"valor": f"{t['segundos']}s", "rotulo": "para provar"}],
@@ -529,7 +583,8 @@ def montar_passos(ctx: dict) -> list[dict]:
             "nota": ("Trocar o roteirizador nao muda uma linha do dominio. "
                      "Mudar a lei nao muda uma linha do codigo de busca."),
             "mapa": {"modo": "final", "rota": ctx["rota"], "estado": "aprovada",
-                     "linha": ctx["trajeto"]["linha"]},
+                     "linhas": {m: v["linha"]
+                                for m, v in ctx["trajetos"].items()}},
             "metricas": [{"valor": len(ctx["paradas"]), "rotulo": "visitas"},
                          {"valor": ctx["plano"]["custo"], "rotulo": "min de turno"},
                          {"valor": ctx["plano"]["acoes"], "rotulo": "acoes"}],
@@ -595,6 +650,12 @@ DEMO_HTML = """<!doctype html>
   .ponto { width:9px; height:9px; border-radius:50%; background:var(--borda); }
   .ponto.on { background:var(--terracota); }
   .contador { font-size:13px; color:var(--bege); }
+  .sep { width:1px; height:22px; background:var(--borda); }
+  .rotulo { font-size:14px; color:var(--bege); }
+  nav .pilula { border-radius:16px; padding:6px 14px; font-size:14px; }
+  nav .pilula.on { background:var(--terracota); color:#fff;
+                   border-color:var(--terracota); font-weight:bold; }
+  nav .info { font-size:13px; color:var(--bege); }
   .pino { border-radius:50%; border:2px solid #fff; color:#fff; font-weight:bold;
           font-size:12px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.4); }
   #semfundo { display:none; position:absolute; z-index:500; left:50%;
@@ -628,6 +689,11 @@ DEMO_HTML = """<!doctype html>
 <nav>
   <button id="voltar">&larr; Anterior</button>
   <button id="avancar">Proximo &rarr;</button>
+  <span class="sep"></span>
+  <span class="rotulo">Traçado:</span>
+  <button class="pilula" data-modal="pe">a pé</button>
+  <button class="pilula" data-modal="carro">de carro</button>
+  <span class="info" id="infoModal"></span>
   <div class="pontos" id="pontos"></div>
   <span class="contador" id="contador"></span>
 </nav>
@@ -636,6 +702,7 @@ DEMO_HTML = """<!doctype html>
 const D = JSON.parse(document.getElementById("dados").textContent);
 const P = D.passos;
 let atual = 0;
+let modalAtual = (D.modal_do_plano in D.trajetos) ? D.modal_do_plano : "pe";
 
 const mapa = L.map("mapa", {scrollWheelZoom:false, zoomControl:true});
 // Ladrilhos. Os servidores voluntarios do OpenStreetMap devolvem HTTP 403
@@ -699,8 +766,9 @@ function desenhar(passo) {
     let i = 0;
     m.rota.forEach(function(id){ if (id !== D.ubs.id) { ordemNaRota[id] = ++i; } });
     const retas = m.rota.map(function(id){ return D.coord[id]; }).filter(Boolean);
-    // segue as ruas quando o servico de rotas respondeu; senao, liga em reta
-    const pontos = (m.linha && m.linha.length) ? m.linha : retas;
+    // segue as ruas do modal escolhido; sem servico de rotas, liga em reta
+    const doModal = (m.linhas || {})[modalAtual] || [];
+    const pontos = doModal.length ? doModal : retas;
     L.polyline(pontos, {color: CORES[m.estado] || CORES.neutro,
                         weight: m.estado === "neutro" ? 3 : 4,
                         opacity: m.estado === "reprovada" ? 0.55 : 0.85,
@@ -735,9 +803,10 @@ function desenhar(passo) {
   });
 
   if (m.modo === "final") {
+    var desv = (D.desvios || {})[modalAtual] || {};
     D.paradas.filter(function(p){ return p.desvio && D.coord[p.id]; }).forEach(function(p){
-      var caminho = (D.desvios && D.desvios[p.id] && D.desvios[p.id].length)
-        ? D.desvios[p.id] : [D.coord[p.id], [D.ubs.lat, D.ubs.lon]];
+      var caminho = (desv[p.id] && desv[p.id].length)
+        ? desv[p.id] : [D.coord[p.id], [D.ubs.lat, D.ubs.lon]];
       L.polyline(caminho, {color:"#B35C38", weight:3, dashArray:"7 6",
                            opacity:0.85}).addTo(camada);
     });
@@ -767,6 +836,22 @@ function mostrar(i) {
   desenhar(passo);
 }
 
+document.querySelectorAll("[data-modal]").forEach(function(b){
+  b.onclick = function(){
+    modalAtual = b.dataset.modal;
+    document.querySelectorAll("[data-modal]").forEach(function(o){
+      o.classList.toggle("on", o.dataset.modal === modalAtual);
+    });
+    var tj = D.trajetos[modalAtual] || {ok:false};
+    document.getElementById("infoModal").textContent = tj.ok
+      ? (tj.metros/1000).toFixed(1) + " km, " + tj.minutos + " min "
+        + (D.rotulos_modal[modalAtual] || modalAtual)
+      : "sem servico de rotas";
+    mostrar(atual);
+  };
+});
+document.querySelector('[data-modal="' + modalAtual + '"]').click();
+
 document.getElementById("voltar").onclick = function(){ mostrar(atual - 1); };
 document.getElementById("avancar").onclick = function(){ mostrar(atual + 1); };
 document.addEventListener("keydown", function(e){
@@ -775,9 +860,8 @@ document.addEventListener("keydown", function(e){
 });
 document.getElementById("ctx").textContent =
   D.pacientes.length + " familias  ·  roteirizador: " + D.metodo +
-  "  ·  distancias: " + D.provedor +
-  ((D.trajeto && D.trajeto.provedor === "ruas")
-     ? "  ·  tracado pelas ruas (OSRM, perfil a pe)" : "") +
+  "  ·  turno planejado " + (D.rotulos_modal[D.modal_do_plano] || D.modal_do_plano) +
+  ", distancias por " + D.provedor +
   "  ·  dados clinicos ficticios, coordenadas reais de Porto Alegre";
 mostrar(0);
 </script>

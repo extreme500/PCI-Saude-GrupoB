@@ -35,24 +35,24 @@ import json
 import os
 
 from . import _rede
+from .distancias import modal_de
 
-SERVIDOR = os.environ.get("ACSPLAN_OSRM_ROTA",
-                          "https://routing.openstreetmap.de/routed-foot")
-PERFIL = "foot"
 TIMEOUT_S = 30
 DIRETORIO_CACHE = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "dados", "cache_trajeto")
 
 
-def _chave(coordenadas: str) -> str:
-    # o servidor entra na chave: perfis diferentes no mesmo caminho /foot/
-    digest = hashlib.sha256((SERVIDOR + "|" + coordenadas).encode()).hexdigest()[:16]
-    return f"{PERFIL}-{digest}.json"
+def _chave(coordenadas: str, cfg: dict) -> str:
+    # o servidor entra na chave: ha instancias que servem um perfil
+    # diferente do que o caminho da URL promete
+    assinatura = cfg["servidor"] + "|" + coordenadas
+    digest = hashlib.sha256(assinatura.encode()).hexdigest()[:16]
+    return f"{cfg['perfil']}-{digest}.json"
 
 
-def _ler_cache(coordenadas: str):
-    caminho = os.path.join(DIRETORIO_CACHE, _chave(coordenadas))
+def _ler_cache(coordenadas: str, cfg: dict):
+    caminho = os.path.join(DIRETORIO_CACHE, _chave(coordenadas, cfg))
     if os.path.exists(caminho):
         try:
             with open(caminho, encoding="utf-8") as arquivo:
@@ -62,9 +62,9 @@ def _ler_cache(coordenadas: str):
     return None
 
 
-def _gravar_cache(coordenadas: str, dados) -> None:
+def _gravar_cache(coordenadas: str, dados, cfg: dict) -> None:
     os.makedirs(DIRETORIO_CACHE, exist_ok=True)
-    caminho = os.path.join(DIRETORIO_CACHE, _chave(coordenadas))
+    caminho = os.path.join(DIRETORIO_CACHE, _chave(coordenadas, cfg))
     with open(caminho, "w", encoding="utf-8") as arquivo:
         json.dump(dados, arquivo)
 
@@ -74,7 +74,8 @@ def _inverter(coordenadas: list) -> list[list[float]]:
     return [[c[1], c[0]] for c in coordenadas]
 
 
-def tracar(pontos: list[dict], *, silencioso: bool = True) -> dict | None:
+def tracar(pontos: list[dict], *, modal: str | None = None,
+           silencioso: bool = True) -> dict | None:
     """Caminho pelas ruas passando pelos pontos, na ordem dada.
 
     Devolve `{"linha": [[lat, lon], ...], "pernas": [...], "metros": float,
@@ -86,12 +87,13 @@ def tracar(pontos: list[dict], *, silencioso: bool = True) -> dict | None:
     if len(pontos) < 2:
         return None
 
+    cfg = modal_de(modal)
     coordenadas = ";".join(f"{p['lon']:.6f},{p['lat']:.6f}" for p in pontos)
-    cache = _ler_cache(coordenadas)
+    cache = _ler_cache(coordenadas, cfg)
     if cache is not None:
         return cache
 
-    url = (f"{SERVIDOR}/route/v1/{PERFIL}/{coordenadas}"
+    url = (f"{cfg['servidor']}/route/v1/{cfg['perfil']}/{coordenadas}"
            f"?overview=full&geometries=geojson&steps=true&annotations=false")
     corpo = _rede.obter_json(url, timeout=TIMEOUT_S, silencioso=silencioso)
     if corpo is None:
@@ -122,11 +124,12 @@ def tracar(pontos: list[dict], *, silencioso: bool = True) -> dict | None:
         "metros": rota.get("distance", 0.0),
         "segundos": rota.get("duration", 0.0),
     }
-    _gravar_cache(coordenadas, resultado)
+    _gravar_cache(coordenadas, resultado, cfg)
     return resultado
 
 
-def tracar_ida_e_volta(a: dict, b: dict) -> list[list[float]] | None:
+def tracar_ida_e_volta(a: dict, b: dict,
+                       modal: str | None = None) -> list[list[float]] | None:
     """Caminho de `a` ate `b`, para desenhar um desvio de reposicao."""
-    traco = tracar([a, b])
+    traco = tracar([a, b], modal=modal)
     return traco["linha"] if traco else None

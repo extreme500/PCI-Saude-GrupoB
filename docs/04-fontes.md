@@ -105,7 +105,8 @@ configurável, não norma** — e deve ser apresentado assim no relatório.
 |---|---|---|
 | `fitas_glicemia_por_carga` | 2 | escolhido baixo de propósito, para gerar escassez e tornar o problema de planejamento não trivial |
 | `janelas_supervisao_no_turno` | 8 (1 por residência) | escolhido para que o recurso escasso do experimento seja a fita, não a supervisão |
-| velocidade de caminhada | 4,5 km/h | valor usual para deslocamento a pé em área urbana |
+| velocidade a pé | 4,5 km/h | valor usual para deslocamento a pé em área urbana |
+| velocidade de carro | 25 km/h | média urbana com paradas e estacionamento, abaixo do fluxo livre |
 | fator de malha urbana | 1,3 | correção usual de distância em linha reta para percurso em malha em grade |
 | custos das ações (minutos) | 2 a 5 | estimativas nossas de ordem de grandeza; **não** foram medidas em campo |
 

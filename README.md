@@ -49,7 +49,7 @@ python -m acsplan roteiro --dados minha.csv --orcamento 240
 python -m acsplan roteiro --orcamento 240 --salvar roteiro.txt
 
 # algoritmo genético e distâncias reais de rua (OSRM, cai para haversine offline)
-python -m acsplan planejar --metodo ag --distancias osrm
+python -m acsplan planejar --metodo ag --distancias osrm --modal carro
 
 # domínio com protocolos sintéticos (mais pesado: prefira busca satisfaciente)
 python -m acsplan planejar --dominio estendido --max-pacientes 4 --estrategia gbfs
@@ -78,7 +78,8 @@ acsplan/                      o sistema
   cli.py                      interface de linha de comando
   selecao/politica.py         [1] quem entra no turno (prioridade + atraso)
   geo/
-    distancias.py             matriz de custos: haversine ou OSRM, com cache
+    distancias.py             matriz de custos: haversine ou OSRM, por modal
+    trajeto.py                geometria do caminho pelas ruas, so para desenho
     roteirizador.py           [2] ordem das paradas + precedência por urgência
     genetico.py               algoritmo genético com reparo de precedência
   logica/

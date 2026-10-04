@@ -160,6 +160,7 @@ def dois_opt(sequencia: list[str], origem: str,
 
 def roteirizar(dados: dict, *, metodo: str = METODO_PADRAO,
                provedor_distancia: str = "haversine",
+               modal: str | None = None,
                usar_precedencia: bool = True,
                semente: int = 0,
                variante: int = 0,
@@ -186,7 +187,7 @@ def roteirizar(dados: dict, *, metodo: str = METODO_PADRAO,
         matriz, provedor_usado = matriz_pronta["matriz"], matriz_pronta["provedor"]
     else:
         matriz, provedor_usado = construir_matriz(pontos, provedor_distancia,
-                                                  silencioso)
+                                                  silencioso, modal=modal)
     precede = precedencias(pacientes, usar_precedencia, intervalo)
 
     ids = [p["id"] for p in pacientes]
@@ -214,5 +215,6 @@ def roteirizar(dados: dict, *, metodo: str = METODO_PADRAO,
         "metodo": metodo,
         "variante": variante,
         "provedor_distancia": provedor_usado,
+        "modal": modal or "pe",
         "metricas_ag": metricas,
     }

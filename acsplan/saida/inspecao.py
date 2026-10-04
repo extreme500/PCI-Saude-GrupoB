@@ -116,7 +116,7 @@ def imprimir(dados: dict, *, mostrar_matriz: bool = False) -> None:
 
     pontos = [dados["ubs"]] + pacientes
     matriz, provedor = construir_matriz(pontos, "haversine")
-    print(f"  Distancias por {provedor}, em minutos de caminhada.")
+    print(f"  Distancias por {provedor}, em minutos de deslocamento.")
     print(f"  Da unidade ate cada paciente (ida):")
     distancias = sorted(((p['id'], matriz[(dados['ubs']['id'], p['id'])])
                          for p in pacientes), key=lambda x: x[1])

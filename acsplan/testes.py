@@ -207,14 +207,14 @@ def _():
               {"id": "p2", "lat": -30.0341, "lon": -51.2203}]
     original = distancias.consultar_osrm
     try:
-        distancias.consultar_osrm = lambda p: [[0, 540, 900], [560, 0, 700],
-                                               [880, 690, 0]]
+        distancias.consultar_osrm = lambda p, modal=None: [
+            [0, 540, 900], [560, 0, 700], [880, 690, 0]]
         m = distancias.matriz_osrm(pontos)
         assert m[("ubs", "p1")] == 9 and m[("ubs", "ubs")] == 0, m
 
         # um ponto inalcancavel invalida a matriz inteira
-        distancias.consultar_osrm = lambda p: [[0, None, 900], [560, 0, 700],
-                                               [880, 690, 0]]
+        distancias.consultar_osrm = lambda p, modal=None: [
+            [0, None, 900], [560, 0, 700], [880, 690, 0]]
         assert distancias.matriz_osrm(pontos) is None
 
         # e o provedor efetivamente usado precisa ser reportado

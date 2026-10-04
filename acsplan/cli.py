@@ -116,6 +116,7 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
             dominio=args.dominio,
             metodo=args.metodo,
             provedor_distancia=args.distancias,
+            modal=getattr(args, "modal", "pe"),
             usar_precedencia=not args.sem_precedencia,
             roteador_ciente=not getattr(args, "roteador_cego", False),
             semente=args.semente,
@@ -128,6 +129,7 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
         if roteamento is None:             # inviabilidade estrutural
             roteamento = roteirizador.roteirizar(
                 dados, metodo=args.metodo, provedor_distancia=args.distancias,
+                modal=getattr(args, "modal", "pe"),
                 usar_precedencia=not args.sem_precedencia,
                 semente=args.semente, silencioso=silencioso)
     else:
@@ -135,6 +137,7 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
             dados,
             metodo=args.metodo,
             provedor_distancia=args.distancias,
+            modal=getattr(args, "modal", "pe"),
             usar_precedencia=not args.sem_precedencia,
             semente=args.semente,
             silencioso=silencioso)
@@ -146,7 +149,11 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
         print(f"  Metodo             : {metodo}")
         print(f"  Distancias         : {roteamento['provedor_distancia']}")
         print(f"  Rota               : {' -> '.join(roteamento['rota'])}")
-        print(f"  Custo do trajeto   : {roteamento['custo_rota']} min de caminhada")
+        from .geo.distancias import modal_de
+        cfg_modal = modal_de(roteamento.get("modal"))
+        print(f"  Modal              : {cfg_modal['rotulo']}")
+        print(f"  Custo do trajeto   : {roteamento['custo_rota']} "
+              f"{cfg_modal['rotulo_custo']}")
         if roteamento["precedencias"]:
             pares = sum(len(v) for v in roteamento["precedencias"].values())
             print(f"  Precedencias       : {pares} restricoes de urgencia ativas")
@@ -192,7 +199,7 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
                     veredito = (f"plano de {t_.acoes} acoes, custo {t_.custo_plano}"
                                 if t_.sucesso else "REPROVADA")
                     print(f"    rota {i}: {t_.custo_rota:>4} min de "
-                          f"caminhada  ->  {veredito}")
+                          f"deslocamento  ->  {veredito}")
                     if not t_.sucesso:
                         base["rota"] = t_.rota
                         causa = realimentacao.explicar_reprovacao(dados, base)
@@ -333,6 +340,9 @@ def construir_parser() -> argparse.ArgumentParser:
                         default=roteirizador.METODO_PADRAO)
         sp.add_argument("--distancias", choices=["haversine", "osrm"],
                         default="haversine")
+        sp.add_argument("--modal", choices=["pe", "carro"], default="pe",
+                        help="como o agente se desloca; muda velocidade, "
+                             "fator de malha e perfil do OSRM")
         sp.add_argument("--estrategia", choices=["astar-hmax", "astar-hadd", "gbfs"],
                         default="astar-hmax")
         sp.add_argument("--orcamento", type=int, default=None,

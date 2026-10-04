@@ -41,7 +41,7 @@ ela apareça.
 
 - **Independentes:** número de pacientes; semente da instância; estratégia de
   busca; domínio (legal ou estendido); método de roteamento; provedor de
-  distâncias; capacidade de insumos; janelas de supervisão; orçamento do turno;
+  distâncias; **modal de deslocamento (a pé ou de carro)**; capacidade de insumos; janelas de supervisão; orçamento do turno;
   habilitação legal do agente; precedência ativa ou não.
 - **Dependentes:** custo do plano (minutos); número de ações; tempo de busca;
   nós expandidos; custo da rota; cobertura de urgência e de atraso; sucesso ou
