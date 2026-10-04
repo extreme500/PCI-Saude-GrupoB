@@ -329,3 +329,38 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
   Se nela a primeira rota quase nunca e reprovada, a arquitetura
   'roteiriza e depois verifica' se sustenta, e o laco e seguranca
   para quando a camada 2 for trocada por algo que nao conhece a lei.
+
+
+==============================================================================
+  E11 NO DOMINIO ESTENDIDO (execucao avulsa)
+  python -c "from acsplan.experimentos.avancados import experimento_e11;
+             experimento_e11(tamanhos=(3,4,5,6), dominio='estendido')"
+==============================================================================
+
+==============================================================================
+  E11 - BUSCA CEGA x PLANEJAMENTO (dominio estendido)
+==============================================================================
+  Todas as estrategias varrem o MESMO modelo declarativo e as
+  mesmas acoes instanciadas. A unica diferenca e a orientacao da
+  busca. 'ucs' e A* com h=0; 'dfs' e profundidade pura.
+
+  Mediana de 3 sementes. '--' = nao concluiu em 25s ou 600000 expansoes.
+  (N) ao lado do custo = so N sementes concluiram. Nesses casos a
+  mediana e sobre um SUBCONJUNTO e nao e comparavel entre colunas.
+
+    N |           A*/h_max |               GBFS |          UCS (h=0) |                DFS
+      |        nos   custo |        nos   custo |        nos   custo |        nos   custo
+  ------------------------------------------------------------------------------------
+    3 |       7320  110(2) |        686     187 |     341556  110(2) |     234099  214(1)
+    4 |      15868  141(2) |        641     235 |         --      -- |         --      --
+    5 |      23499  183(2) |        769  315(2) |         --      -- |         --      --
+    6 |         --      -- |       1165  377(2) |         --      -- |         --      --
+
+  Fator de expansao em relacao ao A*/h_max (mediana por tamanho):
+    ucs  : 47x a 47x
+    dfs  : 32x a 32x
+
+  LEITURA: se a busca cega resolve os mesmos tamanhos, o merito e da
+  modelagem declarativa e nao do planejador, e o trabalho precisa
+  dizer isso. Se ela para antes, a diferenca entre os limites e
+  exatamente o que a tecnologia de planejamento esta comprando.

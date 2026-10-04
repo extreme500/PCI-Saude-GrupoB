@@ -78,14 +78,15 @@ ainda antes:
   N |           A*/h_max |               GBFS |          UCS (h=0) |                DFS
     |        nós   custo |        nós   custo |        nós   custo |        nós   custo
 ------------------------------------------------------------------------------------
-  3 |       8230     113 |        686     187 |     341556  110(1) |     234099  214(1)
+  3 |       7320  110(2) |        686     187 |     341556  110(2) |     234099  214(1)
   4 |      15868  141(2) |        641     235 |         --      -- |         --      --
   5 |      23499  183(2) |        769  315(2) |         --      -- |         --      --
-  6 |         --      -- |       1310  382(2) |         --      -- |         --      --
+  6 |         --      -- |       1165  377(2) |         --      -- |         --      --
 ```
 
-A busca cega resolve **apenas N=3**, e mesmo assim só uma das três sementes.
-O GBFS chega a 6. Quanto mais regras, mais cedo o algoritmo trivial para.
+A busca cega resolve **apenas N=3**, e mesmo assim só em duas das três
+sementes (o DFS, em uma). O GBFS chega a 6. Quanto mais regras, mais cedo o
+algoritmo trivial para.
 
 > `(N)` marca tamanhos em que só N sementes concluíram. Nesses casos as
 > medianas são sobre subconjuntos diferentes e **não são comparáveis entre
