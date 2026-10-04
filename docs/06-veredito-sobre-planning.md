@@ -7,6 +7,9 @@ responder, e que estava respondida pela metade até aqui.
 > protocolos, ou um algoritmo mais simples (ou até trivial) faz o mesmo, com
 > desempenho igual ou melhor?
 
+> **Números refeitos com o algoritmo genético** como método de roteamento, que
+> passou a ser o padrão do projeto. Nenhuma conclusão mudou de sinal.
+
 **Resposta curta: sim, agrega, mas não pelo motivo que o projeto vinha
 alegando.** O valor está na combinação de duas coisas, e nenhuma delas
 sozinha resolve o problema.
@@ -37,7 +40,7 @@ O E11 fecha esse buraco.
 | Custo dos planos | igual ou melhor que o planejador satisfaciente (E7, E9) |
 | Velocidade | instantâneo, nenhuma busca |
 | Falsos negativos nas regras que conhece | **0%** (E7) |
-| Falsos negativos quando as regras mudam | **68%** (E10) |
+| Falsos negativos quando as regras mudam | **65%** (E10) |
 
 Corrigido, ele é excelente **para as regras que alguém já analisou**. O
 problema não é capacidade, é dependência: cada regra nova exige que uma pessoa
@@ -54,11 +57,11 @@ A\* com h=0 (completa e ótima); DFS é o mais trivial que existe.
     |        nós   custo |        nós   custo |        nós   custo |        nós   custo
 ------------------------------------------------------------------------------------
   4 |        227     133 |         59     133 |      25510     133 |      16829     159
-  5 |        341     182 |         80     182 |     318629    171* |     141341    185*
-  6 |        567     222 |        105     222 |         --      -- |      98135    194*
-  7 |       1036     238 |        154     238 |         --      -- |         --      --
-  8 |       1336     279 |        126     290 |         --      -- |         --      --
- 10 |       2629     325 |        550     372 |         --      -- |         --      --
+  5 |        341     182 |         80     182 |     318629  171(2) |     141341  185(2)
+  6 |        662     222 |        105     222 |         --      -- |         --      --
+  7 |       1275     234 |        121     234 |         --      -- |         --      --
+  8 |       2563     267 |        424     278 |         --      -- |         --      --
+ 10 |       4798     344 |       3572     391 |         --      -- |         --      --
 ```
 
 Fator de expansão sobre A\*/h_max: **UCS de 112× a 934×**, DFS de 74× a 414×.
@@ -101,7 +104,7 @@ DFS ingênuo de verdade iria pior.
 |---|---|
 | Tamanho viável | 14 a 20 pacientes com garantia de otimalidade (E1) |
 | Falsos negativos | 0%, tanto nas regras conhecidas quanto nas novas (E10) |
-| Custo dos planos | ótimo com A\*/h_max; 2,83% pior que (A) com GBFS (E9) |
+| Custo dos planos | ótimo com A\*/h_max; 3,49% pior que (A) com GBFS (E9) |
 | Esforço quando a regra muda | zero linhas de código de busca |
 
 ---
@@ -119,7 +122,7 @@ mesmo tempo**:
 
 | | Absorve regra nova sem código? | Resolve turno de 10 a 15 visitas? |
 |---|---|---|
-| Procedimento à mão | **não** (68% de falsos negativos) | sim |
+| Procedimento à mão | **não** (65% de falsos negativos) | sim |
 | Declarativo + busca trivial | sim | **não** (morre em 5 a 6) |
 | **Declarativo + busca heurística** | **sim** | **sim** |
 
@@ -144,7 +147,7 @@ Mas a métrica é enganosa, e o E10 mostra por quê: as 113 linhas declarativas
 são **transcrição de regras**, e não exigem raciocinar sobre interação entre
 elas. As ~11 linhas procedurais exigem saber *quando* conferir *o quê*, e é
 exatamente esse raciocínio que falha quando as regras mudam. Escrever menos
-linhas não ajuda se as linhas erradas custam 68% de falsos negativos.
+linhas não ajuda se as linhas erradas custam 65% de falsos negativos.
 
 ---
 
@@ -221,6 +224,6 @@ do algoritmo genético como otimizador.
 3. **A busca trivial recebeu vantagem** (dedup de estados e poda por custo), o
    que torna o resultado conservador a favor dela, não contra.
 4. **Os parâmetros de escassez do E10 foram escolhidos** para que os recursos
-   restringissem. Necessário para o teste ter poder, mas significa que 68% não
+   restringissem. Necessário para o teste ter poder, mas significa que 65% não
    é taxa esperada em operação.
 5. **Um único agente**, custos de ação estimados, instâncias sintéticas.

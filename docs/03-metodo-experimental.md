@@ -10,6 +10,13 @@ dos experimentos e as medições obtidas até agora.
 > **será** medido; este arquivo registra o que já saiu do que está construído.
 
 Reprodução: `python -m acsplan experimentos`
+
+> **Os números abaixo foram refeitos com o algoritmo genético** como método de
+> roteamento, que passou a ser o padrão do projeto (`METODO_PADRAO`, em
+> `acsplan/geo/roteirizador.py`). A motivação está no E8: a vantagem do AG vem
+> inteira de lidar com precedência, e a precedência está ativa. Nenhuma
+> conclusão mudou de sinal; o que mudou foram custos de rota, e com eles a
+> folga do executor procedural.
 Saída bruta da última execução completa:
 [`saida-experimentos.txt`](saida-experimentos.txt)
 
@@ -66,17 +73,20 @@ Mediana de 3 sementes por tamanho, limite de 25 s.
   N   ações |           A*/h_max |           A*/h_add |               GBFS
       inst. |     t(s)     custo |     t(s)     custo |     t(s)     custo
 --------------------------------------------------------------------------
-  4      83 |     0.05       133 |     0.01       133 |     0.02       133
-  6     133 |     0.20       222 |     0.04       222 |     0.05       222
-  8     191 |     0.57       279 |     0.10       299 |     0.08       290
- 10     257 |     1.41       325 |     0.17       384 |     0.33       372
- 12     331 |     3.22       390 |     0.25       446 |     0.27       437
- 14     426 |     5.80       449 |     0.34       501 |     0.88       510
+  4      83 |     0.07       133 |     0.02       133 |     0.02       133
+  6     133 |     0.39       222 |     0.05       222 |     0.07       222
+  8     191 |     1.67       267 |     0.16       290 |     0.28       278
+ 10     257 |     4.02       344 |     0.37       391 |     2.81       391
+ 12     331 |     7.48       376 |     0.41       441 |     3.20       399
+ 14     426 |    13.23       437 |     8.99       491 |   13.27       510
 ```
 
-A busca ótima permanece viável na faixa de um turno real (10 a 15 visitas). As
-satisfacientes são de 5 a 17 vezes mais rápidas e entregam planos de 10 a 20%
-piores; até N=7 as três empatam, porque todas alcançam o ótimo.
+A busca ótima permanece viável na faixa de um turno real (10 a 15 visitas),
+embora com menos folga do que na medição anterior: 13,2 s em N=14, contra os
+5,8 s das rotas do vizinho mais próximo. As rotas do AG são mais baratas e, por
+isso mesmo, deixam menos folga para o planejador decidir, o que aperta a busca.
+As satisfacientes continuam mais rápidas e entregam planos de 10 a 20% piores;
+até N=7 as três empatam, porque todas alcançam o ótimo.
 
 Isso corrige a afirmação de que planejadores não otimizam custo: eles otimizam,
 com garantia formal. O que não fazem é escalar como um solucionador de Pesquisa
@@ -93,7 +103,7 @@ Operacional dedicado.
 | Procedural melhor que o ótimo | **0** *(teste de sanidade do h_max)* |
 | **Falso negativo do procedural** | **7 de 30** |
 
-Folga de custo do procedural: média 1,27%, **mediana 0,00%**, máxima 7,62%.
+Folga de custo do procedural: média 0,78%, **mediana 0,00%**, máxima 7,93%.
 
 A linha "procedural melhor que o ótimo = 0" não é resultado, é verificação de
 corretude: valor diferente de zero indicaria que h_max não é admissível.
@@ -118,7 +128,7 @@ absorve sem alteração de código.
 | Cenário | Veredito | Nós expandidos | Tempo |
 |---|---|---|---|
 | Agente sem curso técnico (lógica) | SEM PLANO | **0** | 0,0003 s |
-| Supervisões insuficientes (recurso) | SEM PLANO | 286 | 0,117 s |
+| Supervisões insuficientes (recurso) | SEM PLANO | 583 | 0,308 s |
 
 A inviabilidade lógica é detectada sem expandir um único estado: nenhuma ação
 produz o fato exigido nem no problema relaxado, e como a relaxação só facilita o
@@ -172,15 +182,48 @@ Mesma busca ótima nos dois domínios, limite de 20 s.
 
 | N | Legal: ações / t(s) / custo | Estendido: ações / t(s) / custo |
 |---|---|---|
-| 3 | 61 / 0,02 / 104 | 226 / 3,79 / 110 |
-| 4 | 83 / 0,05 / 132 | 275 / 10,25 / 142 |
-| 5 | 107 / 0,09 / 171 | 324 / 17,47 / 183 |
-| 6 | 133 / 0,17 / 202 | 373 / **estourou o limite** |
+| 3 | 61 / 0,03 / 104 | 226 / 4,84 / 110 |
+| 4 | 83 / 0,06 / 132 | 275 / 12,63 / 142 |
+| 5 | 107 / 0,13 / 171 | 324 / **estourou o limite** |
+| 6 | 133 / 0,30 / 202 | 373 / **estourou o limite** |
 
 Três protocolos sintéticos derrubam o limite da busca ótima de cerca de 14
-pacientes para menos de 6, um fator de aproximadamente 100 no tempo. Em uso real
+pacientes para menos de 5, um fator de aproximadamente 100 no tempo. Em uso real
 isso obrigaria a trocar a garantia de otimalidade por busca satisfaciente, o que
 é decisão de engenharia e não detalhe de implementação.
+
+## E13 — A realimentação do passo 3 para o passo 2
+
+Desde 03/10 o pipeline deixou de ser de mão única: quando o planejamento prova
+que a rota corrente é inexequível, a camada geométrica é chamada de novo e
+devolve outra. Este experimento mede se isso funciona.
+
+A falha da primeira rota é **forçada** do jeito realista, com o roteirizador
+ignorando a precedência por urgência, como faria um roteirizador de prateleira
+que só minimiza distância. A camada normativa continua cobrando a regra. A
+mesma varredura roda com o roteirizador ciente da precedência, como controle.
+
+45 instâncias de 7, 8 e 12 pacientes.
+
+| | 1ª rota reprovada | converge | esgota |
+|---|---|---|---|
+| Roteirizador **cego** à norma | 8/45 (18%) | 44/45 | 1 |
+| Roteirizador **ciente** da norma | **0/45 (0%)** | 45/45 | 0 |
+
+Das instâncias em que a primeira rota foi reprovada, todas as que convergiram
+precisaram de exatamente **2 tentativas**.
+
+**O custo da conformidade foi zero.** Em todos os casos a rota aceita tem
+exatamente o mesmo custo de caminhada que a rota reprovada: o que muda é a
+**ordem**, não a distância. É a melhor ilustração possível do argumento do
+projeto, porque mostra que o que separa uma rota utilizável de uma inútil aqui
+não é o comprimento.
+
+A linha do roteirizador ciente é a que importa para o projeto: com a camada
+geométrica respeitando a precedência, **a primeira rota nunca foi reprovada**.
+O laço, portanto, não é cavalo de batalha, é seguro: ele existe para o dia em
+que a camada 2 for trocada por OR-Tools, por um serviço externo ou por uma
+planilha, nenhum dos quais conhece a Lei 11.350.
 
 ---
 

@@ -1,12 +1,12 @@
 Saida bruta da suite completa de experimentos.
-Execucao: 2026-10-01 03:44
+Execucao: 2026-10-04 02:28
 Comando : python -m acsplan experimentos
-Commit  : 3330fe9
+Commit  : 75b7509
+Metodo  : algoritmo genetico (METODO_PADRAO), precedencia por urgencia ativa
 Maquina : Windows, Python 3.14.6
 
 Os CUSTOS sao deterministicos (mesma semente, mesmo resultado).
 Os TEMPOS variam entre execucoes conforme a carga da maquina.
-========================================================================
 
 
 ==============================================================================
@@ -17,17 +17,17 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
     N   acoes |           A*/h_max |           A*/h_add |               GBFS
         inst. |     t(s)     custo |     t(s)     custo |     t(s)     custo
   --------------------------------------------------------------------------
-    4      83 |     0.05       133 |     0.01       133 |     0.02       133
-    5     107 |     0.10       182 |     0.03       182 |     0.03       182
-    6     133 |     0.20       222 |     0.04       222 |     0.05       222
-    7     161 |     0.43       238 |     0.05       238 |     0.08       238
-    8     191 |     0.59       279 |     0.10       299 |     0.08       290
-    9     223 |     0.90       289 |     0.12       326 |     0.18       314
-   10     257 |     1.39       325 |     0.16       384 |     0.31       372
-   11     293 |     2.57       363 |     0.21       419 |     0.25       410
-   12     331 |     3.47       390 |     0.26       446 |     0.27       437
-   13     383 |     4.30       431 |     0.26       475 |     0.75       485
-   14     426 |     5.79       449 |     0.29       501 |     0.80       510
+    4      83 |     0.07       133 |     0.02       133 |     0.02       133
+    5     107 |     0.14       182 |     0.03       182 |     0.05       182
+    6     133 |     0.39       222 |     0.05       222 |     0.07       222
+    7     161 |     0.79       234 |     0.07       234 |     0.09       234
+    8     191 |     1.67       267 |     0.16       290 |     0.28       278
+    9     223 |     1.39       289 |     0.15       326 |     0.24       314
+   10     257 |     4.02       344 |     0.37       391 |     2.81       391
+   11     293 |     3.12       345 |     0.30       404 |     0.58       392
+   12     331 |     7.48       376 |     0.41       441 |     3.20       399
+   13     383 |     9.92       419 |     4.63       488 |    10.71       454
+   14     426 |    13.23       437 |     8.99       491 |    13.27       510
 
   LEITURA: h_max e admissivel (custo garantidamente minimo) e e a que
   cresce mais rapido; as satisfacientes sao mais rapidas e entregam
@@ -45,8 +45,8 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
   FALSO NEGATIVO do procedural          : 7   (declarou inviavel havendo plano valido)
   planejamento estourou o limite        : 0
 
-  folga de custo do procedural: media 1.27%, mediana 0.00%, maxima 7.62%
-  maior ganho absoluto: semente 2, 302 -> 279 min (23 min)
+  folga de custo do procedural: media 0.78%, mediana 0.00%, maxima 7.93%
+  maior ganho absoluto: semente 2, 290 -> 267 min (23 min)
 
   LEITURA: o ganho tipico de custo e pequeno. O resultado que importa
   sao os falsos negativos, em que o procedural desperdica um recurso
@@ -63,7 +63,7 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
          entao a impossibilidade e demonstrada sem expandir um no.
 
   (b) INVIABILIDADE DE RECURSO - so 4 janelas de supervisao
-      planejamento : SEM PLANO em 0.1179s, 286 nos expandidos
+      planejamento : SEM PLANO em 0.3077s, 583 nos expandidos
       motivo       : espaco de estados exaurido: problema sem solucao
       procedural   : falhou
       -> a relaxacao ignora efeitos de remocao e nao 've' o contador
@@ -81,11 +81,11 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
     N |           nn2opt |               AG |            diferenca
       |    custo    t(s) |    custo    t(s) |       min          %
   ------------------------------------------------------------------
-    8 |    106.0    0.00 |    101.0    0.41 |      +5.0      +4.7%
-   12 |    127.8    0.00 |    124.4    0.53 |      +3.4      +2.7%
-   16 |    162.6    0.00 |    139.4    0.68 |     +23.2     +14.3%
-   20 |    183.8    0.00 |    168.8    0.81 |     +15.0      +8.2%
-   30 |    223.6    0.01 |    213.8    1.10 |      +9.8      +4.4%
+    8 |    106.0    0.00 |    101.0    0.49 |      +5.0      +4.7%
+   12 |    127.8    0.00 |    124.4    0.59 |      +3.4      +2.7%
+   16 |    162.6    0.00 |    139.4    0.79 |     +23.2     +14.3%
+   20 |    183.8    0.01 |    168.8    0.99 |     +15.0      +8.2%
+   30 |    223.6    0.02 |    213.8    1.33 |      +9.8      +4.4%
 
   LEITURA: o AG encontra rotas mais baratas em todos os tamanhos
   testados, e a vantagem nao desaparece nas instancias pequenas. A
@@ -130,10 +130,10 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
     N |                      LEGAL |                  ESTENDIDO
       |   acoes     t(s)     custo |   acoes     t(s)     custo
   --------------------------------------------------------------
-    3 |      61     0.02     104.0 |     226     3.96     110.5
-    4 |      83     0.05     131.5 |     275    10.58     141.5
-    5 |     107     0.09     171.0 |     324    17.84     183.0
-    6 |     133     0.18     202.0 |     373       --        --
+    3 |      61     0.03     104.0 |     226     4.84     110.5
+    4 |      83     0.06     131.5 |     275    12.63     141.5
+    5 |     107     0.13     171.0 |     324       --        --
+    6 |     133     0.30     202.0 |     373       --        --
 
   LEITURA: e o resultado que justifica manter os dois dominios. Cada
   protocolo acrescentado multiplica o espaco de estados, e a busca
@@ -157,9 +157,9 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
                                            REATIVO     CORRIGIDO
   --------------------------------------------------------------
   falsos negativos                      9/40 (22%)     0/40 (0%)
-  folga media de custo                       1.20%         1.40%
-  folga maxima de custo                      7.62%         7.83%
-  atingiu o otimo                                          28/40
+  folga media de custo                       0.77%         0.89%
+  folga maxima de custo                      7.93%         6.97%
+  atingiu o otimo                                          29/40
 
   LEITURA: este experimento decide o valor do trabalho, e a resposta
   honesta pode nao ser a que se gostaria. Dois numeros importam:
@@ -197,8 +197,8 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
   GBFS nao achou plano havendo um            : 0
   procedural corrigido falhou                : 0
 
-  GBFS acima do otimo (media)                : +4.73%
-  GBFS em relacao ao procedural corrigido    : +2.83%
+  GBFS acima do otimo (media)                : +4.61%
+  GBFS em relacao ao procedural corrigido    : +3.49%
   instancias em que GBFS ficou PIOR que ele  : 16/25
 
   LEITURA: se o GBFS ficar pior que o procedural corrigido, entao na
@@ -224,11 +224,11 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
     N |  planeja |        REATIVO |  CORRECAO ANTIGA |  CORRECAO NOVA
       |       ok |    falsos neg. |      falsos neg. |    falsos neg.
   --------------------------------------------------------------------------
-    4 |       15 |    12/15 (80%) |      12/15 (80%) |      0/15 (0%)
+    4 |       14 |    11/14 (79%) |      11/14 (79%) |      0/14 (0%)
     5 |       11 |     6/11 (55%) |       6/11 (55%) |      0/11 (0%)
-    6 |       14 |     9/14 (64%) |       9/14 (64%) |      0/14 (0%)
+    6 |       12 |     7/12 (58%) |       7/12 (58%) |      0/12 (0%)
   --------------------------------------------------------------------------
-  TOT |       40 |    27/40 (68%) |      27/40 (68%) |      0/40 (0%)
+  TOT |       37 |    24/37 (65%) |      24/37 (65%) |      0/37 (0%)
 
   COLUNAS: 'correcao antiga' e a do E7, que so conhece as fitas.
   'correcao nova' e a mesma ideia reescrita sabendo dos tres
@@ -241,3 +241,91 @@ Os TEMPOS variam entre execucoes conforme a carga da maquina.
   planejamento dispensa, e e sobre isso que a conclusao do trabalho
   deve se apoiar, nao sobre a taxa de falsos negativos isolada.
 
+==============================================================================
+  E11 - BUSCA CEGA x PLANEJAMENTO (dominio legal)
+==============================================================================
+  Todas as estrategias varrem o MESMO modelo declarativo e as
+  mesmas acoes instanciadas. A unica diferenca e a orientacao da
+  busca. 'ucs' e A* com h=0; 'dfs' e profundidade pura.
+
+  Mediana de 3 sementes. '--' = nao concluiu em 25s ou 600000 expansoes.
+  (N) ao lado do custo = so N sementes concluiram. Nesses casos a
+  mediana e sobre um SUBCONJUNTO e nao e comparavel entre colunas.
+
+    N |           A*/h_max |               GBFS |          UCS (h=0) |                DFS
+      |        nos   custo |        nos   custo |        nos   custo |        nos   custo
+  ------------------------------------------------------------------------------------
+    4 |        227     133 |         59     133 |      25510     133 |      16829     159
+    5 |        341     182 |         80     182 |     318629  171(2) |     141341  185(2)
+    6 |        662     222 |        105     222 |         --      -- |         --      --
+    7 |       1275     234 |        121     234 |         --      -- |         --      --
+    8 |       2563     267 |        424     278 |         --      -- |         --      --
+   10 |       4798     344 |       3572     391 |         --      -- |         --      --
+
+  Fator de expansao em relacao ao A*/h_max (mediana por tamanho):
+    ucs  : 112x a 934x
+    dfs  : 74x a 414x
+
+  LEITURA: se a busca cega resolve os mesmos tamanhos, o merito e da
+  modelagem declarativa e nao do planejador, e o trabalho precisa
+  dizer isso. Se ela para antes, a diferenca entre os limites e
+  exatamente o que a tecnologia de planejamento esta comprando.
+
+==============================================================================
+  E12 - VERIFICACAO CRUZADA COM PLANEJADOR DE REFERENCIA (pyperplan)
+==============================================================================
+  Ambos resolvem a MESMA instancia, na variante de custo unitario e
+  sem precondicoes negativas, e ambos em configuracao otima. A
+  comparacao e sobre VIABILIDADE e COMPRIMENTO MINIMO do plano.
+
+  instancia           acoes    nosso  pyperplan  transf.  veredito
+  --------------------------------------------------------------------------
+  n=2 s=1                41       15         15       ok  concordam
+  n=2 s=2                41       10         10       ok  concordam
+  n=2 s=3                41       16         16       ok  concordam
+  n=3 s=1                61       21         21       ok  concordam
+  n=3 s=2                61       17         17       ok  concordam
+  n=3 s=3                61       26         26       ok  concordam
+  n=4 s=1                83       27         27       ok  concordam
+  n=4 s=2                83       24         24       ok  concordam
+  n=4 s=3                83       32         32       ok  concordam
+  sem curso tec.         51sem plano  sem plano       ok  concordam
+  1 supervisao           69sem plano  sem plano       ok  concordam
+  estendido s=1         226       27         27       ok  concordam
+  estendido s=2         226       23         23       ok  concordam
+  --------------------------------------------------------------------------
+  comparacoes conclusivas : 13
+  concordancias           : 13
+  divergencias            : 0
+  transformacao invalida  : 0
+
+  LEITURA: concordancia total. Duas implementacoes independentes,
+  com parsers, groundings e buscas distintos, chegam ao mesmo
+  veredito de viabilidade e ao mesmo comprimento minimo. A maior
+  ameaca a validade do trabalho deixa de estar em aberto.
+
+
+==============================================================================
+  E13 - REALIMENTACAO: O PASSO 3 REPROVA, O PASSO 2 TENTA DE NOVO
+==============================================================================
+  A falha da primeira rota e forcada do jeito realista: o
+  roteirizador ignora a precedencia clinica (como faria um
+  roteirizador de prateleira) e a camada normativa cobra.
+
+                                    1a rota reprovada    converge   esgotou
+  --------------------------------------------------------------------------
+  roteirizador CEGO a norma           8/45  (  18%)       44/45          1
+  roteirizador CIENTE da norma        0/45  (   0%)       45/45          0
+
+  Das 7 instancias em que a 1a rota foi reprovada, todas as que
+  convergiram precisaram de mediana 2 tentativas, maxima 2.
+
+  CUSTO DA CONFORMIDADE (rota aceita menos rota reprovada):
+    media +0.0 min de caminhada, minimo +0, maximo +0
+    ou seja, ZERO: a rota que cumpre a norma custa o mesmo
+    numero de minutos. O que muda e a ORDEM, nao a distancia.
+
+  LEITURA: a linha do roteirizador ciente e o resultado que importa.
+  Se nela a primeira rota quase nunca e reprovada, a arquitetura
+  'roteiriza e depois verifica' se sustenta, e o laco e seguranca
+  para quando a camada 2 for trocada por algo que nao conhece a lei.

@@ -68,8 +68,11 @@ def _varrer(ciente: bool, tamanhos, sementes, limite):
                 primeira_reprovada += 1
             if r.sucesso:
                 convergiu += 1
-                tentativas_ate_valida.append(len(r.tentativas))
                 if not r.tentativas[0].sucesso:
+                    # so interessa contar tentativas de quem precisou de
+                    # mais de uma: incluir quem acertou de primeira puxaria
+                    # a mediana para 1 e esconderia o custo do laco.
+                    tentativas_ate_valida.append(len(r.tentativas))
                     delta_caminhada.append(
                         r.tentativas[-1].custo_rota - r.tentativas[0].custo_rota)
             else:
@@ -111,14 +114,19 @@ def experimento_e13(tamanhos=(7, 8, 12), sementes=range(1, 16),
     print()
 
     if cego["tentativas"]:
-        print(f"  tentativas ate a rota valida (cego): "
-              f"mediana {statistics.median(cego['tentativas']):.0f}, "
-              f"maxima {max(cego['tentativas'])}")
+        n = len(cego["tentativas"])
+        print(f"  Das {n} instancias em que a 1a rota foi reprovada, todas as que")
+        print(f"  convergiram precisaram de mediana {statistics.median(cego['tentativas']):.0f} "
+              f"tentativas, maxima {max(cego['tentativas'])}.")
     if cego["delta"]:
         media = statistics.mean(cego["delta"])
-        print(f"  custo da conformidade: {media:+.1f} min de caminhada em media "
-              f"entre a rota reprovada e a aceita")
-        print(f"  (minimo {min(cego['delta']):+d}, maximo {max(cego['delta']):+d} min)")
+        print()
+        print(f"  CUSTO DA CONFORMIDADE (rota aceita menos rota reprovada):")
+        print(f"    media {media:+.1f} min de caminhada, "
+              f"minimo {min(cego['delta']):+d}, maximo {max(cego['delta']):+d}")
+        if max(cego["delta"]) == 0 and min(cego["delta"]) == 0:
+            print("    ou seja, ZERO: a rota que cumpre a norma custa o mesmo")
+            print("    numero de minutos. O que muda e a ORDEM, nao a distancia.")
     if cego["estruturais"] or ciente["estruturais"]:
         print(f"  instancias com inviabilidade estrutural, descartadas: "
               f"{cego['estruturais']}")

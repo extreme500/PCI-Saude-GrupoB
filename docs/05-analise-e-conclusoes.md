@@ -9,6 +9,9 @@ defensável sobre o que o projeto demonstrou.
 
 Reprodução: `python -m acsplan experimentos`
 
+> **Números refeitos com o algoritmo genético** como método de roteamento, que
+> passou a ser o padrão do projeto. Nenhuma conclusão mudou de sinal.
+
 ---
 
 ## 1. O percurso
@@ -34,8 +37,8 @@ chegar na residência e desviar **antes** de acionar a supervisão) produziu:
 | | Reativo | Corrigido |
 |---|---|---|
 | Falsos negativos | 9/40 (22%) | **0/40 (0%)** |
-| Folga média de custo | 1,20% | 1,40% |
-| Atingiu o ótimo | — | 28/40 |
+| Folga média de custo | 0,77% | 0,89% |
+| Atingiu o ótimo | | 29/40 |
 
 **O resultado principal do E2 não sobreviveu.** Uma correção de poucas linhas
 zera os falsos negativos e mantém a folga de custo praticamente inalterada.
@@ -67,8 +70,8 @@ Em uso real a escolha seria GBFS. Comparando GBFS com o procedural **corrigido**
 
 | | |
 |---|---|
-| GBFS acima do ótimo | +4,73% |
-| GBFS em relação ao procedural corrigido | **+2,83%** (pior) |
+| GBFS acima do ótimo | +4,61% |
+| GBFS em relação ao procedural corrigido | **+3,49%** (pior) |
 | Instâncias em que GBFS ficou pior | 16/25 |
 
 Na única configuração que de fato escalaria, o planejamento entrega planos
@@ -84,14 +87,14 @@ aplicando a correção do E7 ao domínio estendido, que acrescenta três recurso
 finitos que não existiam quando ela foi escrita.
 
 Com os recursos novos **escassos** (3 doses de solução alcoólica, coletor para
-1, 1 máscara), em 40 instâncias com plano comprovadamente existente:
+1, 1 máscara), em 37 instâncias com plano comprovadamente existente:
 
 | | Falsos negativos |
 |---|---|
-| Executor reativo | 27/40 (68%) |
-| Executor com a **correção antiga** | **27/40 (68%)** |
-| Executor com uma **correção nova**, escrita sabendo das regras novas | 0/40 (0%) |
-| **Planejamento, sem ajuste algum** | **0/40 (0%)** |
+| Executor reativo | 24/37 (65%) |
+| Executor com a **correção antiga** | **24/37 (65%)** |
+| Executor com uma **correção nova**, escrita sabendo das regras novas | 0/37 (0%) |
+| **Planejamento, sem ajuste algum** | **0/37 (0%)** |
 
 A correção antiga entregou **benefício zero**. Ela funcionava porque o recurso
 que ela conhecia era o que restringia; quando o gargalo mudou, voltou a ser
@@ -127,7 +130,7 @@ A formulação que os dados sustentam é outra:
 > domínio e deriva a ordem correta das pré-condições, sem que a interação
 > precise ter sido antecipada por um programador.
 
-O E10 é a medida disso: diante de regras novas, o procedural passa de 68% de
+O E10 é a medida disso: diante de regras novas, o procedural passa de 65% de
 falsos negativos para 0% **apenas depois** de receber uma correção escrita
 especificamente para elas. O planejador vai de 0% a 0% sem tocar em código.
 
@@ -187,7 +190,7 @@ instância fixa e saíam calados quando ela era inviável. Com a semente que est
 fixada, o executor falhava e o teste passava sem verificar coisa alguma.
 
 Ambos passaram a varrer doze sementes e a **exigir um mínimo de casos
-efetivamente exercitados**, falhando se não houver. A suíte tem hoje 12 testes,
+efetivamente exercitados**, falhando se não houver. A suíte tem hoje 19 testes,
 dos quais três cobrem bugs que de fato ocorreram e um fixa uma decisão de
 modelagem com base legal (o encaminhamento condicional do inciso III).
 
@@ -198,12 +201,12 @@ modelagem com base legal (o encaminhamento condicional do inciso III).
 1. ~~**Planejador próprio, sem verificação cruzada.**~~ **Fechada** pelo E12:
    o pyperplan, implementação independente do grupo do Fast Downward,
    concorda em 13 de 13 instâncias sobre viabilidade e comprimento mínimo.
-2. **Amostras pequenas:** 40 instâncias no E7 e no E10, 25 no E9, 8 por tamanho
-   no E8.
+2. **Amostras pequenas:** 40 instâncias no E7, 37 no E10, 25 no E9, 8 por
+   tamanho no E8.
 3. **A "correção nova" do E10 foi escrita por nós**, que já sabíamos o modo de
    falha. Em um cenário real a descoberta seria mais cara, não mais barata,
    o que favorece o argumento, mas não foi medido.
 4. **Os parâmetros de escassez do E10 foram escolhidos para que os recursos
    restringissem.** É metodologicamente necessário para o teste ter poder, e
-   está declarado, mas significa que o 68% não é uma taxa esperada em operação.
+   está declarado, mas significa que o 65% não é uma taxa esperada em operação.
 5. **Um único agente**, custos de ação estimados, instâncias sintéticas.
