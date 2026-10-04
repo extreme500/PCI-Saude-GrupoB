@@ -233,7 +233,11 @@ planilha, nenhum dos quais conhece a Lei 11.350.
    plano é submeter os mesmos `.pddl` ao Fast Downward e comparar vereditos e
    custo ótimo.
 2. **Um único agente.** Dimensionamento de equipe fora do escopo.
-3. **Custos de ação estimados**, não medidos em campo.
+3. **Custos de ação estimados**, não medidos em campo. A parte de
+   *deslocamento* ganhou uma conferência: o caminho real a pé pelas ruas,
+   obtido do OSRM na microárea da demonstração, dá fator 1,26 sobre a
+   linha reta contra o 1,30 que o modelo assume, e 97 minutos contra os
+   100 estimados. Os custos dos *procedimentos* continuam sem medição.
 4. **Instâncias sintéticas** variam estrutura combinatória, não representam
    prevalência epidemiológica.
 5. **Amostras pequenas** (30 sementes em E2, 5 em E4, 12 em E5).

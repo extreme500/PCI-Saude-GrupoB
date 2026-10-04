@@ -6,6 +6,7 @@ venv/
 .idea/
 acsplan/logica/problema_gerado.pddl
 acsplan/dados/cache_osrm/
+acsplan/dados/cache_trajeto/
 roteiro.txt
 
 # saida gerada pelos comandos (mapa, demonstracao); so a raiz,

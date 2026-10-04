@@ -385,7 +385,8 @@ Gera dois arquivos HTML autocontidos, com os dados embutidos como JSON:
 - **mapa da rota**: a rota final sobre o mapa real de Porto Alegre, com as
   paradas numeradas na ordem de visita, coloridas por urgência, os desvios de
   reposição em tracejado e o roteiro parada a parada ao lado. As famílias
-  adiadas pela política aparecem apagadas.
+  adiadas pela política aparecem apagadas. **O traçado segue as ruas**, e não
+  linhas retas entre coordenadas.
 - **demonstração**: os mesmos dados em sete passos navegáveis, que é o
   caminho que o sistema percorre: microárea inteira, seleção do turno, rota
   candidata, veredito do protocolo, rota seguinte quando a primeira é
@@ -435,3 +436,63 @@ controle: com o roteirizador **ciente** da precedência. Se nele a primeira
 rota quase nunca for reprovada, o resultado diz que a arquitetura
 "roteiriza e depois verifica" é robusta, e que o laço é seguro para o dia em
 que a camada 2 for trocada, não componente de uso diário.
+
+
+---
+
+## O traçado pelas ruas, e o que ele não é
+
+O caminho desenhado no mapa vem do serviço de rotas do OSRM, no **perfil a
+pé** (`routing.openstreetmap.de/routed-foot`, a mesma instância que o site do
+OpenStreetMap usa para rotas de pedestre). A instância do projeto OSRM
+(`router.project-osrm.org`) aceita o caminho `/foot/` mas responde com o
+perfil de carro, a 34 km/h e respeitando mão única, o que para um ACS a pé
+está errado.
+
+**Isso muda o desenho, nunca o número.** Os custos que o planejamento e o
+executor procedural usam continuam vindo de `geo/distancias.py`, onde a
+decisão de medição está declarada. Misturar as duas coisas tornaria a
+comparação entre os dois grupos dependente de uma chamada de rede, que é
+justamente o que o método experimental evita.
+
+As respostas vão para cache em disco (`acsplan/dados/cache_trajeto/`), e sem
+rede o mapa volta a ligar as coordenadas em linha reta, dizendo-o na legenda.
+
+### De quebra, uma validação do modelo de distância
+
+Na microárea da demonstração, o caminho real a pé mede **7,23 km** contra
+**5,75 km** de soma em linha reta, ou seja, um fator de **1,26**. O modelo do
+projeto usa **1,30** fixo. E o tempo: o OSRM estima **97 minutos**, o nosso
+modelo diz **100**.
+
+E numa segunda conferência, com `--distancias osrm` ligado numa microárea de
+seis pacientes: o OSRM a pé dá **96 minutos** e o modelo haversine dá **98**,
+com a mesma ordem de paradas.
+
+A aproximação que estava declarada como ameaça à validade ("custos de ação
+estimados, não medidos") se mostrou boa dentro de 3% para a parte de
+deslocamento, nas duas microáreas conferidas.
+
+### Um aviso sobre o servidor, que também era um bug
+
+`--distancias osrm` apontava para `router.project-osrm.org`, que responde ao
+caminho `/foot/` **com o perfil de carro**. Ligar a opção alimentaria o modelo
+com tempos de automóvel para um agente que anda a pé: na mesma microárea,
+dava 18 minutos em vez de 96. O servidor passou a ser a instância de
+pedestres, e o nome do servidor entrou na chave do cache, porque sem isso uma
+resposta antiga continuava valendo depois da troca.
+
+### Por que `--distancias osrm` parecia não funcionar
+
+Ficou registrado por um tempo que o OSRM estaria inacessível desta máquina.
+Não estava. Os servidores públicos apresentam uma cadeia de certificados
+**incompleta**: falta um intermediário, e o que sobra inclui uma assinatura
+cruzada vencida. O Windows e o `curl` resolvem isso sozinhos, porque buscam o
+intermediário que falta pelo campo AIA do certificado; o OpenSSL, que é o que
+o Python usa, não faz essa busca e recusa a cadeia.
+
+O módulo `geo/_rede.py` passa a tentar primeiro o caminho normal (`urllib`) e,
+se o OpenSSL recusar a cadeia, repetir pelo `curl`. **A verificação não é
+desligada em momento algum**: quem valida continua sendo uma autoridade
+certificadora, muda só quem monta o caminho até ela. Com isso,
+`--distancias osrm` passou a funcionar de verdade.

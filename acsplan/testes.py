@@ -381,6 +381,28 @@ def _():
     assert "openstreetmap" in html.lower()
 
 
+@teste("o tracado pelas ruas sai coerente, se o servico responder")
+def _():
+    from .geo import trajeto
+    dados = gerador.gerar(5, 1)
+    pontos = [dados["ubs"]] + dados["pacientes"][:3]
+    traco = trajeto.tracar(pontos)
+    if traco is None:
+        return                      # offline: nada a verificar, e e legitimo
+
+    assert len(traco["linha"]) > len(pontos), "a geometria nao seguiu ruas"
+    assert len(traco["pernas"]) == len(pontos) - 1, traco["pernas"]
+    assert all(isinstance(p, list) and len(p) == 2 for p in traco["linha"])
+    # Porto Alegre: a linha inteira tem de cair dentro de uma caixa plausivel
+    for lat, lon in traco["linha"]:
+        assert -30.3 < lat < -29.9, lat
+        assert -51.5 < lon < -51.0, lon
+    # o caminho pelas ruas nunca e mais curto que a linha reta
+    reta = sum(distancias.haversine_km(pontos[i], pontos[i + 1]) * 1000
+               for i in range(len(pontos) - 1))
+    assert traco["metros"] >= reta * 0.95, (traco["metros"], reta)
+
+
 # ---------------------------------------------------------------------------
 
 def main() -> int:

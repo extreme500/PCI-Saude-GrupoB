@@ -58,6 +58,18 @@ def _pacientes_para_json(dados: dict, intervalo: int) -> list[dict]:
     return saida
 
 
+def _pontos_da_rota(dados: dict, rota: list[str]) -> list[dict]:
+    por_id = {p["id"]: p
+              for p in (dados.get("_todos_pacientes") or dados["pacientes"])}
+    por_id[dados["ubs"]["id"]] = dados["ubs"]
+    return [por_id[i] for i in rota if i in por_id]
+
+
+def _arredondar(linha) -> list[list[float]]:
+    """5 casas decimais e cerca de 1 metro: o suficiente para desenhar."""
+    return [[round(p[0], 5), round(p[1], 5)] for p in (linha or [])]
+
+
 def montar_contexto(estado: dict) -> dict:
     """Reune num unico dicionario tudo o que as duas paginas precisam."""
     from ..logica import executor_guloso
@@ -90,6 +102,20 @@ def montar_contexto(estado: dict) -> dict:
                 "minuto": parada["minutos_chegada"],
             })
 
+    # Caminho pelas ruas, so para desenho. Os custos continuam vindo da
+    # camada de distancias; ver o cabecalho de geo/trajeto.py.
+    from ..geo import trajeto as tracador
+    traco = tracador.tracar(_pontos_da_rota(dados, roteamento["rota"]))
+    desvios = {}
+    for parada in paradas:
+        if parada["desvio"] and parada["id"]:
+            alvo = next((p for p in dados["pacientes"]
+                         if p["id"] == parada["id"]), None)
+            if alvo is not None:
+                linha = tracador.tracar_ida_e_volta(alvo, ubs)
+                if linha:
+                    desvios[parada["id"]] = _arredondar(linha)
+
     selecao = dados.get("_selecao", {})
     tentativas = []
     if laco is not None:
@@ -106,8 +132,10 @@ def montar_contexto(estado: dict) -> dict:
                 culpados = [c for c in (causa.get("baixo"), causa.get("alto")) if c]
             invertida = (i > 1 and realimentacao.mesma_volta_invertida(
                 t.rota, laco.tentativas[i - 2].rota))
+            traco_t = tracador.tracar(_pontos_da_rota(dados, t.rota))
             tentativas.append({
                 "numero": i, "rota": t.rota, "custo_rota": t.custo_rota,
+                "linha": _arredondar(traco_t["linha"]) if traco_t else [],
                 "sucesso": t.sucesso, "motivo": t.motivo,
                 "explicacao": explicacao, "invertida": bool(invertida),
                 "culpados": culpados,
@@ -122,6 +150,13 @@ def montar_contexto(estado: dict) -> dict:
         "coord": coord,
         "rota": roteamento["rota"],
         "custo_rota": roteamento["custo_rota"],
+        "trajeto": {
+            "linha": _arredondar(traco["linha"]) if traco else [],
+            "metros": round(traco["metros"]) if traco else 0,
+            "minutos": round(traco["segundos"] / 60) if traco else 0,
+            "provedor": "ruas" if traco else "reta",
+        },
+        "desvios": desvios,
         "metodo": roteamento["metodo"],
         "provedor": roteamento["provedor_distancia"],
         "precedencias": {k: sorted(v) for k, v in
@@ -274,7 +309,9 @@ D.paradas.forEach(p => ordemPorId[p.id] = p);
 
 const pontos = [];
 D.rota.forEach(id => { if (D.coord[id]) pontos.push(D.coord[id]); });
-L.polyline(pontos, {color:"#5C4F41", weight:3, opacity:.75}).addTo(mapa);
+// o traçado segue as ruas quando o serviço de rotas respondeu; senão, reta
+const linhaRota = (D.trajeto && D.trajeto.linha.length) ? D.trajeto.linha : pontos;
+L.polyline(linhaRota, {color:"#5C4F41", weight:4, opacity:.8}).addTo(mapa);
 
 L.marker([D.ubs.lat, D.ubs.lon], {icon: pino("U", "#33291F", 30)})
  .addTo(mapa).bindPopup(`<b>${D.ubs.nome}</b><br>ponto de partida, de retorno e de reposicao`);
@@ -303,16 +340,23 @@ D.pacientes.forEach(p => {
 // desvios de reposicao, tracejados ate a unidade
 D.paradas.filter(p => p.desvio).forEach(p => {
   if (!D.coord[p.id]) return;
-  L.polyline([D.coord[p.id], [D.ubs.lat, D.ubs.lon]],
-             {color:"#B35C38", weight:2, dashArray:"6 6", opacity:.8}).addTo(mapa);
+  const caminho = (D.desvios && D.desvios[p.id] && D.desvios[p.id].length)
+    ? D.desvios[p.id] : [D.coord[p.id], [D.ubs.lat, D.ubs.lon]];
+  L.polyline(caminho, {color:"#B35C38", weight:3, dashArray:"7 6",
+                       opacity:.85}).addTo(mapa);
 });
 
 mapa.fitBounds(L.polyline(pontos.concat([[D.ubs.lat, D.ubs.lon]])).getBounds(),
                {padding:[40,40]});
 
+const traj = D.trajeto || {provedor:"reta"};
 document.getElementById("sub").textContent =
   `${D.paradas.length} visitas  ·  ${D.custo_rota} min de caminhada  ·  ` +
-  `roteirizador: ${D.metodo}  ·  distancias: ${D.provedor}  ·  dados clinicos ficticios, coordenadas reais`;
+  `roteirizador: ${D.metodo}  ·  distancias: ${D.provedor}` +
+  (traj.provedor === "ruas"
+     ? `  ·  tracado pelas ruas: ${(traj.metros/1000).toFixed(1)} km, ${traj.minutos} min a pe`
+     : "") +
+  `  ·  dados clinicos ficticios, coordenadas reais`;
 
 document.getElementById("numeros").innerHTML = `
   <div><b>${D.plano.custo}</b><span>min de turno</span></div>
@@ -333,7 +377,13 @@ document.getElementById("legenda").innerHTML =
   `Cor do pino: <b style="color:#B35C38">urgencia alta</b>, ` +
   `<b style="color:#BF9000">media</b>, <b style="color:#4A6B5B">baixa</b>. ` +
   `Linha cheia: a rota. Linha tracejada: desvio de reposicao decidido pelo planejamento. ` +
-  `Pinos apagados e sem numero: familias adiadas para o proximo turno.`;
+  `Pinos apagados e sem numero: familias adiadas para o proximo turno.` +
+  (traj.provedor === "ruas"
+    ? ` O tracado segue o caminho de pedestre pelas ruas (OSRM, perfil a pe). Os
+        minutos do plano continuam vindo do modelo de distancias do projeto, e nao
+        deste tracado.`.replace(/\s+/g, " ")
+    : ` O servico de rotas nao respondeu, entao o tracado liga as coordenadas em
+        linha reta.`.replace(/\s+/g, " "));
 </script>
 </body>
 </html>
@@ -422,7 +472,8 @@ def montar_passos(ctx: dict) -> list[dict]:
                    "custa exatamente o mesmo." if t.get("invertida") else "")),
             "nota": (_nota_rota_nova(ctx, t) if t["numero"] > 1 else
                      "A rota entra congelada no passo seguinte."),
-            "mapa": {"modo": "rota", "rota": t["rota"], "estado": "neutro"},
+            "mapa": {"modo": "rota", "rota": t["rota"], "estado": "neutro",
+                     "linha": t.get("linha") or []},
             "metricas": [{"valor": t["custo_rota"], "rotulo": "min de caminhada"}],
         })
         if t["sucesso"]:
@@ -440,7 +491,8 @@ def montar_passos(ctx: dict) -> list[dict]:
                        if t["numero"] > 1 else "")),
                 "nota": (f"{t['expandidos']} estados expandidos em "
                          f"{t['segundos']}s, com garantia de otimalidade."),
-                "mapa": {"modo": "rota", "rota": t["rota"], "estado": "aprovada"},
+                "mapa": {"modo": "rota", "rota": t["rota"],
+                         "estado": "aprovada", "linha": t.get("linha") or []},
                 "metricas": [{"valor": t["acoes"], "rotulo": "acoes"},
                              {"valor": t["custo_plano"], "rotulo": "min de turno"}],
             })
@@ -457,7 +509,7 @@ def montar_passos(ctx: dict) -> list[dict]:
                          "inviabilidade e sensivel a ordem, isto e, vale para esta "
                          "rota e nao para o turno. Por isso vale voltar ao passo 2."),
                 "mapa": {"modo": "rota", "rota": t["rota"],
-                         "estado": "reprovada",
+                         "estado": "reprovada", "linha": t.get("linha") or [],
                          "destaques": t.get("culpados") or []},
                 "metricas": [{"valor": t["expandidos"], "rotulo": "estados exauridos"},
                              {"valor": f"{t['segundos']}s", "rotulo": "para provar"}],
@@ -476,7 +528,8 @@ def montar_passos(ctx: dict) -> list[dict]:
                          "Neste turno nenhum desvio foi necessario.")),
             "nota": ("Trocar o roteirizador nao muda uma linha do dominio. "
                      "Mudar a lei nao muda uma linha do codigo de busca."),
-            "mapa": {"modo": "final", "rota": ctx["rota"], "estado": "aprovada"},
+            "mapa": {"modo": "final", "rota": ctx["rota"], "estado": "aprovada",
+                     "linha": ctx["trajeto"]["linha"]},
             "metricas": [{"valor": len(ctx["paradas"]), "rotulo": "visitas"},
                          {"valor": ctx["plano"]["custo"], "rotulo": "min de turno"},
                          {"valor": ctx["plano"]["acoes"], "rotulo": "acoes"}],
@@ -645,7 +698,9 @@ function desenhar(passo) {
   if (m.rota) {
     let i = 0;
     m.rota.forEach(function(id){ if (id !== D.ubs.id) { ordemNaRota[id] = ++i; } });
-    const pontos = m.rota.map(function(id){ return D.coord[id]; }).filter(Boolean);
+    const retas = m.rota.map(function(id){ return D.coord[id]; }).filter(Boolean);
+    // segue as ruas quando o servico de rotas respondeu; senao, liga em reta
+    const pontos = (m.linha && m.linha.length) ? m.linha : retas;
     L.polyline(pontos, {color: CORES[m.estado] || CORES.neutro,
                         weight: m.estado === "neutro" ? 3 : 4,
                         opacity: m.estado === "reprovada" ? 0.55 : 0.85,
@@ -681,8 +736,10 @@ function desenhar(passo) {
 
   if (m.modo === "final") {
     D.paradas.filter(function(p){ return p.desvio && D.coord[p.id]; }).forEach(function(p){
-      L.polyline([D.coord[p.id], [D.ubs.lat, D.ubs.lon]],
-        {color:"#B35C38", weight:2, dashArray:"6 6", opacity:0.85}).addTo(camada);
+      var caminho = (D.desvios && D.desvios[p.id] && D.desvios[p.id].length)
+        ? D.desvios[p.id] : [D.coord[p.id], [D.ubs.lat, D.ubs.lon]];
+      L.polyline(caminho, {color:"#B35C38", weight:3, dashArray:"7 6",
+                           opacity:0.85}).addTo(camada);
     });
   }
 }
@@ -719,6 +776,8 @@ document.addEventListener("keydown", function(e){
 document.getElementById("ctx").textContent =
   D.pacientes.length + " familias  ·  roteirizador: " + D.metodo +
   "  ·  distancias: " + D.provedor +
+  ((D.trajeto && D.trajeto.provedor === "ruas")
+     ? "  ·  tracado pelas ruas (OSRM, perfil a pe)" : "") +
   "  ·  dados clinicos ficticios, coordenadas reais de Porto Alegre";
 mostrar(0);
 </script>

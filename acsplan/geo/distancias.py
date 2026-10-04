@@ -30,6 +30,8 @@ import os
 import urllib.error
 import urllib.request
 
+from . import _rede
+
 # ---------------------------------------------------------------------------
 #  Parâmetros do provedor haversine
 # ---------------------------------------------------------------------------
@@ -45,7 +47,13 @@ FATOR_MALHA_URBANA = 1.3
 #  Parâmetros do provedor OSRM
 # ---------------------------------------------------------------------------
 
-OSRM_SERVIDOR = os.environ.get("ACSPLAN_OSRM", "https://router.project-osrm.org")
+# A instancia do projeto OSRM (router.project-osrm.org) ACEITA o caminho
+# /foot/ mas responde com o perfil de carro: 34 km/h e respeito a mao unica.
+# Usar aquele servidor aqui alimentaria o modelo com tempos de automovel para
+# um agente que vai a pe. Esta e a instancia que o proprio site do
+# OpenStreetMap usa para rotas de pedestre, e devolve 4,4 km/h.
+OSRM_SERVIDOR = os.environ.get("ACSPLAN_OSRM",
+                               "https://routing.openstreetmap.de/routed-foot")
 OSRM_PERFIL = "foot"
 OSRM_TIMEOUT_S = 25
 
@@ -85,7 +93,12 @@ def matriz_haversine(pontos: list[dict]) -> dict[tuple[str, str], int]:
 # ---------------------------------------------------------------------------
 
 def _chave_cache(pontos: list[dict]) -> str:
-    assinatura = ";".join(f"{p['lon']:.6f},{p['lat']:.6f}" for p in pontos)
+    # O SERVIDOR entra na chave de proposito: dois servidores respondem ao
+    # mesmo caminho /foot/ com perfis diferentes (um deles com velocidade de
+    # carro), e sem isso uma resposta antiga continuaria valendo depois de
+    # trocar de servidor, que foi exatamente o que aconteceu aqui.
+    assinatura = OSRM_SERVIDOR + "|" + ";".join(
+        f"{p['lon']:.6f},{p['lat']:.6f}" for p in pontos)
     digest = hashlib.sha256(assinatura.encode()).hexdigest()[:16]
     return f"{OSRM_PERFIL}-{len(pontos)}-{digest}.json"
 
@@ -118,14 +131,8 @@ def consultar_osrm(pontos: list[dict]) -> list[list[float]] | None:
     coordenadas = ";".join(f"{p['lon']:.6f},{p['lat']:.6f}" for p in pontos)
     url = (f"{OSRM_SERVIDOR}/table/v1/{OSRM_PERFIL}/{coordenadas}"
            f"?annotations=duration")
-    try:
-        requisicao = urllib.request.Request(url, headers={"User-Agent": "acsplan/1.0"})
-        with urllib.request.urlopen(requisicao, timeout=OSRM_TIMEOUT_S) as resposta:
-            corpo = json.loads(resposta.read().decode("utf-8"))
-    except (urllib.error.URLError, TimeoutError, OSError, ValueError):
-        return None
-
-    if corpo.get("code") != "Ok" or "durations" not in corpo:
+    corpo = _rede.obter_json(url, timeout=OSRM_TIMEOUT_S)
+    if corpo is None or corpo.get("code") != "Ok" or "durations" not in corpo:
         return None
 
     _gravar_cache(pontos, corpo["durations"])
