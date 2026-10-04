@@ -42,7 +42,7 @@ SAIDA = tempfile.mkdtemp(prefix="acsplan-exp-")
 
 
 def preparar(dados: dict, rotulo: str, *, dominio: str = "legal",
-             metodo: str = "nn2opt", precedencia: bool = True):
+             metodo: str = roteirizador.METODO_PADRAO, precedencia: bool = True):
     roteamento = roteirizador.roteirizar(dados, metodo=metodo,
                                          usar_precedencia=precedencia)
     caminho = os.path.join(SAIDA, f"problema_{rotulo}.pddl")
@@ -369,12 +369,14 @@ from .avancados import (experimento_e7, experimento_e8,  # noqa: E402
                         experimento_e9, experimento_e10,
                         experimento_e11)
 from .verificacao_cruzada import experimento_e12  # noqa: E402
+from .laco import experimento_e13  # noqa: E402
 
 EXPERIMENTOS = {
     "e1": experimento_e1, "e2": experimento_e2, "e3": experimento_e3,
     "e4": experimento_e4, "e5": experimento_e5, "e6": experimento_e6,
     "e7": experimento_e7, "e8": experimento_e8, "e9": experimento_e9,
     "e10": experimento_e10, "e11": experimento_e11, "e12": experimento_e12,
+    "e13": experimento_e13,
 }
 
 

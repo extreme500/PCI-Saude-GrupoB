@@ -304,7 +304,9 @@ def comando_mapa(args) -> None:
         print(f"  Demonstracao       : {caminho_demo}  ({passos} passos)")
     print()
     print("  Os dois arquivos sao HTML autocontido. Abrir no navegador exige")
-    print("  rede, porque os ladrilhos do mapa vem do OpenStreetMap.")
+    print("  rede, porque o fundo cartografico vem do Esri World Street Map,")
+    print("  com queda para o OpenStreetMap. Sem rede, a rota e as paradas")
+    print("  continuam corretas sobre fundo neutro.")
 
 
 def construir_parser() -> argparse.ArgumentParser:
@@ -320,7 +322,8 @@ def construir_parser() -> argparse.ArgumentParser:
                         metavar=("N", "SEMENTE"),
                         help="usa uma microarea sorteada em vez do arquivo")
         sp.add_argument("--dominio", choices=["legal", "estendido"], default="legal")
-        sp.add_argument("--metodo", choices=["nn2opt", "ag"], default="nn2opt")
+        sp.add_argument("--metodo", choices=["nn2opt", "ag"],
+                        default=roteirizador.METODO_PADRAO)
         sp.add_argument("--distancias", choices=["haversine", "osrm"],
                         default="haversine")
         sp.add_argument("--estrategia", choices=["astar-hmax", "astar-hadd", "gbfs"],
@@ -374,7 +377,7 @@ def construir_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("experimentos", help="executa os experimentos")
     sp.add_argument("--experimento",
-                    choices=["e1","e2","e3","e4","e5","e6","e7","e8","e9","e10","e11","e12","todos"],
+                    choices=["e1","e2","e3","e4","e5","e6","e7","e8","e9","e10","e11","e12","e13","todos"],
                     default="todos")
     sp.set_defaults(func=comando_experimentos)
 

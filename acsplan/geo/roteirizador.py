@@ -30,6 +30,20 @@ from ..dados import modelos
 from . import genetico
 from .distancias import construir_matriz, custo_da_rota
 
+# Metodo de roteamento do projeto. A escolha esta num lugar so, de proposito,
+# porque ela e consequencia de experimento e nao de gosto.
+#
+# O E8 mostrou que a vantagem do algoritmo genetico sobre vizinho mais
+# proximo + 2-opt vem INTEIRA de lidar com precedencia: sem precedencia o
+# ganho e de +1,4%, 0,0% e -0,3%. Como a precedencia por urgencia esta ativa
+# por padrao neste projeto, o AG e o metodo certo: na configuracao de fato
+# usada ele entrega rotas de 3% a 13% mais baratas, por menos de um segundo,
+# o que e irrelevante para um turno planejado uma vez por dia.
+#
+# Ha um segundo motivo, operacional: a realimentacao do passo 3 precisa de
+# rotas ALTERNATIVAS, e o AG as produz naturalmente, mudando a semente.
+METODO_PADRAO = "ag"
+
 
 def precedencias(pacientes: list[dict], ativar: bool = True,
                  intervalo_padrao: int = modelos.INTERVALO_MAXIMO_PADRAO_DIAS
@@ -144,7 +158,7 @@ def dois_opt(sequencia: list[str], origem: str,
     return melhor
 
 
-def roteirizar(dados: dict, *, metodo: str = "nn2opt",
+def roteirizar(dados: dict, *, metodo: str = METODO_PADRAO,
                provedor_distancia: str = "haversine",
                usar_precedencia: bool = True,
                semente: int = 0,

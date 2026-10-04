@@ -111,7 +111,7 @@ def diagnosticar(dados: dict) -> tuple[bool, str]:
 def planejar_com_realimentacao(
         dados: dict, caminho_dominio: str, *,
         dominio: str = "legal",
-        metodo: str = "nn2opt",
+        metodo: str = roteirizador.METODO_PADRAO,
         provedor_distancia: str = "haversine",
         usar_precedencia: bool = True,
         roteador_ciente: bool = True,

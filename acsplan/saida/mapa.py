@@ -160,6 +160,7 @@ MAPA_HTML = """<!doctype html>
   .sub { font-size:15px; color:var(--bege); }
   .corpo { display:grid; grid-template-columns:1fr 380px; gap:16px;
            padding:0 24px 24px; align-items:start; }
+  .corpo > div:first-child { min-height:0; }
   #mapa { height:72vh; min-height:460px; border-radius:12px;
           border:1px solid var(--borda); }
   .painel { background:var(--cartao); border:1px solid var(--borda);
@@ -186,6 +187,10 @@ MAPA_HTML = """<!doctype html>
   .pino { border-radius:50%; border:2px solid #fff; color:#fff;
           font-weight:bold; font-size:12px; text-align:center;
           box-shadow:0 1px 4px rgba(0,0,0,.4); }
+  #semfundo { display:none; position:absolute; z-index:500; left:50%;
+              top:14px; transform:translateX(-50%); background:var(--cartao);
+              border:1px solid var(--borda); border-radius:8px;
+              padding:7px 14px; font-size:13px; color:var(--bege); }
   @media (max-width:900px){ .corpo{grid-template-columns:1fr;} #mapa{height:52vh;} }
 </style>
 </head>
@@ -195,7 +200,10 @@ MAPA_HTML = """<!doctype html>
   <div class="sub" id="sub"></div>
 </header>
 <div class="corpo">
-  <div id="mapa"></div>
+  <div style="position:relative">
+    <div id="semfundo">Sem o fundo cartografico: a rota e as paradas continuam corretas.</div>
+    <div id="mapa"></div>
+  </div>
   <div class="painel">
     <div class="num" id="numeros"></div>
     <h2>Roteiro parada a parada</h2>
@@ -207,10 +215,36 @@ MAPA_HTML = """<!doctype html>
 <script>
 const D = JSON.parse(document.getElementById("dados").textContent);
 const mapa = L.map("mapa", {scrollWheelZoom:true});
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution: '&copy; colaboradores do <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(mapa);
+// Ladrilhos. Os servidores voluntarios do OpenStreetMap devolvem HTTP 403
+// para paginas abertas de file://, porque a politica de uso deles exige que
+// a requisicao venha de um site identificado. O provedor principal passa a
+// ser o Esri World Street Map, que nao exige chave; se ele falhar, cai para
+// o OSM; se os dois falharem, a pagina fica com fundo neutro e a rota
+// continua perfeitamente legivel.
+var PROVEDORES = [
+  {url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+   att: 'Ladrilhos &copy; Esri. Fontes: Esri, HERE, Garmin, OpenStreetMap e colaboradores'},
+  {url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+   att: '&copy; colaboradores do <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}
+];
+var iProvedor = 0, falhasLadrilho = 0, base = null;
+function montarBase() {
+  if (base) { mapa.removeLayer(base); base = null; }
+  var p = PROVEDORES[iProvedor];
+  if (!p) {
+    var aviso = document.getElementById("semfundo");
+    if (aviso) { aviso.style.display = "block"; }
+    return;
+  }
+  falhasLadrilho = 0;
+  base = L.tileLayer(p.url, {maxZoom: 19, attribution: p.att});
+  base.on("tileerror", function () {
+    falhasLadrilho += 1;
+    if (falhasLadrilho === 3) { iProvedor += 1; montarBase(); }
+  });
+  base.addTo(mapa);
+}
+montarBase();
 
 function pino(texto, cor, tamanho) {
   const t = tamanho || 26;
@@ -451,7 +485,9 @@ DEMO_HTML = """<!doctype html>
   header .ctx { font-size:13px; color:var(--bege); }
   main { flex:1; display:grid; grid-template-columns:1fr 440px; gap:18px;
          padding:0 30px 10px; min-height:0; }
-  #mapa { border-radius:14px; border:1px solid var(--borda); min-height:0; }
+  main > div:first-child { position:relative; min-height:0; }
+  #mapa { border-radius:14px; border:1px solid var(--borda);
+          height:100%; min-height:0; }
   .lado { display:flex; flex-direction:column; min-height:0; }
   .cartao { background:var(--cartao); border:1px solid var(--borda);
             border-radius:14px; padding:20px 22px; flex:1; overflow:auto; }
@@ -483,6 +519,10 @@ DEMO_HTML = """<!doctype html>
   .contador { font-size:13px; color:var(--bege); }
   .pino { border-radius:50%; border:2px solid #fff; color:#fff; font-weight:bold;
           font-size:12px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.4); }
+  #semfundo { display:none; position:absolute; z-index:500; left:50%;
+              top:14px; transform:translateX(-50%); background:var(--cartao);
+              border:1px solid var(--borda); border-radius:8px;
+              padding:7px 14px; font-size:13px; color:var(--bege); }
   @media (max-width:980px){ main{grid-template-columns:1fr; grid-template-rows:46% 1fr;} }
 </style>
 </head>
@@ -492,7 +532,10 @@ DEMO_HTML = """<!doctype html>
   <span class="ctx" id="ctx"></span>
 </header>
 <main>
-  <div id="mapa"></div>
+  <div style="position:relative">
+    <div id="semfundo">Sem o fundo cartografico: a rota e as paradas continuam corretas.</div>
+    <div id="mapa"></div>
+  </div>
   <div class="lado">
     <div class="cartao">
       <div class="etapa" id="etapa"></div>
@@ -517,10 +560,36 @@ const P = D.passos;
 let atual = 0;
 
 const mapa = L.map("mapa", {scrollWheelZoom:false, zoomControl:true});
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution: '&copy; colaboradores do <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(mapa);
+// Ladrilhos. Os servidores voluntarios do OpenStreetMap devolvem HTTP 403
+// para paginas abertas de file://, porque a politica de uso deles exige que
+// a requisicao venha de um site identificado. O provedor principal passa a
+// ser o Esri World Street Map, que nao exige chave; se ele falhar, cai para
+// o OSM; se os dois falharem, a pagina fica com fundo neutro e a rota
+// continua perfeitamente legivel.
+var PROVEDORES = [
+  {url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+   att: 'Ladrilhos &copy; Esri. Fontes: Esri, HERE, Garmin, OpenStreetMap e colaboradores'},
+  {url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+   att: '&copy; colaboradores do <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}
+];
+var iProvedor = 0, falhasLadrilho = 0, base = null;
+function montarBase() {
+  if (base) { mapa.removeLayer(base); base = null; }
+  var p = PROVEDORES[iProvedor];
+  if (!p) {
+    var aviso = document.getElementById("semfundo");
+    if (aviso) { aviso.style.display = "block"; }
+    return;
+  }
+  falhasLadrilho = 0;
+  base = L.tileLayer(p.url, {maxZoom: 19, attribution: p.att});
+  base.on("tileerror", function () {
+    falhasLadrilho += 1;
+    if (falhasLadrilho === 3) { iProvedor += 1; montarBase(); }
+  });
+  base.addTo(mapa);
+}
+montarBase();
 const camada = L.layerGroup().addTo(mapa);
 
 function pino(texto, cor, tamanho, opacidade) {

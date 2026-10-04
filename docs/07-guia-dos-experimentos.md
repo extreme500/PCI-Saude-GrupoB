@@ -391,8 +391,47 @@ Gera dois arquivos HTML autocontidos, com os dados embutidos como JSON:
   candidata, veredito do protocolo, rota seguinte quando a primeira é
   reprovada, veredito de novo, e o roteiro final.
 
-Os dois exigem rede para **abrir**, não para gerar, porque os ladrilhos do
-mapa vêm do OpenStreetMap. As cópias usadas na apresentação estão em
+### Fundo cartográfico
+
+Os dois exigem rede para **abrir**, não para gerar. O provedor principal é o
+**Esri World Street Map**, que não exige chave de API.
+
+A primeira versão usava os servidores do OpenStreetMap e tomava **HTTP 403**
+ao ser aberta por `file://`: a política de uso dos servidores voluntários do
+OSM recusa requisições que não venham de um site identificado, e uma página
+aberta do disco não manda `Referer`. O CARTO, que seria a alternativa óbvia,
+passou a exigir chave de API.
+
+A página tenta Esri, cai para o OpenStreetMap se o Esri falhar três
+ladrilhos seguidos e, se os dois falharem, mostra um aviso discreto e
+desenha a rota sobre fundo neutro. Sem rede, portanto, as paradas e a rota
+continuam corretas; só o mapa de ruas some.
+
+As cópias usadas na apresentação estão em
 [`apresentacao/3/`](../apresentacao/3/).
 
 As coordenadas são reais. Os dados clínicos são fictícios.
+
+
+---
+
+## E13: a realimentação funciona?
+
+```bash
+python -m acsplan experimentos --experimento e13
+```
+
+Mede três coisas sobre o laço 3 → 2: se ele converge para uma rota válida,
+em quantas tentativas, e quanto custa a conformidade em minutos de caminhada
+entre a rota reprovada e a aceita.
+
+A falha da primeira rota é **forçada** do jeito realista, com
+`roteador_ciente=False`: a camada geométrica passa a ignorar a precedência
+por urgência, como faria um roteirizador de prateleira que só minimiza
+distância, e a camada normativa continua cobrando a regra.
+
+O experimento roda a mesma varredura duas vezes, e a segunda é o grupo de
+controle: com o roteirizador **ciente** da precedência. Se nele a primeira
+rota quase nunca for reprovada, o resultado diz que a arquitetura
+"roteiriza e depois verifica" é robusta, e que o laço é seguro para o dia em
+que a camada 2 for trocada, não componente de uso diário.
