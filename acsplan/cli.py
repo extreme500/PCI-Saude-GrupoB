@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import textwrap
 
 from .dados import carregador, gerador, modelos
 from .geo import roteirizador
@@ -186,11 +187,17 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
                 print("    nenhuma reordenacao das paradas resolveria, "
                       "entao nao se tenta outra rota.")
             else:
+                base = dict(roteamento)
                 for i, t_ in enumerate(laco.tentativas, 1):
                     veredito = (f"plano de {t_.acoes} acoes, custo {t_.custo_plano}"
-                                if t_.sucesso else f"reprovada ({t_.motivo[:38]})")
+                                if t_.sucesso else "REPROVADA")
                     print(f"    rota {i}: {t_.custo_rota:>4} min de "
                           f"caminhada  ->  {veredito}")
+                    if not t_.sucesso:
+                        base["rota"] = t_.rota
+                        causa = realimentacao.explicar_reprovacao(dados, base)
+                        for linha in textwrap.wrap(causa["texto"], 62):
+                            print(f"            {linha}")
                 if not laco.sucesso:
                     print(f"    {laco.diagnostico}")
 

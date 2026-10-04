@@ -108,6 +108,64 @@ def diagnosticar(dados: dict) -> tuple[bool, str]:
     return False, ""
 
 
+def explicar_reprovacao(dados: dict, roteamento: dict) -> dict:
+    """Traduz "espaco de estados exaurido" na causa concreta, legivel.
+
+    O planejador prova que nao existe plano, mas o motivo que ele devolve e
+    o da BUSCA ("exauri o espaco"), nao o do PROBLEMA. Para quem le, isso
+    nao explica nada. Esta funcao reconstitui a causa a partir dos dados e
+    da ordem das paradas.
+
+    A causa que interessa aqui e a precedencia por urgencia. Com a rota
+    congelada, se um paciente de urgencia baixa aparece antes de um de
+    urgencia alta, a acao `iniciar-visita-adiavel` nunca fica aplicavel:
+    sua pre-condicao exige o contador (altos-pendentes n0), e o contador so
+    baixa quando a visita de urgencia alta comeca. Como o agente nao pode
+    pular nem reordenar, nao ha plano, e A*/h_max demonstra isso exaurindo
+    o espaco.
+    """
+    precede = roteamento.get("precedencias") or {}
+    id_ubs = dados["ubs"]["id"]
+    rota = [p for p in roteamento["rota"] if p != id_ubs]
+    posicao = {p: i + 1 for i, p in enumerate(rota)}
+
+    vistos: set[str] = set()
+    for parada in rota:
+        pendentes = [a for a in precede.get(parada, ()) if a not in vistos]
+        if pendentes:
+            alto = min(pendentes, key=lambda a: posicao.get(a, 999))
+            return {
+                "tipo": "precedencia",
+                "baixo": parada, "alto": alto,
+                "pos_baixo": posicao[parada], "pos_alto": posicao.get(alto, 0),
+                "texto": (
+                    f"a {posicao[parada]}a parada e {parada}, de urgencia baixa, "
+                    f"e {alto}, de urgencia alta, so viria na "
+                    f"{posicao.get(alto, 0)}a. Com a rota congelada, a acao de "
+                    f"iniciar uma visita adiavel exige que nenhuma urgencia alta "
+                    f"esteja pendente, e esse contador so baixa quando {alto} e "
+                    f"atendido. Nenhuma sequencia de acoes satisfaz isso."),
+            }
+        vistos.add(parada)
+
+    return {"tipo": "recurso", "texto": (
+        "a ordem das paradas nao viola precedencia, entao a causa esta no "
+        "consumo de recursos ao longo do turno: nesta sequencia, as janelas "
+        "de supervisao ou o insumo nao bastam para cobrir todas as visitas.")}
+
+
+def mesma_volta_invertida(rota_a: list[str], rota_b: list[str]) -> bool:
+    """Diz se duas rotas sao o mesmo ciclo percorrido em sentidos opostos.
+
+    Importa para a explicacao: num ciclo simetrico as duas direcoes custam
+    exatamente o mesmo, e ainda assim uma pode cumprir a norma e a outra
+    nao. E a demonstracao mais limpa de que o problema nao e geometrico.
+    """
+    if len(rota_a) != len(rota_b):
+        return False
+    return rota_a == list(reversed(rota_b))
+
+
 def planejar_com_realimentacao(
         dados: dict, caminho_dominio: str, *,
         dominio: str = "legal",

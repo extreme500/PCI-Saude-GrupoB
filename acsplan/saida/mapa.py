@@ -93,10 +93,24 @@ def montar_contexto(estado: dict) -> dict:
     selecao = dados.get("_selecao", {})
     tentativas = []
     if laco is not None:
+        from ..logica import realimentacao
+        base = dict(roteamento)
         for i, t in enumerate(laco.tentativas, 1):
+            # a causa concreta da reprovacao, e nao "espaco exaurido", que e
+            # o motivo da BUSCA e nao explica nada a quem le.
+            explicacao, culpados = "", []
+            if not t.sucesso:
+                base["rota"] = t.rota
+                causa = realimentacao.explicar_reprovacao(dados, base)
+                explicacao = causa["texto"]
+                culpados = [c for c in (causa.get("baixo"), causa.get("alto")) if c]
+            invertida = (i > 1 and realimentacao.mesma_volta_invertida(
+                t.rota, laco.tentativas[i - 2].rota))
             tentativas.append({
                 "numero": i, "rota": t.rota, "custo_rota": t.custo_rota,
                 "sucesso": t.sucesso, "motivo": t.motivo,
+                "explicacao": explicacao, "invertida": bool(invertida),
+                "culpados": culpados,
                 "custo_plano": t.custo_plano, "acoes": t.acoes,
                 "expandidos": t.expandidos, "segundos": round(t.segundos, 3),
             })
@@ -344,10 +358,12 @@ def _nota_rota_nova(ctx: dict, tentativa: dict) -> str:
     anterior = ctx["tentativas"][tentativa["numero"] - 2]
     delta = tentativa["custo_rota"] - anterior["custo_rota"]
     if delta == 0:
-        return ("Mesma distancia da anterior, ordem diferente. Vale reparar: o "
-                "que separa uma rota valida de uma invalida aqui nao e o "
-                "comprimento, e a ordem em que as condicoes legais podem ser "
-                "satisfeitas.")
+        igual = ("E a mesma volta no sentido contrario: "
+                 if tentativa.get("invertida") else "Mesma distancia da anterior: ")
+        return (igual + "o custo de caminhada e identico ao da rota reprovada. "
+                "O que separa uma rota valida de uma invalida aqui nao e o "
+                "comprimento, e a ordem em que as condicoes legais conseguem "
+                "ser satisfeitas.")
     if delta > 0:
         return (f"Custa {delta} min a mais de caminhada que a rota reprovada. "
                 "O preco da conformidade aparece aqui, e e mensuravel.")
@@ -397,10 +413,13 @@ def montar_passos(ctx: dict) -> list[dict]:
             "etapa": f"PASSO 2{'' if t['numero'] == 1 else ' (de novo)'}",
             "titulo": (f"Rota candidata {t['numero']}"
                        if t["numero"] > 1 else "Roteamento: em que ordem visitar"),
-            "texto": (f"A camada geometrica devolve uma sequencia de paradas com "
-                      f"{t['custo_rota']} minutos de caminhada. Ela otimiza "
-                      "distancia, e so. Nao sabe o que a lei exige dentro de cada "
-                      "casa."),
+            "texto": (
+                f"A camada geometrica devolve uma sequencia de paradas com "
+                f"{t['custo_rota']} minutos de caminhada. Ela otimiza distancia, "
+                "e so: nao sabe o que a lei exige dentro de cada casa, nem que "
+                "urgencia alta tem de ser atendida antes de urgencia baixa."
+                + (" Esta rota e a anterior percorrida ao contrario, e por isso "
+                   "custa exatamente o mesmo." if t.get("invertida") else "")),
             "nota": (_nota_rota_nova(ctx, t) if t["numero"] > 1 else
                      "A rota entra congelada no passo seguinte."),
             "mapa": {"modo": "rota", "rota": t["rota"], "estado": "neutro"},
@@ -410,12 +429,15 @@ def montar_passos(ctx: dict) -> list[dict]:
             passos.append({
                 "etapa": "PASSO 3",
                 "titulo": "O protocolo cabe nesta rota",
-                "texto": (f"O planejamento encontrou uma sequencia de "
-                          f"{t['acoes']} acoes, de custo {t['custo_plano']} "
-                          "minutos, que cumpre as condicoes do art. 3o par. 4o em "
-                          "todas as paradas: curso tecnico, equipamento, "
-                          "supervisao ativa, insumo disponivel e encaminhamento "
-                          "quando o procedimento o exige."),
+                "texto": (
+                    f"O planejamento encontrou uma sequencia de {t['acoes']} "
+                    f"acoes, de custo {t['custo_plano']} minutos, que cumpre as "
+                    "condicoes do art. 3o par. 4o em todas as paradas: curso "
+                    "tecnico, equipamento, supervisao ativa, insumo disponivel e "
+                    "encaminhamento quando o procedimento o exige."
+                    + (" Nesta ordem a urgencia alta vem antes da baixa, que era "
+                       "exatamente o que faltava na rota anterior."
+                       if t["numero"] > 1 else "")),
                 "nota": (f"{t['expandidos']} estados expandidos em "
                          f"{t['segundos']}s, com garantia de otimalidade."),
                 "mapa": {"modo": "rota", "rota": t["rota"], "estado": "aprovada"},
@@ -426,14 +448,17 @@ def montar_passos(ctx: dict) -> list[dict]:
             passos.append({
                 "etapa": "PASSO 3",
                 "titulo": "O protocolo NAO cabe nesta rota",
-                "texto": ("O planejamento nao disse apenas que nao encontrou. Ele "
-                          "exauriu o espaco de estados e demonstrou que, nesta "
-                          "ordem de paradas, nenhuma sequencia de acoes satisfaz "
-                          "as condicoes legais de todas as visitas."),
-                "nota": ("Inviabilidade sensivel a ordem: o veredito vale para "
-                         "esta rota, nao para o turno. Por isso vale voltar ao "
-                         "passo 2."),
-                "mapa": {"modo": "rota", "rota": t["rota"], "estado": "reprovada"},
+                "texto": ("Por que esta rota nao serve: "
+                          + (t.get("explicacao") or
+                             "nesta ordem de paradas nenhuma sequencia de acoes "
+                             "satisfaz as condicoes legais de todas as visitas.")),
+                "nota": ("O planejamento nao disse que nao encontrou: ele exauriu "
+                         "o espaco de estados e DEMONSTROU que nao existe. E a "
+                         "inviabilidade e sensivel a ordem, isto e, vale para esta "
+                         "rota e nao para o turno. Por isso vale voltar ao passo 2."),
+                "mapa": {"modo": "rota", "rota": t["rota"],
+                         "estado": "reprovada",
+                         "destaques": t.get("culpados") or []},
                 "metricas": [{"valor": t["expandidos"], "rotulo": "estados exauridos"},
                              {"valor": f"{t['segundos']}s", "rotulo": "para provar"}],
             })
@@ -628,8 +653,17 @@ function desenhar(passo) {
                        }).addTo(camada);
   }
 
+  var destaques = {};
+  (m.destaques || []).forEach(function(id){ destaques[id] = true; });
+
   D.pacientes.forEach(function(p){
     const dentro = !D.selecao.ativa || m.modo === "todos" || selecionados[p.id];
+    if (destaques[p.id]) {
+      // aro em volta de quem causou a reprovacao, para a explicacao do
+      // painel ter onde pousar no mapa
+      L.circleMarker([p.lat, p.lon], {radius: 22, color: "#B35C38",
+        weight: 3, opacity: 0.95, fill: false, dashArray: "4 4"}).addTo(camada);
+    }
     const rotulo = ordemNaRota[p.id] ? String(ordemNaRota[p.id]) : "";
     const cor = dentro ? p.cor : "#C9BFAF";
     const marcador = L.marker([p.lat, p.lon],
