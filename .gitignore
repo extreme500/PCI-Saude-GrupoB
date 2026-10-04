@@ -7,3 +7,7 @@ venv/
 acsplan/logica/problema_gerado.pddl
 acsplan/dados/cache_osrm/
 roteiro.txt
+
+# saida gerada pelos comandos (mapa, demonstracao); so a raiz,
+# nunca o pacote acsplan/saida/
+/saida/

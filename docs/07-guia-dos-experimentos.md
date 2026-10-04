@@ -331,3 +331,68 @@ python -m acsplan experimentos --experimento e12
 # provar que o sistema detecta turno impossível
 python -m acsplan planejar --sem-curso-tecnico
 ```
+
+
+---
+
+## Realimentação do passo 3 para o passo 2
+
+Até aqui o pipeline era de mão única: a camada geométrica entregava uma rota
+e a camada lógica dizia se ela servia. Com `--realimentar`, quando o
+planejamento prova que a rota corrente é inexequível, o pipeline volta ao
+passo 2, pede **outra** rota e tenta de novo.
+
+```bash
+python -m acsplan planejar --instancia-sintetica 12 7 --orcamento 240     --realimentar --roteador-cego
+```
+
+As rotas alternativas saem de duas fontes, conforme o método: outra execução
+do algoritmo genético (semente diferente), ou uma construção gulosa
+aleatorizada, no estilo GRASP, seguida de 2-opt. Rotas repetidas são
+descartadas sem gastar busca.
+
+`--roteador-cego` faz o roteirizador ignorar a precedência por urgência,
+enquanto a camada normativa continua exigindo-a. É a situação real de quem
+troca a camada geométrica por um serviço externo que não conhece a norma: o
+roteirizador otimiza distância, a camada lógica reprova o que viola a regra,
+e o laço converge para uma rota que satisfaz as duas coisas.
+
+### Nem toda inviabilidade se resolve com outra rota
+
+Antes de iterar, o módulo diagnostica. Duas causas são **estruturais**, e
+nenhuma reordenação das paradas as resolve:
+
+1. o ACS não cumpre as condições do art. 3º § 4º (sem curso técnico ou sem
+   equipamento) e há paciente que exige procedimento condicionado;
+2. as janelas de supervisão do turno são menos numerosas que os pacientes
+   que exigem procedimento do § 4º. Como a supervisão se encerra ao deixar a
+   residência e não se repõe na unidade, cada uma dessas visitas consome ao
+   menos uma janela, em qualquer ordem.
+
+Nesses dois casos o laço para de saída e diz por quê, em vez de reprovar N
+rotas pelo mesmo motivo.
+
+---
+
+## Saída visual: mapa e demonstração
+
+```bash
+python -m acsplan mapa --instancia-sintetica 12 7 --orcamento 240     --realimentar --roteador-cego     --saida saida/mapa.html --demonstracao saida/demonstracao.html
+```
+
+Gera dois arquivos HTML autocontidos, com os dados embutidos como JSON:
+
+- **mapa da rota**: a rota final sobre o mapa real de Porto Alegre, com as
+  paradas numeradas na ordem de visita, coloridas por urgência, os desvios de
+  reposição em tracejado e o roteiro parada a parada ao lado. As famílias
+  adiadas pela política aparecem apagadas.
+- **demonstração**: os mesmos dados em sete passos navegáveis, que é o
+  caminho que o sistema percorre: microárea inteira, seleção do turno, rota
+  candidata, veredito do protocolo, rota seguinte quando a primeira é
+  reprovada, veredito de novo, e o roteiro final.
+
+Os dois exigem rede para **abrir**, não para gerar, porque os ladrilhos do
+mapa vêm do OpenStreetMap. As cópias usadas na apresentação estão em
+[`apresentacao/3/`](../apresentacao/3/).
+
+As coordenadas são reais. Os dados clínicos são fictícios.

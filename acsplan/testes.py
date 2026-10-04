@@ -19,10 +19,11 @@ import traceback
 
 from .dados import gerador, modelos
 from .geo import distancias, genetico, roteirizador
-from .logica import executor_guloso
+from .logica import executor_guloso, realimentacao
 from .logica.gerador_problema import gerar_problema
 from .logica.planejador import (TarefaPlanejamento, carregar_dominio,
                                 carregar_problema, resolver)
+from .saida import mapa
 from .selecao import politica
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
@@ -302,6 +303,82 @@ def _():
     _, tarefa = _tarefa(dados)
     r = resolver(tarefa, "astar-hmax", limite_segundos=40)
     assert r.sucesso, r.motivo
+
+
+@teste("inviabilidade estrutural e diagnosticada sem tentar rota nenhuma")
+def _():
+    # sem curso tecnico, nenhuma reordenacao das paradas resolve: o laco
+    # precisa dizer isso de saida, em vez de reprovar N rotas pelo mesmo
+    # motivo.
+    dados = gerador.gerar(6, 3)
+    dados["agente"]["curso_tecnico_concluido"] = False
+    estrutural, motivo = realimentacao.diagnosticar(dados)
+    assert estrutural, "deveria acusar inviabilidade estrutural"
+    assert "curso tecnico" in motivo, motivo
+
+    r = realimentacao.planejar_com_realimentacao(
+        dados, DOMINIOS["legal"], max_tentativas=4, limite=20)
+    assert not r.sucesso
+    assert r.estrutural
+    assert r.tentativas == [], "nao deveria ter gasto busca em rota alguma"
+
+    # e o contrario: turno normal nao e acusado de estrutural
+    assert not realimentacao.diagnosticar(gerador.gerar(6, 3))[0]
+
+
+@teste("REALIMENTACAO: rota reprovada pelo protocolo leva a outra rota valida")
+def _():
+    # com o roteirizador ignorando a precedencia clinica, a camada normativa
+    # reprova a primeira rota. O laco tem de pedir outra e terminar com plano.
+    exercitados = 0
+    for n, semente in ((8, 1), (7, 6), (7, 7), (12, 7)):
+        dados = gerador.gerar(n, semente)
+        if n == 12:
+            dados = politica.selecionar(dados, orcamento_minutos=240)
+        if realimentacao.diagnosticar(dados)[0]:
+            continue
+        r = realimentacao.planejar_com_realimentacao(
+            dados, DOMINIOS["legal"], max_tentativas=6, limite=30,
+            roteador_ciente=False)
+        if len(r.tentativas) > 1 and not r.tentativas[0].sucesso:
+            exercitados += 1
+            assert r.sucesso, (n, semente, r.diagnostico)
+            assert r.tentativas[-1].sucesso
+            assert r.roteamento is not None and r.plano.sucesso
+            # as rotas tentadas tem de ser realmente diferentes entre si
+            assinaturas = {tuple(t.rota) for t in r.tentativas}
+            assert len(assinaturas) == len(r.tentativas), "rota repetida no laco"
+    assert exercitados >= 2, (
+        "nenhuma instancia exercitou a realimentacao; o teste passaria por "
+        "vacuidade")
+
+
+@teste("a saida visual sai com rota, paradas e passos coerentes")
+def _():
+    dados = gerador.gerar(8, 1)
+    dados = politica.selecionar(dados, maximo_pacientes=6)
+    roteamento, tarefa = _tarefa(dados)
+    plano = resolver(tarefa, "astar-hmax", limite_segundos=40)
+    assert plano.sucesso, plano.motivo
+
+    estado = {"dados": dados, "roteamento": roteamento, "planejador": plano,
+              "laco": None, "caminho_dominio": DOMINIOS["legal"],
+              "intervalo": modelos.INTERVALO_MAXIMO_PADRAO_DIAS}
+    ctx = mapa.montar_contexto(estado)
+    assert len(ctx["pacientes"]) == len(dados["pacientes"])
+    assert ctx["paradas"], "o roteiro saiu vazio"
+    assert all(p["id"] for p in ctx["paradas"])
+
+    passos = mapa.montar_passos(ctx)
+    assert passos[0]["mapa"]["modo"] == "todos"
+    assert passos[-1]["mapa"]["modo"] == "final"
+
+    destino = os.path.join(TMP, "mapa.html")
+    mapa.gerar_mapa(estado, destino)
+    with open(destino, encoding="utf-8") as arquivo:
+        html = arquivo.read()
+    assert "__DADOS__" not in html, "o JSON nao foi injetado"
+    assert "openstreetmap" in html.lower()
 
 
 # ---------------------------------------------------------------------------

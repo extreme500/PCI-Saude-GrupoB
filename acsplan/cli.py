@@ -34,11 +34,11 @@ import os
 
 from .dados import carregador, gerador, modelos
 from .geo import roteirizador
-from .logica import executor_guloso
+from .logica import executor_guloso, realimentacao
 from .logica.gerador_problema import gerar_problema
 from .logica.planejador import (TarefaPlanejamento, carregar_dominio,
                                 carregar_problema, resolver)
-from .saida import inspecao
+from .saida import inspecao, mapa
 from .saida import roteiro as saida_roteiro
 from .selecao import politica
 
@@ -74,12 +74,16 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
         "intervalo_maximo_padrao_dias", modelos.INTERVALO_MAXIMO_PADRAO_DIAS)
 
     # ---- [1] selecao ------------------------------------------------------
+    # a lista completa e guardada antes do corte: a saida visual precisa
+    # mostrar a microarea inteira antes de mostrar quem entrou no turno.
+    todos_os_pacientes = [dict(p) for p in dados["pacientes"]]
     dados = politica.selecionar(
         dados,
         orcamento_minutos=args.orcamento,
         maximo_pacientes=args.max_pacientes,
         ativar=not args.sem_selecao)
     selecao = dados["_selecao"]
+    dados["_todos_pacientes"] = todos_os_pacientes
 
     if not silencioso:
         titulo("[1] SELECAO DO TURNO")
@@ -101,13 +105,38 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
                 print("  [aviso] os inadiaveis estouram o orcamento nominal do turno.")
 
     # ---- [2] roteamento ---------------------------------------------------
-    roteamento = roteirizador.roteirizar(
-        dados,
-        metodo=args.metodo,
-        provedor_distancia=args.distancias,
-        usar_precedencia=not args.sem_precedencia,
-        semente=args.semente,
-        silencioso=silencioso)
+    # Com --realimentar, os passos 2 e 3 deixam de ser uma via de mao unica:
+    # se o planejamento reprovar a rota, a camada geometrica entrega outra.
+    realimentar = getattr(args, "realimentar", False)
+    laco = None
+    if realimentar:
+        laco = realimentacao.planejar_com_realimentacao(
+            dados, caminho_dominio,
+            dominio=args.dominio,
+            metodo=args.metodo,
+            provedor_distancia=args.distancias,
+            usar_precedencia=not args.sem_precedencia,
+            roteador_ciente=not getattr(args, "roteador_cego", False),
+            semente=args.semente,
+            estrategia=args.estrategia,
+            limite=args.limite,
+            max_tentativas=getattr(args, "max_tentativas", 6),
+            caminho_problema=CAMINHO_PROBLEMA,
+            silencioso=silencioso)
+        roteamento = laco.roteamento
+        if roteamento is None:             # inviabilidade estrutural
+            roteamento = roteirizador.roteirizar(
+                dados, metodo=args.metodo, provedor_distancia=args.distancias,
+                usar_precedencia=not args.sem_precedencia,
+                semente=args.semente, silencioso=silencioso)
+    else:
+        roteamento = roteirizador.roteirizar(
+            dados,
+            metodo=args.metodo,
+            provedor_distancia=args.distancias,
+            usar_precedencia=not args.sem_precedencia,
+            semente=args.semente,
+            silencioso=silencioso)
 
     if not silencioso:
         titulo("[2] ROTEAMENTO")
@@ -126,10 +155,13 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
                   f"melhor na geracao {m['melhor_geracao']}")
 
     # ---- [3] planejamento -------------------------------------------------
-    gerar_problema(dados, roteamento, CAMINHO_PROBLEMA, dominio=args.dominio)
-    tarefa = TarefaPlanejamento(carregar_dominio(caminho_dominio),
-                                carregar_problema(CAMINHO_PROBLEMA))
-    resultado = resolver(tarefa, args.estrategia, limite_segundos=args.limite)
+    if laco is not None and laco.tarefa is not None:
+        tarefa, resultado = laco.tarefa, laco.plano
+    else:
+        gerar_problema(dados, roteamento, CAMINHO_PROBLEMA, dominio=args.dominio)
+        tarefa = TarefaPlanejamento(carregar_dominio(caminho_dominio),
+                                    carregar_problema(CAMINHO_PROBLEMA))
+        resultado = resolver(tarefa, args.estrategia, limite_segundos=args.limite)
 
     if not silencioso:
         titulo("[3] PLANEJAMENTO")
@@ -146,12 +178,27 @@ def executar_pipeline(args, *, silencioso: bool = False) -> dict:
                   f"custo {resultado.custo} min")
         else:
             print(f"  SEM PLANO          : {resultado.motivo}")
+        if laco is not None:
+            print()
+            print("  REALIMENTACAO 3 -> 2")
+            if laco.estrutural:
+                print(f"    inviabilidade estrutural: {laco.diagnostico}")
+                print("    nenhuma reordenacao das paradas resolveria, "
+                      "entao nao se tenta outra rota.")
+            else:
+                for i, t_ in enumerate(laco.tentativas, 1):
+                    veredito = (f"plano de {t_.acoes} acoes, custo {t_.custo_plano}"
+                                if t_.sucesso else f"reprovada ({t_.motivo[:38]})")
+                    print(f"    rota {i}: {t_.custo_rota:>4} min de "
+                          f"caminhada  ->  {veredito}")
+                if not laco.sucesso:
+                    print(f"    {laco.diagnostico}")
 
     guloso = executor_guloso.executar(dados, roteamento, caminho_dominio,
                                       estendido=args.dominio == "estendido")
 
     return {"dados": dados, "roteamento": roteamento, "tarefa": tarefa,
-            "planejador": resultado, "guloso": guloso,
+            "planejador": resultado, "guloso": guloso, "laco": laco,
             "caminho_dominio": caminho_dominio, "intervalo": intervalo}
 
 
@@ -239,6 +286,27 @@ def comando_experimentos(args) -> None:
     rodar.main(args.experimento)
 
 
+def comando_mapa(args) -> None:
+    """Gera o mapa da rota final e a demonstracao passo a passo do pipeline."""
+    estado = executar_pipeline(args, silencioso=True)
+    plano = estado["planejador"]
+
+    titulo("SAIDA VISUAL")
+    if not plano.sucesso:
+        print("  [aviso] nenhuma rota valida foi encontrada; o mapa sai com a")
+        print("          ultima rota tentada e sem o roteiro do plano.")
+
+    caminho_mapa = mapa.gerar_mapa(estado, args.saida)
+    print(f"  Mapa da rota       : {caminho_mapa}")
+    if args.demonstracao:
+        caminho_demo = mapa.gerar_demonstracao(estado, args.demonstracao)
+        passos = len(mapa.montar_passos(mapa.montar_contexto(estado)))
+        print(f"  Demonstracao       : {caminho_demo}  ({passos} passos)")
+    print()
+    print("  Os dois arquivos sao HTML autocontido. Abrir no navegador exige")
+    print("  rede, porque os ladrilhos do mapa vem do OpenStreetMap.")
+
+
 def construir_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="acsplan",
@@ -262,6 +330,13 @@ def construir_parser() -> argparse.ArgumentParser:
         sp.add_argument("--max-pacientes", type=int, default=None)
         sp.add_argument("--sem-selecao", action="store_true")
         sp.add_argument("--sem-precedencia", action="store_true")
+        sp.add_argument("--realimentar", action="store_true",
+                        help="se o passo 3 reprovar a rota, pede outra ao passo 2")
+        sp.add_argument("--max-tentativas", type=int, default=6,
+                        help="quantas rotas distintas tentar (com --realimentar)")
+        sp.add_argument("--roteador-cego", action="store_true",
+                        help="o roteirizador ignora a precedencia clinica, e a "
+                             "camada normativa cobra")
         sp.add_argument("--sem-curso-tecnico", action="store_true",
                         help="remove a habilitacao legal do ACS")
         sp.add_argument("--semente", type=int, default=0)
@@ -277,6 +352,15 @@ def construir_parser() -> argparse.ArgumentParser:
     comuns(sp)
     sp.add_argument("--salvar", metavar="ARQUIVO")
     sp.set_defaults(func=comando_roteiro)
+
+    sp = sub.add_parser("mapa", help="gera o mapa da rota e a demonstracao em HTML")
+    comuns(sp)
+    sp.add_argument("--saida", default="saida/mapa.html",
+                    metavar="ARQUIVO", help="arquivo HTML do mapa da rota final")
+    sp.add_argument("--demonstracao", default="saida/demonstracao.html",
+                    metavar="ARQUIVO",
+                    help="HTML passo a passo do pipeline; vazio para nao gerar")
+    sp.set_defaults(func=comando_mapa)
 
     sp = sub.add_parser("dados", help="mostra a microarea: pacientes, mapa e recursos")
     sp.add_argument("--dados", default=DADOS_PADRAO)

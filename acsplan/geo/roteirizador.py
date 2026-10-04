@@ -24,6 +24,8 @@ componente substituível sem abrir mão da garantia.
 
 from __future__ import annotations
 
+import random
+
 from ..dados import modelos
 from . import genetico
 from .distancias import construir_matriz, custo_da_rota
@@ -75,6 +77,37 @@ def vizinho_mais_proximo(ids: list[str], origem: str,
     return sequencia
 
 
+def vizinho_mais_proximo_aleatorizado(
+        ids: list[str], origem: str, matriz: dict[tuple[str, str], int],
+        precede: dict[str, set[str]] | None = None,
+        *, semente: int = 1, candidatos: int = 3) -> list[str]:
+    """Variante GRASP da construção gulosa, para gerar rotas alternativas.
+
+    A cada passo, em vez de tomar sempre a parada elegível mais barata,
+    sorteia entre as `candidatos` mais baratas. Serve à realimentação do
+    passo 3 para o passo 2: quando o planejamento prova que a rota corrente
+    é inexequível, é preciso oferecer outra rota, e não a mesma.
+    """
+    precede = precede or {}
+    sorteio = random.Random(semente)
+    pendentes = [i for i in ids if i != origem]
+    visitados: set[str] = set()
+    sequencia: list[str] = []
+    atual = origem
+    while pendentes:
+        elegiveis = [p for p in pendentes
+                     if all(a in visitados for a in precede.get(p, ()))]
+        if not elegiveis:
+            elegiveis = pendentes
+        elegiveis.sort(key=lambda x: matriz[(atual, x)])
+        proximo = sorteio.choice(elegiveis[:max(1, candidatos)])
+        sequencia.append(proximo)
+        visitados.add(proximo)
+        pendentes.remove(proximo)
+        atual = proximo
+    return sequencia
+
+
 def dois_opt(sequencia: list[str], origem: str,
              matriz: dict[tuple[str, str], int],
              precede: dict[str, set[str]] | None = None) -> list[str]:
@@ -115,11 +148,19 @@ def roteirizar(dados: dict, *, metodo: str = "nn2opt",
                provedor_distancia: str = "haversine",
                usar_precedencia: bool = True,
                semente: int = 0,
+               variante: int = 0,
+               matriz_pronta: dict | None = None,
                silencioso: bool = True) -> dict:
     """Ponto de entrada da camada geométrica.
 
     metodo = "nn2opt" -> vizinho mais próximo + 2-opt
     metodo = "ag"     -> algoritmo genético, semeado com a rota do nn2opt
+
+    `variante` serve à realimentação do passo 3. Com `variante = 0` sai a
+    rota canônica, determinística. Com `variante > 0` sai uma rota
+    alternativa: outra execução do algoritmo genético, ou uma construção
+    gulosa aleatorizada seguida de 2-opt. A matriz de distâncias pode ser
+    passada pronta, para não refazer chamadas de rede a cada tentativa.
     """
     ubs = dados["ubs"]
     pacientes = dados["pacientes"]
@@ -127,17 +168,26 @@ def roteirizar(dados: dict, *, metodo: str = "nn2opt",
     intervalo = dados.get("_meta", {}).get(
         "intervalo_maximo_padrao_dias", modelos.INTERVALO_MAXIMO_PADRAO_DIAS)
 
-    matriz, provedor_usado = construir_matriz(pontos, provedor_distancia, silencioso)
+    if matriz_pronta is not None:
+        matriz, provedor_usado = matriz_pronta["matriz"], matriz_pronta["provedor"]
+    else:
+        matriz, provedor_usado = construir_matriz(pontos, provedor_distancia,
+                                                  silencioso)
     precede = precedencias(pacientes, usar_precedencia, intervalo)
 
     ids = [p["id"] for p in pacientes]
-    base = vizinho_mais_proximo([ubs["id"]] + ids, ubs["id"], matriz, precede)
+    if variante == 0:
+        base = vizinho_mais_proximo([ubs["id"]] + ids, ubs["id"], matriz, precede)
+    else:
+        base = vizinho_mais_proximo_aleatorizado(
+            [ubs["id"]] + ids, ubs["id"], matriz, precede,
+            semente=semente * 1000 + variante)
 
     metricas: dict = {}
     if metodo == "ag":
         rota, metricas = genetico.otimizar(
             ids, ubs["id"], matriz, precede,
-            semente=semente, sequencia_inicial=base)
+            semente=semente + variante, sequencia_inicial=base)
     else:
         rota = [ubs["id"]] + dois_opt(base, ubs["id"], matriz, precede) + [ubs["id"]]
 
@@ -148,6 +198,7 @@ def roteirizar(dados: dict, *, metodo: str = "nn2opt",
         "custo_rota": custo_da_rota(rota, matriz),
         "precedencias": precede,
         "metodo": metodo,
+        "variante": variante,
         "provedor_distancia": provedor_usado,
         "metricas_ag": metricas,
     }
