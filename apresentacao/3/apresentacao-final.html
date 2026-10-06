@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planejamento Automatizado para protocolos legais, apresentação final</title>
+<style>
+  :root {
+    --escuro:#33291F; --medio:#5C4F41; --bege:#8A7A67;
+    --terracota:#B35C38; --salvia:#4A6B5B; --dourado:#BF9000;
+    --cartao:#FFFDF8; --borda:#E6DCCB;
+    --quente:#F3DFD3; --verde:#DDE7E0;
+    --serif:Cambria,Georgia,"Times New Roman",serif;
+    --sans:Calibri,Carlito,"Segoe UI",system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; overflow:hidden; }
+  body {
+    font-family:var(--sans); color:var(--medio);
+    background:linear-gradient(135deg,#FEFCF7 0%,#F9F2E4 45%,#F2E7D2 100%);
+  }
+
+  .slide { display:none; height:100vh; width:100vw; padding:4vh 5vw 10.5vh;
+           flex-direction:column; justify-content:center; }
+  .slide.on { display:flex; }
+
+  .etapa { font-family:var(--sans); font-weight:bold;
+           font-size:clamp(14px,1.45vw,26px); letter-spacing:.11em;
+           text-transform:uppercase; color:var(--terracota);
+           margin-bottom:1.4vh; }
+  h1 { font-family:var(--serif); color:var(--escuro); margin:0 0 2.4vh;
+       font-size:clamp(40px,5.6vw,96px); line-height:1.04; font-weight:bold; }
+  h2 { font-family:var(--serif); color:var(--escuro); margin:0 0 2.6vh;
+       font-size:clamp(32px,4.1vw,70px); line-height:1.07; font-weight:bold; }
+  h3 { font-family:var(--serif); color:var(--escuro); margin:0 0 1.1vh;
+       font-size:clamp(22px,2.5vw,42px); line-height:1.12; font-weight:bold; }
+  p  { font-size:clamp(19px,2.0vw,36px); line-height:1.4; margin:0 0 1.6vh; }
+  .grande { font-size:clamp(23px,2.5vw,46px); line-height:1.34; }
+
+  .faixa { background:var(--quente); border-radius:18px;
+           padding:3.2vh 3vw; }
+  .faixa.verde { background:var(--verde); }
+  .faixa p:last-child, .cartao p:last-child { margin-bottom:0; }
+
+  .cartoes { display:grid; gap:2.2vw; }
+  .c2 { grid-template-columns:1fr 1fr; }
+  .c3 { grid-template-columns:1fr 1fr 1fr; }
+  .cartao { background:var(--cartao); border:1px solid var(--borda);
+            border-radius:18px; padding:3vh 2.2vw; }
+  .cartao.quente { background:var(--quente); border-color:#E9CFC2; }
+  .cartao.verde  { background:var(--verde); border-color:#CBDCD1; }
+  .rotulo { font-weight:bold; font-size:clamp(13px,1.3vw,24px);
+            letter-spacing:.08em; text-transform:uppercase;
+            color:var(--bege); margin-bottom:.8vh; }
+  .rotulo.terra { color:var(--terracota); }
+  .rotulo.salvia { color:var(--salvia); }
+
+  .fecho { margin-top:auto; padding-top:2.6vh; }
+  .fecho p { font-family:var(--serif); color:var(--escuro);
+             font-size:clamp(22px,2.55vw,46px); line-height:1.26; margin:0; }
+
+  .numerao { font-family:var(--serif); font-weight:bold; color:var(--escuro);
+             font-size:clamp(54px,8.5vw,150px); line-height:.95; }
+  .numerao.terra { color:var(--terracota); }
+  .numerao.salvia { color:var(--salvia); }
+  .legenda-num { font-size:clamp(15px,1.5vw,27px); color:var(--bege);
+                 text-transform:uppercase; letter-spacing:.05em; }
+
+  .citacao { font-family:var(--serif); font-style:italic; color:var(--escuro);
+             font-size:clamp(22px,2.65vw,48px); line-height:1.3; }
+  .fonte { font-size:clamp(13px,1.3vw,22px); color:var(--bege);
+           margin-top:1.2vh; }
+  code, .codigo { font-family:"Courier New",monospace; }
+  .codigo { background:var(--cartao); border:1px solid var(--borda);
+            border-radius:14px; padding:2.4vh 1.6vw; color:var(--escuro);
+            font-size:clamp(12px,1.25vw,23px); line-height:1.55;
+            white-space:pre; overflow:visible; }
+  .lado-a-lado { display:grid; grid-template-columns:1.15fr 1fr;
+                 gap:2vw; align-items:start; }
+  .codigo b { color:var(--salvia); }
+
+  .linha-passo { display:flex; align-items:flex-start; gap:1.6vw;
+                 background:var(--cartao); border:1px solid var(--borda);
+                 border-radius:16px; padding:2.2vh 2vw; margin-bottom:1.6vh; }
+  .bolha { flex:none; width:clamp(34px,3.4vw,62px); height:clamp(34px,3.4vw,62px);
+           border-radius:50%; background:var(--terracota); color:#fff;
+           font-family:var(--serif); font-weight:bold;
+           font-size:clamp(17px,1.8vw,33px);
+           display:flex; align-items:center; justify-content:center; }
+  .bolha.salvia { background:var(--salvia); }
+
+  .risco { color:var(--terracota); font-weight:bold; }
+  .ok { color:var(--salvia); font-weight:bold; }
+  .sumiu { text-decoration:line-through; color:var(--bege); }
+
+  .capa-linha { width:14vw; height:4px; background:var(--terracota);
+                border-radius:2px; margin:3vh 0 3.4vh; }
+  .autores { font-family:var(--serif); font-weight:bold; color:var(--escuro);
+             font-size:clamp(19px,2.0vw,36px); line-height:1.5; }
+  .instituicao { font-size:clamp(15px,1.5vw,28px); color:var(--bege);
+                 margin-top:.8vh; }
+
+  .demo { flex:1; border:1px solid var(--borda); border-radius:18px;
+          overflow:hidden; background:var(--cartao); min-height:0; }
+  .demo iframe { width:100%; height:100%; border:0; display:block; }
+  .demo-barra { display:flex; align-items:center; gap:1.4vw;
+                margin-bottom:1.6vh; flex-wrap:wrap; }
+  .botao { font-family:var(--sans); font-size:clamp(15px,1.5vw,26px);
+           padding:1.1vh 1.6vw; border-radius:12px; cursor:pointer;
+           border:1px solid var(--terracota); background:var(--terracota);
+           color:#fff; font-weight:bold; text-decoration:none; }
+  .botao.vazado { background:var(--cartao); color:var(--escuro);
+                  border-color:var(--borda); }
+
+  nav { position:fixed; left:0; right:0; bottom:0; height:7vh;
+        display:flex; align-items:center; gap:1.2vw; padding:0 5vw;
+        font-size:clamp(12px,1.2vw,20px); color:var(--bege); }
+  nav .pontos { display:flex; gap:.55vw; flex:1; }
+  nav .ponto { width:.62vw; height:.62vw; min-width:7px; min-height:7px;
+               border-radius:50%; background:var(--borda); cursor:pointer; }
+  nav .ponto.on { background:var(--terracota); }
+  nav button { font-family:inherit; font-size:inherit; color:var(--escuro);
+               background:var(--cartao); border:1px solid var(--borda);
+               border-radius:10px; padding:.7vh 1.1vw; cursor:pointer; }
+  nav button:hover { background:var(--quente); }
+
+  #notas { position:fixed; left:5vw; right:5vw; bottom:8vh; display:none;
+           background:var(--escuro); color:#F4EDE2; border-radius:14px;
+           padding:2.2vh 2vw; font-size:clamp(14px,1.45vw,24px);
+           line-height:1.45; max-height:42vh; overflow:auto; z-index:50; }
+  #notas.on { display:block; }
+  #notas b { color:#E9B99D; }
+</style>
+</head>
+<body>
+
+<!-- 1 ............................................................. capa -->
+<section class="slide on" data-notas="Abertura. Apresente os tres e diga em uma frase o recorte: um agente, um turno, uma microarea. Nao mencione PDDL ainda, isso vem no slide 3. A frase que prepara tudo: quase todo mundo ataca isso como problema de rota, e a rota e so metade do problema.">
+  <div class="etapa">Projeto em Ciência e Inovação · INF99003 · Ciclo 2 · Apresentação final</div>
+  <h1>Planejamento Automatizado para<br>o cumprimento de protocolos legais</h1>
+  <p class="grande">Visitas domiciliares de Agentes Comunitários de Saúde na Atenção Primária do SUS.</p>
+  <div class="capa-linha"></div>
+  <div class="autores">Gabriel Pieruccini Knopp · Arthur Andrade da Silva · Izadora Candotti de Oliveira</div>
+  <div class="instituicao">Grupo B · Instituto de Informática, UFRGS</div>
+</section>
+
+<!-- 2 .......................................................... problema -->
+<section class="slide" data-notas="O enunciado do ciclo cita percurso, equipe, urgencia e intervalo. Quase todo grupo le isso como roteirizacao. A dor que nos interessou e outra: chegar na casa NAO autoriza atender. A lei condiciona, e algumas condicoes acabam no meio do turno.">
+  <div class="etapa">O problema</div>
+  <h2>Chegar na casa não autoriza atender</h2>
+  <div class="cartoes c2">
+    <div class="cartao">
+      <div class="rotulo">Como o problema costuma ser lido</div>
+      <h3>Um problema de percurso</h3>
+      <p>Minimizar deslocamento, cobrir o território no prazo e respeitar a capacidade da equipe. Roteirizadores já resolvem isso bem.</p>
+    </div>
+    <div class="cartao quente">
+      <div class="rotulo terra">O que essa leitura deixa de fora</div>
+      <h3>Uma norma que condiciona cada atendimento</h3>
+      <p>A Lei 11.350/2006 diz o que o agente pode fazer em cada residência. E nem toda condição é estática: insumo e supervisão se esgotam ao longo do turno.</p>
+    </div>
+  </div>
+  <div class="fecho"><p>A pergunta não é qual o menor percurso, e sim se aquela sequência de atendimentos é executável sem violar a norma.</p></div>
+</section>
+
+<!-- 3 ............................................................... lei -->
+<section class="slide" data-notas="Leia o trecho da lei em voz alta: e a unica leitura literal que vale a pena no deck. Tres condicoes conjuntivas e um efeito obrigatorio. Isso e exatamente um esquema de acao STRIPS, formalismo de 1971: pre-condicoes, o que passa a valer e o que deixa de valer. Planejamento Automatizado e a area que, dado um estado inicial, um objetivo e acoes descritas assim, procura a sequencia que leva de um ao outro. Se a norma mudar, edita-se a norma, nao o codigo de busca.">
+  <div class="etapa">Justificativa · por que Planejamento Automatizado</div>
+  <h2>A lei já está escrita no formato de uma ação</h2>
+  <div class="lado-a-lado">
+    <div class="faixa">
+      <div class="citacao" style="font-size:clamp(17px,1.95vw,34px)">“desde que o Agente Comunitário de Saúde tenha concluído <b>curso técnico</b> e tenha disponíveis os <b>equipamentos adequados</b>, são atividades do Agente [...] <b>assistidas por profissional de saúde de nível superior</b> [...] a aferição da pressão arterial [...], <b>encaminhando o paciente</b> para a unidade de saúde de referência”</div>
+      <div class="fonte">Lei nº 11.350/2006, art. 3º § 4º, na redação da Lei nº 13.595/2018</div>
+    </div>
+    <div>
+      <div class="rotulo salvia" style="margin-bottom:1.2vh">A mesma regra, no domínio PDDL</div>
+      <div class="codigo"><b>:precondition</b>
+  (and (curso-tecnico-concluido ?ag)
+       (equipamento-disponivel ?ag)
+       (supervisao-ativa ?ag))
+
+<b>:effect</b>
+  (and (pa-ok ?p)
+       (pendencia-encaminhamento ?p))</div>
+    </div>
+  </div>
+  <div class="fecho"><p>Três condições conjuntivas e um efeito obrigatório: é a forma de um esquema de ação STRIPS, o formalismo de 1971 em que o Planejamento Automatizado se apoia.</p></div>
+</section>
+
+<!-- 4 ......................................................... acoplamento -->
+<section class="slide" data-notas="Se a rota esta fixa e cada visita fosse independente, o problema se decomporia e um laco for bastaria. O que impede isso sao os recursos finitos. Observacao honesta, e vale dizer na hora: a lei exige assistencia e nao diz nada sobre forma ou frequencia. Representa-la como recurso finito por turno, e encerra-la ao sair da casa, sao decisoes de modelagem NOSSAS.">
+  <div class="etapa">Justificativa · por que não basta um laço</div>
+  <h2>Duas coisas acabam no meio do turno</h2>
+  <div class="cartoes c2" style="margin-bottom:2.4vh">
+    <div class="cartao">
+      <div class="rotulo terra">Recurso 1</div>
+      <h3>Insumo consumível</h3>
+      <p>A fita de glicemia só se repõe na unidade. Acabar no meio da rota obriga um desvio não previsto.</p>
+    </div>
+    <div class="cartao">
+      <div class="rotulo terra">Recurso 2</div>
+      <h3>Supervisão da equipe</h3>
+      <p>O § 4º exige assistência de profissional de nível superior, e ela se encerra quando o agente deixa a residência.</p>
+    </div>
+  </div>
+  <div class="faixa">
+    <p class="grande" style="font-family:var(--serif);color:var(--escuro);font-weight:bold">Uma decisão tomada na terceira parada pode inviabilizar a sétima.</p>
+    <p>É isso que impede decompor o turno visita a visita, e é por isso que um laço <code>for</code> sobre a rota não resolve.</p>
+  </div>
+</section>
+
+<!-- 5 ....................................................... literatura 1 -->
+<section class="slide" data-notas="Este slide e o mais importante da primeira metade. Nao leia os tres cartoes inteiros: gaste o tempo no terceiro. Os dois primeiros dizem que a literatura ja sabe das partes. O terceiro e o que quase ninguem espera: embutir regra legal em algoritmo de roteamento NAO e novidade, tem survey proprio, e a arquitetura rota pronta mais verificacao da norma tem nome, Truck Driver Scheduling Problem, resolvido desde 2009.">
+  <div class="etapa">Revisão de literatura · o que já existe</div>
+  <h2>Três frentes, e nenhuma delas é novidade</h2>
+  <div class="cartoes c3">
+    <div class="cartao">
+      <div class="rotulo">Frente 1</div>
+      <h3>Roteamento em saúde domiciliar</h3>
+      <p>Reconhece qualificação profissional como restrição, mas a trata como etiqueta fixa de compatibilidade.</p>
+      <p class="fonte">Fikar &amp; Hirsch (2017)<br>Cissé et al. (2017)</p>
+    </div>
+    <div class="cartao">
+      <div class="rotulo">Frente 2</div>
+      <h3>Protocolo de saúde virando domínio de planejamento</h3>
+      <p>Diretrizes clínicas já são traduzidas para planejamento automatizado, mas sem componente de roteamento.</p>
+      <p class="fonte">González-Ferrer et al. (2013)<br>Bradbrook et al. (2005)</p>
+    </div>
+    <div class="cartao quente">
+      <div class="rotulo terra">Frente 3, a que nos surpreendeu</div>
+      <h3>Regra legal dentro de roteamento</h3>
+      <p>A jornada de motoristas na União Europeia é lei embutida em roteirização, e tem revisão sistemática própria.</p>
+      <p class="fonte">Archetti &amp; Savelsbergh (2009)<br>Goel (2010) · Goel &amp; Kok (2011)</p>
+    </div>
+  </div>
+  <div class="fecho"><p>A arquitetura que usamos, rota já fixada e depois uma camada que verifica a norma, tem nome na literatura: <b>Truck Driver Scheduling Problem</b>.</p></div>
+</section>
+
+<!-- 6 ....................................................... literatura 2 -->
+<section class="slide" data-notas="Aqui esta a honestidade que fortalece. Dissemos aos professores que eramos os primeiros, fomos checar, e nao somos. Mas a lista de artigos do TDSP e o nosso melhor argumento: um artigo e um algoritmo novo por jurisdicao, Uniao Europeia, Estados Unidos, Canada, Australia. Isso e o custo de manutencao do jeito procedural, acontecendo de verdade, por vinte anos. Nos medimos esse custo em laboratorio.">
+  <div class="etapa">Revisão de literatura · onde nos encaixamos</div>
+  <h2>Não somos os primeiros a fazer. Somos os primeiros a medir.</h2>
+  <div class="faixa verde" style="margin-bottom:2.6vh">
+    <p class="grande">O que não encontramos na literatura é esta combinação: a <b>sequência de ações obrigatórias dentro da visita</b>, derivada de norma jurídica, como domínio declarativo acoplado a roteamento, com a qualificação tratada como <b>soma de condições que se gastam</b> e não como etiqueta fixa.</p>
+  </div>
+  <div class="cartoes c2">
+    <div class="cartao">
+      <div class="rotulo terra">O que a literatura do TDSP mostra</div>
+      <p class="grande">Um artigo e um algoritmo <b>novo por jurisdição</b>: União Europeia, Estados Unidos, Canadá, Austrália. O mesmo problema resolvido quatro vezes.</p>
+    </div>
+    <div class="cartao verde">
+      <div class="rotulo salvia">O que isso abre para nós</div>
+      <p class="grande">Esse é o custo de manutenção do caminho procedural, acontecendo por vinte anos. Ninguém o quantificou. Nós quantificamos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 ........................................................... pipeline -->
+<section class="slide" data-notas="Explique POR QUE sobra decisao para o planejador, senao a plateia conclui que ele e decorativo. A camada 2 entrega a ordem congelada e o custo de desvio. O que sobra para a camada 3: o que fazer em cada casa, quando acionar a supervisao, e em qual parada vale a pena sair da rota para repor. Se perguntarem por que nao OR-Tools: ele resolve a metade geometrica, nao a normativa.">
+  <div class="etapa">O sistema</div>
+  <h2>Três camadas, e só a terceira conhece a lei</h2>
+  <div class="linha-passo">
+    <div class="bolha">1</div>
+    <div><h3 style="color:var(--terracota)">Seleção: quem entra no turno</h3>
+      <p>Prioridade clínica e atraso em relação ao intervalo máximo, sob orçamento de tempo.</p></div>
+  </div>
+  <div class="linha-passo">
+    <div class="bolha">2</div>
+    <div><h3 style="color:var(--terracota)">Roteamento: em que ordem visitar</h3>
+      <p>Algoritmo genético sobre a matriz de distâncias. Entrega a rota e o custo de desviar até a unidade.</p></div>
+  </div>
+  <div class="linha-passo">
+    <div class="bolha salvia">3</div>
+    <div><h3 style="color:var(--salvia)">Planejamento: o que fazer em cada parada</h3>
+      <p>Domínio PDDL com as condições legais e os recursos finitos. Decide as ações e os desvios de reposição.</p></div>
+  </div>
+  <div class="fecho"><p>A camada 3 nunca escolhe a rota: ela só anda pelas arestas que a camada 2 autorizou. Por isso trocar o roteirizador não muda uma linha do domínio.</p></div>
+</section>
+
+<!-- 8 ........................................................... hipótese -->
+<section class="slide" data-notas="Esta e a parte metodologica que vale sublinhar: a hipotese podia estar errada, e o desenho admitia isso. Nao formulamos uma pergunta que so podia dar certo. Guarde esta frase, porque dois slides adiante vamos cobrar: um dos dois caminhos de erro realmente se materializou.">
+  <div class="etapa">Metodologia</div>
+  <h2>Formulamos a hipótese de modo que ela pudesse cair</h2>
+  <div class="faixa" style="margin-bottom:2.6vh">
+    <div class="citacao">“A representação declarativa das condições legais reduzirá a ocorrência de falsos negativos: turnos classificados como inexequíveis quando existe sequência válida.”</div>
+  </div>
+  <div class="cartoes c2">
+    <div class="cartao">
+      <div class="rotulo">Se estivermos errados, caminho 1</div>
+      <h3>O planejador é redundante</h3>
+      <p>Um executor procedural simples alcança desempenho equivalente.</p>
+    </div>
+    <div class="cartao">
+      <div class="rotulo">Se estivermos errados, caminho 2</div>
+      <h3>O planejador não escala</h3>
+      <p>O custo da busca cresce a ponto de inviabilizar microáreas reais.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 ........................................................ refutações -->
+<section class="slide" data-notas="Abrir isso e mais forte do que esconder: mostra que o desenho experimental funcionou. O caminho 1 de erro, previsto no slide anterior, foi o que se materializou. Se perguntarem quantas instancias: 40 no E7, 25 no E9, 8 por tamanho no E8.">
+  <div class="etapa">Resultados · o que nós mesmos derrubamos</div>
+  <h2>Construímos três experimentos para nos refutar. Os três funcionaram.</h2>
+  <div class="cartoes c3">
+    <div class="cartao quente">
+      <div class="rotulo terra">Caiu</div>
+      <h3>“Achamos planos que um programa não acharia”</h3>
+      <p>Uma correção manual de poucas linhas leva o executor procedural de <b class="risco">22%</b> de falsos negativos a <b class="ok">0%</b>.</p>
+    </div>
+    <div class="cartao quente">
+      <div class="rotulo terra">Caiu</div>
+      <h3>“O algoritmo genético é melhor otimizador”</h3>
+      <p>Sem precedência, o ganho dele vira <b class="risco">+1,4%, 0,0% e −0,3%</b>. A vantagem vinha da restrição, não do operador.</p>
+    </div>
+    <div class="cartao quente">
+      <div class="rotulo terra">Caiu</div>
+      <h3>“Na prática o planejamento sai na frente”</h3>
+      <p>Na busca satisfaciente, que é a que escala, ele entrega planos <b class="risco">3,5% mais caros</b>, piores em 16 de 25.</p>
+    </div>
+  </div>
+  <div class="fecho"><p>O caminho 1 de erro, previsto no slide da hipótese, foi exatamente o que se materializou.</p></div>
+</section>
+
+<!-- 10 ....................................................... o que sobrou -->
+<section class="slide" data-notas="Este e o resultado central do trabalho. A correcao do E7 foi escrita observando UM modo de falha. Aplicada ao dominio estendido, com tres recursos novos e escassos, ela entrega beneficio ZERO. Uma correcao nova zera, mas alguem precisou escreve-la, e para escreve-la precisou descobrir a interacao antes. Ressalva honesta: os parametros de escassez foram escolhidos para que os recursos restringissem, entao 65% nao e taxa esperada em operacao.">
+  <div class="etapa">Resultados · o que sobreviveu</div>
+  <h2>Diante de regras novas, a correção antiga valeu nada</h2>
+  <div class="cartoes c3" style="margin-bottom:2.6vh">
+    <div class="cartao">
+      <div class="rotulo">Executor procedural, sem correção</div>
+      <div class="numerao terra">65%</div>
+      <div class="legenda-num">falsos negativos</div>
+    </div>
+    <div class="cartao quente">
+      <div class="rotulo terra">Com a correção escrita antes das regras novas</div>
+      <div class="numerao terra">65%</div>
+      <div class="legenda-num">idêntico, benefício zero</div>
+    </div>
+    <div class="cartao verde">
+      <div class="rotulo salvia">Planejamento, sem receber ajuste algum</div>
+      <div class="numerao salvia">0%</div>
+      <div class="legenda-num">em 37 instâncias</div>
+    </div>
+  </div>
+  <div class="faixa verde">
+    <p class="grande" style="font-family:var(--serif);color:var(--escuro)">O executor procedural depende de <b>alguém descobrir cada interação entre regras antes de respeitá-la</b>. O planejamento lê as regras do domínio e deriva a ordem correta sozinho.</p>
+  </div>
+</section>
+
+<!-- 11 ...................................................... busca trivial -->
+<section class="slide" data-notas="Este slide fecha o buraco que todos os outros deixavam. Ate aqui o planejamento so tinha sido comparado contra um programa escrito a mao. Faltava a terceira possibilidade: pegar o MESMO modelo declarativo e varrer com busca cega. Se funcionasse, o merito seria da modelagem e nao do planejador, e falar em Planejamento Automatizado seria inflar o que usamos. Nao funciona.">
+  <div class="etapa">Resultados · e se a busca fosse trivial?</div>
+  <h2>O mérito é da modelagem ou do planejador?</h2>
+  <p class="grande" style="margin-bottom:2.4vh">Pegamos o <b>mesmo</b> modelo declarativo e o varremos com busca cega, sem heurística nenhuma. Se ela resolvesse, chamar o nosso trabalho de Planejamento Automatizado seria inflar o que de fato usamos.</p>
+  <div class="cartoes c2">
+    <div class="cartao quente">
+      <div class="rotulo terra">Busca cega sobre o mesmo modelo</div>
+      <div class="numerao terra">5 a 6</div>
+      <div class="legenda-num">pacientes, e para</div>
+      <p style="margin-top:1.4vh">Expande de 112 a 934 vezes mais estados.</p>
+    </div>
+    <div class="cartao verde">
+      <div class="rotulo salvia">Busca heurística, o que o projeto usa</div>
+      <div class="numerao salvia">14 a 20</div>
+      <div class="legenda-num">pacientes, com garantia de ótimo</div>
+      <p style="margin-top:1.4vh">Um turno real de ACS tem de 10 a 15 visitas.</p>
+    </div>
+  </div>
+  <div class="fecho"><p>Declaratividade sozinha não escala. Busca sozinha não absorve regra nova. <b>Planejamento Automatizado é o nome da combinação das duas.</b></p></div>
+</section>
+
+<!-- 12 ........................................................ verificação -->
+<section class="slide" data-notas="A maior ameaca a validade do trabalho estava aqui: todos os numeros saem de um planejador que nos mesmos escrevemos, e um bug exatamente desse tipo ja tinha acontecido, o da hipotese de nomes unicos no grounding, que fez o planejador provar inviabilidade onde havia plano. Os casos inviaveis importam tanto quanto os viaveis: concordar que NAO existe plano exercita o grounding de outro jeito.">
+  <div class="etapa">Validade</div>
+  <h2>Como sabemos que isso não é um bug nosso</h2>
+  <div class="cartoes c2" style="align-items:center">
+    <div class="cartao verde" style="text-align:center">
+      <div class="numerao salvia">13 de 13</div>
+      <div class="legenda-num">instâncias em concordância</div>
+    </div>
+    <div>
+      <p class="grande">Submetemos os mesmos arquivos ao <b>pyperplan</b>, do grupo de Malte Helmert, em Basileia, o mesmo grupo do Fast Downward. Ele tem parser, grounding e busca próprios, e não compartilha uma linha com o nosso código.</p>
+      <p class="grande">Concordância total sobre viabilidade e sobre o comprimento mínimo do plano, incluindo os dois casos <b>inviáveis</b> e o domínio estendido.</p>
+    </div>
+  </div>
+  <div class="fecho"><p>A maior ameaça à validade do trabalho deixou de estar em aberto.</p></div>
+</section>
+
+<!-- 13 ....................................................... demonstração -->
+<section class="slide" data-notas="Navegue pelos sete passos com as setas DENTRO da demonstracao, ou clique em abrir em tela cheia. O ponto alto e o passo 4 e o 5: as duas rotas candidatas custam os MESMOS 94 minutos de caminhada, porque sao a mesma volta percorrida em sentidos opostos, e ainda assim uma cumpre a norma e a outra nao. Em p4, de urgencia baixa, na primeira parada, enquanto p7, de urgencia alta, so viria na sexta. O seletor a pe / de carro troca o tracado na hora.">
+  <div class="etapa">Demonstração · o sistema rodando</div>
+  <h2 style="margin-bottom:1.4vh">Da microárea inteira até o roteiro do agente</h2>
+  <div class="demo-barra">
+    <a class="botao" href="demonstracao-do-pipeline.html" target="_blank" rel="noopener">Abrir a demonstração em tela cheia</a>
+    <a class="botao vazado" href="mapa-da-rota.html" target="_blank" rel="noopener">Abrir só o mapa da rota</a>
+    <span style="font-size:clamp(14px,1.4vw,24px)">Coordenadas reais de Porto Alegre. Dados clínicos fictícios.</span>
+  </div>
+  <div class="demo"><iframe src="demonstracao-do-pipeline.html" title="Demonstração do pipeline"></iframe></div>
+</section>
+
+<!-- 14 ............................................................. fecho -->
+<section class="slide" data-notas="Fecho. O trunfo do trabalho nao e ter usado Planning. E termos medido COMO ele ajuda neste problema, inclusive descobrindo que a resposta nao era a que esperavamos. Se a banca perguntar o que sobrou: declaratividade com efeito medido, e prova de inviabilidade. Se perguntar o que caiu: economia de tempo e exclusividade de capacidade. E a frase final: nenhuma das duas metades sozinha resolve.">
+  <div class="etapa">Conclusão</div>
+  <h2>A hipótese que sobreviveu aos experimentos</h2>
+  <div class="faixa verde" style="margin-bottom:2.6vh">
+    <div class="citacao">“Manter a norma como especificação declarativa preserva a corretude do sistema diante de regras novas, a um custo de busca que ainda cabe num turno real.”</div>
+  </div>
+  <div class="cartoes c2">
+    <div class="cartao">
+      <div class="rotulo terra">Tire a camada declarativa</div>
+      <p class="grande">O programa procedural volta a falhar assim que entra uma regra que ninguém previu ao escrevê-lo.</p>
+    </div>
+    <div class="cartao">
+      <div class="rotulo terra">Tire a busca heurística</div>
+      <p class="grande">Varrer o mesmo modelo sem heurística para em 5 ou 6 pacientes, e um turno real tem de 10 a 15.</p>
+    </div>
+  </div>
+  <div class="fecho"><p>O trunfo do trabalho não é ter usado Planning. É termos medido <b>como</b> ele ajuda, inclusive descobrindo que a resposta não era a que esperávamos.</p></div>
+</section>
+
+<nav>
+  <button id="voltar">&larr;</button>
+  <button id="avancar">&rarr;</button>
+  <div class="pontos" id="pontos"></div>
+  <button id="btnotas" title="tecla N">notas</button>
+  <button id="bttela" title="tecla F">tela cheia</button>
+  <span id="contador"></span>
+</nav>
+<div id="notas"></div>
+
+<script>
+const slides = Array.from(document.querySelectorAll(".slide"));
+const pontos = document.getElementById("pontos");
+const notas = document.getElementById("notas");
+let atual = 0;
+
+slides.forEach(function (_, i) {
+  const p = document.createElement("div");
+  p.className = "ponto";
+  p.onclick = function () { mostrar(i); };
+  pontos.appendChild(p);
+});
+
+function mostrar(i) {
+  atual = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach(function (s, k) { s.classList.toggle("on", k === atual); });
+  Array.from(pontos.children).forEach(function (p, k) {
+    p.classList.toggle("on", k === atual);
+  });
+  document.getElementById("contador").textContent = (atual + 1) + " / " + slides.length;
+  notas.innerHTML = "<b>Nota de orador:</b> " + (slides[atual].dataset.notas || "");
+}
+
+document.getElementById("voltar").onclick = function () { mostrar(atual - 1); };
+document.getElementById("avancar").onclick = function () { mostrar(atual + 1); };
+document.getElementById("btnotas").onclick = function () { notas.classList.toggle("on"); };
+document.getElementById("bttela").onclick = function () {
+  if (document.fullscreenElement) { document.exitFullscreen(); }
+  else { document.documentElement.requestFullscreen(); }
+};
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowRight" || e.key === "PageDown") { mostrar(atual + 1); }
+  else if (e.key === "ArrowLeft" || e.key === "PageUp") { mostrar(atual - 1); }
+  else if (e.key === " ") { e.preventDefault(); mostrar(atual + 1); }
+  else if (e.key === "Home") { mostrar(0); }
+  else if (e.key === "End") { mostrar(slides.length - 1); }
+  else if (e.key === "n" || e.key === "N") { notas.classList.toggle("on"); }
+  else if (e.key === "f" || e.key === "F") { document.getElementById("bttela").click(); }
+});
+
+mostrar(0);
+</script>
+</body>
+</html>
