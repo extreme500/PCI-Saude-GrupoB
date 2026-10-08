@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demonstração do pipeline, slide avulso</title>
+<style>
+  :root {
+    --escuro:#33291F; --medio:#5C4F41; --bege:#8A7A67;
+    --terracota:#B35C38; --salvia:#4A6B5B;
+    --cartao:#FFFDF8; --borda:#E6DCCB; --quente:#F3DFD3;
+    --serif:Cambria,Georgia,"Times New Roman",serif;
+    --sans:Calibri,Carlito,"Segoe UI",system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; overflow:hidden; }
+  body {
+    font-family:var(--sans); color:var(--medio);
+    background:linear-gradient(135deg,#FEFCF7 0%,#F9F2E4 45%,#F2E7D2 100%);
+  }
+  .slide { display:flex; flex-direction:column; justify-content:center;
+           height:100vh; width:100vw; padding:4vh 5vw 4vh; }
+  .etapa { font-weight:bold; font-size:clamp(14px,1.45vw,26px);
+           letter-spacing:.11em; text-transform:uppercase;
+           color:var(--terracota); margin-bottom:1.4vh; }
+  h2 { font-family:var(--serif); color:var(--escuro); margin:0 0 1.4vh;
+       font-size:clamp(32px,4.1vw,70px); line-height:1.07; font-weight:bold; }
+  .demo-barra { display:flex; align-items:center; gap:1.4vw;
+                margin-bottom:1.6vh; flex-wrap:wrap; }
+  .botao { font-family:var(--sans); font-size:clamp(15px,1.5vw,26px);
+           padding:1.1vh 1.6vw; border-radius:12px; cursor:pointer;
+           border:1px solid var(--terracota); background:var(--terracota);
+           color:#fff; font-weight:bold; text-decoration:none; }
+  .botao.vazado { background:var(--cartao); color:var(--escuro);
+                  border-color:var(--borda); }
+  .demo { flex:1; border:1px solid var(--borda); border-radius:18px;
+          overflow:hidden; background:var(--cartao); min-height:0; }
+  .demo iframe { width:100%; height:100%; border:0; display:block; }
+</style>
+</head>
+<body>
+
+<section class="slide">
+  <div class="etapa">Demonstração · o sistema rodando</div>
+  <h2>Da microárea inteira até o roteiro do agente</h2>
+  <div class="demo-barra">
+    <a class="botao" href="demonstracao-do-pipeline.html" target="_blank" rel="noopener">Abrir a demonstração em tela cheia</a>
+    <a class="botao vazado" href="mapa-da-rota.html" target="_blank" rel="noopener">Abrir só o mapa da rota</a>
+    <span style="font-size:clamp(14px,1.4vw,24px)">Coordenadas reais de Porto Alegre. Dados clínicos fictícios.</span>
+  </div>
+  <div class="demo"><iframe src="demonstracao-do-pipeline.html" title="Demonstração do pipeline"></iframe></div>
+</section>
+
+<script>
+  // F entra e sai de tela cheia, igual ao deck completo
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "f" || e.key === "F") {
+      if (document.fullscreenElement) { document.exitFullscreen(); }
+      else { document.documentElement.requestFullscreen(); }
+    }
+  });
+</script>
+</body>
+</html>
