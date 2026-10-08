@@ -105,6 +105,33 @@
   .demo iframe { width:100%; height:100%; border:0; display:block; }
   .demo-barra { display:flex; align-items:center; gap:1.4vw;
                 margin-bottom:1.6vh; flex-wrap:wrap; }
+
+  /* passo do pipeline: mapa a esquerda, explicacao a direita */
+  .passo { display:grid; grid-template-columns:1.32fr 1fr; gap:2.2vw;
+           flex:1; min-height:0; align-items:stretch; }
+  .passo .mapa { border:1px solid var(--borda); border-radius:16px;
+                 overflow:hidden; background:var(--cartao); min-height:0;
+                 display:flex; }
+  .passo .mapa img { width:100%; height:100%; object-fit:contain;
+                     object-position:center; display:block; }
+  .passo .texto { display:flex; flex-direction:column; justify-content:center;
+                  min-height:0; }
+  .passo .texto p { font-size:clamp(18px,1.95vw,35px); line-height:1.36; }
+  .selo { display:inline-block; align-self:flex-start; padding:.7vh 1.3vw;
+          border-radius:30px; font-size:clamp(13px,1.35vw,24px);
+          font-weight:bold; margin-bottom:1.6vh; }
+  .selo.reprovada { background:var(--quente); color:var(--terracota); }
+  .selo.aprovada { background:var(--verde); color:var(--salvia); }
+  .medidas { display:flex; gap:2vw; margin:1.6vh 0 0; flex-wrap:wrap; }
+  .medidas b { display:block; font-family:var(--serif); font-weight:bold;
+               color:var(--escuro); font-size:clamp(30px,3.6vw,64px);
+               line-height:1; }
+  .medidas span { font-size:clamp(12px,1.25vw,21px); color:var(--bege);
+                  text-transform:uppercase; letter-spacing:.05em; }
+  .passo .remate { font-family:var(--serif); color:var(--escuro);
+                   font-size:clamp(18px,2.0vw,36px); line-height:1.26;
+                   margin-top:2vh; padding-top:1.6vh;
+                   border-top:1px solid var(--borda); }
   .botao { font-family:var(--sans); font-size:clamp(15px,1.5vw,26px);
            padding:1.1vh 1.6vw; border-radius:12px; cursor:pointer;
            border:1px solid var(--terracota); background:var(--terracota);
@@ -387,16 +414,103 @@
   <div class="fecho"><p>A maior ameaça à validade do trabalho deixou de estar em aberto.</p></div>
 </section>
 
-<!-- 13 ....................................................... demonstração -->
-<section class="slide" data-notas="Navegue pelos sete passos com as setas DENTRO da demonstracao, ou clique em abrir em tela cheia. O ponto alto e o passo 4 e o 5: as duas rotas candidatas custam os MESMOS 94 minutos de caminhada, porque sao a mesma volta percorrida em sentidos opostos, e ainda assim uma cumpre a norma e a outra nao. Em p4, de urgencia baixa, na primeira parada, enquanto p7, de urgencia alta, so viria na sexta. O seletor a pe / de carro troca o tracado na hora.">
-  <div class="etapa">Demonstração · o sistema rodando</div>
-  <h2 style="margin-bottom:1.4vh">Da microárea inteira até o roteiro do agente</h2>
-  <div class="demo-barra">
-    <a class="botao" href="demonstracao-do-pipeline.html" target="_blank" rel="noopener">Abrir a demonstração em tela cheia</a>
-    <a class="botao vazado" href="mapa-da-rota.html" target="_blank" rel="noopener">Abrir só o mapa da rota</a>
-    <span style="font-size:clamp(14px,1.4vw,24px)">Coordenadas reais de Porto Alegre. Dados clínicos fictícios.</span>
+<!-- 13 a 19 ............................. demonstração, passo a passo -->
+<section class="slide" data-notas="Coordenadas reais de Porto Alegre, dados clinicos ficticios. Diga o recorte: um agente, um turno, uma microarea. A unidade de saude e o pino escuro marcado com U.">
+  <div class="etapa">Demonstração · ponto de partida</div>
+  <h2 style="margin-bottom:1.6vh">A microárea inteira</h2>
+  <div class="passo">
+    <div class="mapa"><img src="passos/passo0.jpg" alt="A microárea inteira"></div>
+    <div class="texto">
+      
+      <p>São <b>12 famílias</b> cadastradas na microárea, com a unidade de saúde como ponto de partida e de retorno. Uma delas está em urgência alta. Nenhum turno cabe todas elas.</p>
+      <div class="medidas"><div><b>12</b><span>famílias</span></div><div><b>1</b><span>urgência alta</span></div></div>
+      <div class="remate">A cor do pino é a urgência: terracota é alta, dourado é média, verde é baixa.</div>
+    </div>
   </div>
-  <div class="demo"><iframe src="demonstracao-do-pipeline.html" title="Demonstração do pipeline"></iframe></div>
+</section>
+
+<section class="slide" data-notas="Se perguntarem o criterio: prioridade clinica mais atraso relativo a janela de cada grupo, e corte no orcamento. O E5 mediu o ganho: cobertura de atrasados vai de 37% para 73%.">
+  <div class="etapa">Demonstração · passo 1</div>
+  <h2 style="margin-bottom:1.6vh">Seleção: quem entra no turno</h2>
+  <div class="passo">
+    <div class="mapa"><img src="passos/passo1.jpg" alt="Seleção: quem entra no turno"></div>
+    <div class="texto">
+      
+      <p>A política ordena por prioridade clínica e por atraso em relação ao intervalo máximo, e corta no orçamento de 240 minutos. Entram 6 famílias, e 6 ficam para o próximo turno, apagadas no mapa.</p>
+      <div class="medidas"><div><b>6</b><span>no turno</span></div><div><b>6</b><span>adiados</span></div></div>
+      <div class="remate">Esta camada ainda não sabe nada sobre a lei. Ela só escolhe.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notas="Aqui o roteirizador esta deliberadamente CEGO a norma, que e a situacao de quem usa OR-Tools ou um servico externo. O tracado segue as ruas de verdade, nao liga as coordenadas em reta.">
+  <div class="etapa">Demonstração · passo 2</div>
+  <h2 style="margin-bottom:1.6vh">Roteamento: em que ordem visitar</h2>
+  <div class="passo">
+    <div class="mapa"><img src="passos/passo2.jpg" alt="Roteamento: em que ordem visitar"></div>
+    <div class="texto">
+      
+      <p>A camada geométrica devolve uma sequência de paradas com 94 minutos de caminhada. Ela otimiza distância, e só: não sabe o que a lei exige dentro de cada casa, nem que urgência alta tem de ser atendida antes de urgência baixa.</p>
+      <div class="medidas"><div><b>94</b><span>min de caminhada</span></div></div>
+      <div class="remate">A rota entra congelada no passo seguinte.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notas="Os dois aros tracejados no mapa sao p4 e p7, os pinos 1 e 6. Este e o momento de dizer que a inviabilidade e sensivel a ordem: vale para esta rota, nao para o turno. Por isso vale voltar ao passo 2.">
+  <div class="etapa">Demonstração · passo 3</div>
+  <h2 style="margin-bottom:1.6vh">O protocolo NÃO cabe nesta rota</h2>
+  <div class="passo">
+    <div class="mapa"><img src="passos/passo3.jpg" alt="O protocolo NÃO cabe nesta rota"></div>
+    <div class="texto">
+      <div class="selo reprovada">rota reprovada pelo protocolo</div>
+      <p>A 1ª parada é <b>p4</b>, de urgência baixa, e <b>p7</b>, de urgência alta, só viria na 6ª. Com a rota congelada, iniciar uma visita adiável exige que nenhuma urgência alta esteja pendente, e esse contador só baixa quando p7 é atendido.</p>
+      <div class="medidas"><div><b>50</b><span>estados exauridos</span></div><div><b>0,03s</b><span>para provar</span></div></div>
+      <div class="remate">O planejamento não disse que não encontrou: ele exauriu o espaço e <b>demonstrou que não existe</b>.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notas="Este e o slide que mais vale na demonstracao. Duas rotas geometricamente identicas, e so uma e executavel. O E13 mediu isso em 45 instancias: o custo da conformidade deu ZERO minuto de caminhada em todos os casos.">
+  <div class="etapa">Demonstração · passo 2, de novo</div>
+  <h2 style="margin-bottom:1.6vh">Outra rota, exatamente a mesma distância</h2>
+  <div class="passo">
+    <div class="mapa"><img src="passos/passo4.jpg" alt="Outra rota, exatamente a mesma distância"></div>
+    <div class="texto">
+      
+      <p>A camada geométrica é chamada outra vez e devolve outra ordem. É a <b>mesma volta percorrida ao contrário</b>, e por isso custa exatamente os mesmos 94 minutos de caminhada.</p>
+      <div class="medidas"><div><b>94</b><span>min de caminhada</span></div><div><b>0</b><span>min a mais</span></div></div>
+      <div class="remate">O que separa uma rota válida de uma inválida aqui não é o comprimento, é a ordem.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notas="Com garantia de otimalidade, porque a busca usada aqui e A* com h_max. Se perguntarem o tempo: pouco mais de um segundo e meio.">
+  <div class="etapa">Demonstração · passo 3</div>
+  <h2 style="margin-bottom:1.6vh">O protocolo cabe nesta rota</h2>
+  <div class="passo">
+    <div class="mapa"><img src="passos/passo5.jpg" alt="O protocolo cabe nesta rota"></div>
+    <div class="texto">
+      <div class="selo aprovada">rota válida sob o protocolo</div>
+      <p>O planejamento encontrou uma sequência de 51 ações, de custo 266 minutos, que cumpre as condições do art. 3º § 4º em todas as paradas: curso técnico, equipamento, supervisão ativa, insumo disponível e encaminhamento quando o procedimento o exige.</p>
+      <div class="medidas"><div><b>51</b><span>ações</span></div><div><b>266</b><span>min de turno</span></div></div>
+      <div class="remate">Nesta ordem a urgência alta vem antes da baixa, que era exatamente o que faltava na rota anterior.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notas="Fecho da demonstracao. O tracejado terracota sai da parada 2 ate a unidade e volta: e o desvio de reposicao que o planejamento decidiu, e ele cai ENTRE visitas, nao no meio de uma, que era exatamente o erro do executor procedural.">
+  <div class="etapa">Demonstração · resultado</div>
+  <h2 style="margin-bottom:1.6vh">O protocolo formalizado sobre a rota</h2>
+  <div class="passo">
+    <div class="mapa"><img src="passos/passo6.jpg" alt="O protocolo formalizado sobre a rota"></div>
+    <div class="texto">
+      <div class="selo aprovada">rota válida sob o protocolo</div>
+      <p>A saída não é uma linha no mapa, é um <b>roteiro</b>: em cada parada, o que fazer, em que ordem, e quando sair da rota para repor material na unidade. Neste turno o plano decidiu um desvio de reposição, em tracejado.</p>
+      <div class="medidas"><div><b>6</b><span>visitas</span></div><div><b>266</b><span>min de turno</span></div><div><b>51</b><span>ações</span></div></div>
+      <div class="remate">Trocar o roteirizador não muda uma linha do domínio. Mudar a lei não muda uma linha do código de busca.</div>
+    </div>
+  </div>
 </section>
 
 <!-- 14 ............................................................. fecho -->

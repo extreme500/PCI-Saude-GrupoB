@@ -481,48 +481,155 @@ function numerao(s, texto, o) {
   fecho(s, "A maior ameaça à validade do trabalho deixou de estar em aberto.", { y: 6.1 });
 }
 
-// ===========================================================  13  demonstracao
+// =====================================  13 a 19  demonstracao, passo a passo
 {
-  const s = novo("No HTML esta demonstracao roda VIVA dentro do slide. Aqui ela esta como storyboard, e o link abre a versao viva. Navegue pelos sete passos. O ponto alto e o quarto e o quinto: as duas rotas candidatas custam os MESMOS 94 minutos de caminhada, porque sao a mesma volta percorrida em sentidos opostos, e ainda assim uma cumpre a norma e a outra nao. Em p4, de urgencia baixa, na primeira parada, enquanto p7, de urgencia alta, so viria na sexta.");
-  etapa(s, "Demonstração · o sistema rodando");
-  titulo(s, "Da microárea inteira até o roteiro do agente", { y: 0.72, h: 0.72, tamanho: 34 });
-
-  const legendas = [
-    "1. a microárea inteira", "2. seleção do turno", "3. rota candidata",
-    "4. REPROVADA pelo protocolo", "5. outra rota, mesma distância",
-    "6. aprovada", "7. o roteiro final",
+  const PASSOS = [
+    {
+      etapa: "Demonstração · ponto de partida",
+      titulo: "A microárea inteira",
+      img: "passo0.jpg", selo: null,
+      texto: [
+        { text: "São " },
+        { text: "12 famílias", options: { bold: true } },
+        { text: " cadastradas na microárea, com a unidade de saúde como ponto de partida e de retorno. Uma delas está em urgência alta. Nenhum turno cabe todas elas." },
+      ],
+      medidas: [["12", "famílias"], ["1", "urgência alta"]],
+      remate: [{ text: "A cor do pino é a urgência: terracota é alta, dourado é média, verde é baixa." }],
+      notas: "Coordenadas reais de Porto Alegre, dados clinicos ficticios. Diga o recorte: um agente, um turno, uma microarea. A unidade de saude e o pino escuro marcado com U.",
+    },
+    {
+      etapa: "Demonstração · passo 1",
+      titulo: "Seleção: quem entra no turno",
+      img: "passo1.jpg", selo: null,
+      texto: [{ text: "A política ordena por prioridade clínica e por atraso em relação ao intervalo máximo, e corta no orçamento de 240 minutos. Entram 6 famílias, e 6 ficam para o próximo turno, apagadas no mapa." }],
+      medidas: [["6", "no turno"], ["6", "adiados"]],
+      remate: [{ text: "Esta camada ainda não sabe nada sobre a lei. Ela só escolhe." }],
+      notas: "Se perguntarem o criterio: prioridade clinica mais atraso relativo a janela de cada grupo, e corte no orcamento. O E5 mediu o ganho: cobertura de atrasados vai de 37% para 73%.",
+    },
+    {
+      etapa: "Demonstração · passo 2",
+      titulo: "Roteamento: em que ordem visitar",
+      img: "passo2.jpg", selo: null,
+      texto: [{ text: "A camada geométrica devolve uma sequência de paradas com 94 minutos de caminhada. Ela otimiza distância, e só: não sabe o que a lei exige dentro de cada casa, nem que urgência alta tem de ser atendida antes de urgência baixa." }],
+      medidas: [["94", "min de caminhada"]],
+      remate: [{ text: "A rota entra congelada no passo seguinte." }],
+      notas: "Aqui o roteirizador esta deliberadamente CEGO a norma, que e a situacao de quem usa OR-Tools ou um servico externo. O tracado segue as ruas de verdade, nao liga as coordenadas em reta.",
+    },
+    {
+      etapa: "Demonstração · passo 3",
+      titulo: "O protocolo NÃO cabe nesta rota",
+      img: "passo3.jpg", selo: ["reprovada", "rota reprovada pelo protocolo"],
+      texto: [
+        { text: "A 1ª parada é " },
+        { text: "p4", options: { bold: true } },
+        { text: ", de urgência baixa, e " },
+        { text: "p7", options: { bold: true } },
+        { text: ", de urgência alta, só viria na 6ª. Com a rota congelada, iniciar uma visita adiável exige que nenhuma urgência alta esteja pendente, e esse contador só baixa quando p7 é atendido." },
+      ],
+      medidas: [["50", "estados exauridos"], ["0,03s", "para provar"]],
+      remate: [
+        { text: "O planejamento não disse que não encontrou: ele exauriu o espaço e " },
+        { text: "demonstrou que não existe", options: { bold: true } },
+        { text: "." },
+      ],
+      notas: "Os dois aros tracejados no mapa sao p4 e p7, os pinos 1 e 6. Este e o momento de dizer que a inviabilidade e sensivel a ordem: vale para esta rota, nao para o turno. Por isso vale voltar ao passo 2.",
+    },
+    {
+      etapa: "Demonstração · passo 2, de novo",
+      titulo: "Outra rota, exatamente a mesma distância",
+      img: "passo4.jpg", selo: null,
+      texto: [
+        { text: "A camada geométrica é chamada outra vez e devolve outra ordem. É a " },
+        { text: "mesma volta percorrida ao contrário", options: { bold: true } },
+        { text: ", e por isso custa exatamente os mesmos 94 minutos de caminhada." },
+      ],
+      medidas: [["94", "min de caminhada"], ["0", "min a mais"]],
+      remate: [{ text: "O que separa uma rota válida de uma inválida aqui não é o comprimento, é a ordem." }],
+      notas: "Este e o slide que mais vale na demonstracao. Duas rotas geometricamente identicas, e so uma e executavel. O E13 mediu isso em 45 instancias: o custo da conformidade deu ZERO minuto de caminhada em todos os casos.",
+    },
+    {
+      etapa: "Demonstração · passo 3",
+      titulo: "O protocolo cabe nesta rota",
+      img: "passo5.jpg", selo: ["aprovada", "rota válida sob o protocolo"],
+      texto: [{ text: "O planejamento encontrou uma sequência de 51 ações, de custo 266 minutos, que cumpre as condições do art. 3º § 4º em todas as paradas: curso técnico, equipamento, supervisão ativa, insumo disponível e encaminhamento quando o procedimento o exige." }],
+      medidas: [["51", "ações"], ["266", "min de turno"]],
+      remate: [{ text: "Nesta ordem a urgência alta vem antes da baixa, que era exatamente o que faltava na rota anterior." }],
+      notas: "Com garantia de otimalidade, porque a busca usada aqui e A* com h_max. Se perguntarem o tempo: pouco mais de um segundo e meio.",
+    },
+    {
+      etapa: "Demonstração · resultado",
+      titulo: "O protocolo formalizado sobre a rota",
+      img: "passo6.jpg", selo: ["aprovada", "rota válida sob o protocolo"],
+      texto: [
+        { text: "A saída não é uma linha no mapa, é um " },
+        { text: "roteiro", options: { bold: true } },
+        { text: ": em cada parada, o que fazer, em que ordem, e quando sair da rota para repor material na unidade. Neste turno o plano decidiu um desvio de reposição, em tracejado." },
+      ],
+      medidas: [["6", "visitas"], ["266", "min de turno"], ["51", "ações"]],
+      remate: [{ text: "Trocar o roteirizador não muda uma linha do domínio. Mudar a lei não muda uma linha do código de busca." }],
+      notas: "Fecho da demonstracao. O tracejado terracota sai da parada 2 ate a unidade e volta: e o desvio de reposicao que o planejamento decidiu, e ele cai ENTRE visitas, nao no meio de uma, que era exatamente o erro do executor procedural.",
+    },
   ];
-  const lw = 2.42, lh = 1.76, g = 0.24;
-  for (let i = 0; i < 7; i++) {
-    const linha = i < 4 ? 0 : 1;
-    const naLinha = linha === 0 ? i : i - 4;
-    const n = linha === 0 ? 4 : 3;
-    const x0 = (13.33 - (n * lw + (n - 1) * g)) / 2;
-    const x = x0 + naLinha * (lw + g);
-    const y = 1.66 + linha * (lh + 0.53);
-    s.addImage({
-      path: path.join(IMG, "passo" + i + ".jpg"),
-      x: x, y: y, w: lw, h: lh,
+
+  PASSOS.forEach(function (p) {
+    const s = novo(p.notas);
+    etapa(s, p.etapa);
+    titulo(s, p.titulo, { y: 0.72, h: 0.8, tamanho: 34 });
+
+    const iw = 7.0, ih = 5.1, ix = L, iy = 1.72;
+    s.addShape(pres.ShapeType.roundRect, {
+      x: ix - 0.06, y: iy - 0.06, w: iw + 0.12, h: ih + 0.12,
+      fill: { color: C.cartao }, line: { color: C.borda, width: 1 },
+      rectRadius: 0.1,
     });
-    s.addText(legendas[i], {
-      x: x, y: y + lh + 0.04, w: lw, h: 0.4, isTextBox: true,
-      fontFace: SANS, fontSize: 13,
-      bold: i === 3, color: i === 3 ? C.terracota : C.bege,
-      align: "center",
+    s.addImage({ path: path.join(IMG, p.img), x: ix, y: iy, w: iw, h: ih });
+
+    const tx = ix + iw + 0.45;
+    const tw = 13.33 - tx - L;
+    let y = 1.85;
+    if (p.selo) {
+      const quente = p.selo[0] === "reprovada";
+      s.addShape(pres.ShapeType.roundRect, {
+        x: tx, y: y, w: Math.min(tw, 3.5), h: 0.42,
+        fill: { color: quente ? C.quente : C.verde },
+        line: { color: quente ? C.quente : C.verde }, rectRadius: 0.5,
+      });
+      s.addText(p.selo[1], {
+        x: tx, y: y, w: Math.min(tw, 3.5), h: 0.42, isTextBox: true,
+        fontFace: SANS, fontSize: 13, bold: true,
+        color: quente ? C.terracota : C.salvia,
+        align: "center", valign: "middle",
+      });
+      y += 0.62;
+    }
+    s.addText(p.texto, {
+      x: tx, y: y, w: tw, h: 2.5, isTextBox: true,
+      fontFace: SANS, fontSize: 17, color: C.medio,
+      lineSpacingMultiple: 1.14, valign: "top",
     });
-  }
-  s.addText([
-    { text: "As duas rotas candidatas custam os mesmos 94 minutos de caminhada: são a mesma volta percorrida em sentidos opostos. ", options: {} },
-    { text: "Uma cumpre a norma e a outra não.", options: { bold: true } },
-  ], {
-    x: L, y: 6.14, w: W, h: 0.62, isTextBox: true,
-    fontFace: SERIF, fontSize: 19, color: C.escuro, valign: "top",
-  });
-  s.addText("Versão viva, navegável: apresentacao/3/demonstracao-do-pipeline.html", {
-    x: L, y: 6.82, w: W, h: 0.38, isTextBox: true,
-    fontFace: SANS, fontSize: 13, color: C.terracota, bold: true,
-    hyperlink: { url: "demonstracao-do-pipeline.html",
-                 tooltip: "abre a demonstracao viva no navegador" },
+
+    const my = 4.72;
+    const mw = tw / p.medidas.length;
+    p.medidas.forEach(function (m, i) {
+      s.addText(m[0], {
+        x: tx + i * mw, y: my, w: mw, h: 0.75, isTextBox: true,
+        fontFace: SERIF, fontSize: 32, bold: true, color: C.escuro, valign: "top",
+      });
+      s.addText(m[1].toUpperCase(), {
+        x: tx + i * mw, y: my + 0.72, w: mw, h: 0.6, isTextBox: true,
+        fontFace: SANS, fontSize: 11, color: C.bege, charSpacing: 0.7,
+      });
+    });
+
+    s.addShape(pres.ShapeType.line, {
+      x: tx, y: 5.9, w: tw, h: 0,
+      line: { color: C.borda, width: 1 },
+    });
+    s.addText(p.remate, {
+      x: tx, y: 6.04, w: tw, h: 1.1, isTextBox: true,
+      fontFace: SERIF, fontSize: 17, color: C.escuro,
+      lineSpacingMultiple: 1.12, valign: "top",
+    });
   });
 }
 
