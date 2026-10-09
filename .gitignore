@@ -12,3 +12,6 @@ roteiro.txt
 # saida gerada pelos comandos (mapa, demonstracao); so a raiz,
 # nunca o pacote acsplan/saida/
 /saida/
+
+# arquivos de bloqueio do Office, criados quando o deck esta aberto
+~$*
