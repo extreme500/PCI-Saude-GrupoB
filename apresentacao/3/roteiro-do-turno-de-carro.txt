@@ -1,0 +1,65 @@
+==================================================================
+  ROTEIRO DO TURNO
+  Saida e retorno: UBS sintetica
+  6 visitas  |  duracao estimada: 174 min
+==================================================================
+
+  1. Paciente 07  (pessoa idosa)
+     inicio aprox.: 11 min de turno
+     [ ] Acionar o enfermeiro da equipe (acompanhamento obrigatorio)
+     [ ] Aferir pressao arterial
+     [ ] Medir glicemia capilar
+     [ ] Orientar a administracao da medicacao
+     [ ] Conferir a caderneta de vacinacao
+     [ ] Encaminhar o paciente a unidade de referencia
+     [ ] Registrar a visita no sistema
+
+  2. Paciente 06  (crianca)
+     inicio aprox.: 45 min de turno
+     [ ] Acionar o enfermeiro da equipe (acompanhamento obrigatorio)
+     [ ] Verificacao antropometrica (peso e altura)
+     [ ] Conferir a caderneta de vacinacao
+     [ ] Registrar a visita no sistema
+
+  3. Paciente 03  (pessoa idosa)
+     inicio aprox.: 71 min de turno
+     >> PASSAR NA UNIDADE ANTES desta visita: repor fitas de glicemia
+     [ ] Acionar o enfermeiro da equipe (acompanhamento obrigatorio)
+     [ ] Aferir pressao arterial
+     [ ] Orientar a administracao da medicacao
+     [ ] Conferir a caderneta de vacinacao
+     [ ] Encaminhar o paciente a unidade de referencia
+     [ ] Registrar a visita no sistema
+
+  4. Paciente 01  (pessoa idosa)
+     inicio aprox.: 99 min de turno
+     [ ] Acionar o enfermeiro da equipe (acompanhamento obrigatorio)
+     [ ] Aferir pressao arterial
+     [ ] Medir glicemia capilar
+     [ ] Orientar a administracao da medicacao
+     [ ] Conferir a caderneta de vacinacao
+     [ ] Encaminhar o paciente a unidade de referencia
+     [ ] Registrar a visita no sistema
+
+  5. Paciente 05  (adulto)
+     inicio aprox.: 132 min de turno
+     [ ] Acionar o enfermeiro da equipe (acompanhamento obrigatorio)
+     [ ] Aferir pressao arterial
+     [ ] Medir glicemia capilar
+     [ ] Encaminhar o paciente a unidade de referencia
+     [ ] Registrar a visita no sistema
+
+  6. Paciente 04  (pessoa idosa)
+     inicio aprox.: 154 min de turno
+     [ ] Acionar o enfermeiro da equipe (acompanhamento obrigatorio)
+     [ ] Aferir pressao arterial
+     [ ] Orientar a administracao da medicacao
+     [ ] Conferir a caderneta de vacinacao
+     [ ] Encaminhar o paciente a unidade de referencia
+     [ ] Registrar a visita no sistema
+
+------------------------------------------------------------------
+  Marque cada item ao concluir. Em caso de impossibilidade de
+  realizar algum procedimento, registre a ocorrencia e comunique
+  a equipe antes de seguir para a proxima visita.
+------------------------------------------------------------------
